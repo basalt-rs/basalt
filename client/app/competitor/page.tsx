@@ -93,7 +93,19 @@ const RunTest = () => {
     );
 };
 
-const TestResults = () => {
+const TestResults = ({
+    testData,
+}: {
+    testData: {
+        question: string;
+        description: string;
+        input: string;
+        output: string;
+        expectedOutput: string;
+        status: string;
+    };
+}) => {
+    const { input, output, expectedOutput } = testData;
     return (
         <div className="w-full">
             <Accordion type="single" collapsible>
@@ -110,41 +122,19 @@ const TestResults = () => {
                         <div className="flex h-full flex-grow flex-col gap-2">
                             <b>Input</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />2 11 15 0
+                                {input}
+                            </pre>
+                        </div>
+                        <div className="flex h-full flex-grow flex-col gap-2">
+                            <b>Output</b>
+                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                {output}
                             </pre>
                         </div>
                         <div className="flex h-full flex-grow flex-col gap-2">
                             <b>Expected Output</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />0 2 11 15
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Expected Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />0 2 11 15
+                                {expectedOutput}
                             </pre>
                         </div>
                     </AccordionContent>
@@ -163,36 +153,19 @@ const TestResults = () => {
                         <div className="flex h-full flex-grow flex-col gap-2">
                             <b>Input</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />2 11 15 0
+                                {input}
                             </pre>
                         </div>
                         <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Your Output</b>
+                            <b>Output</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />2 11 15 0
+                                {output}
                             </pre>
                         </div>
                         <div className="flex h-full flex-grow flex-col gap-2">
                             <b>Expected Output</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />0 2 11 15
+                                {expectedOutput}
                             </pre>
                         </div>
                     </AccordionContent>
@@ -211,37 +184,19 @@ const TestResults = () => {
                         <div className="flex h-full flex-grow flex-col gap-2">
                             <b>Input</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />2 11 15 0
+                                {input}
                             </pre>
                         </div>
                         <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Your Output</b>
+                            <b>Output</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                11 15 0 2<br />
-                                11 15 0 2<br />
-                                11 15 0 2<br />
-                                11 15 0 2<br />
-                                11 15 0 2<br />
-                                11 15 0 2
+                                {output}
                             </pre>
                         </div>
                         <div className="flex h-full flex-grow flex-col gap-2">
                             <b>Expected Output</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />0 2 11 15
+                                {expectedOutput}
                             </pre>
                         </div>
                     </AccordionContent>
@@ -257,6 +212,7 @@ export default function Competitor() {
         description: 'Sort an array of integers in ascending order and return it.',
         input: '2 11 15 0',
         output: '0 2 11 15',
+        expectedOutput: '0 2 11 15',
         status: 'complete',
     });
 
@@ -304,7 +260,7 @@ export default function Competitor() {
                                 <ResizablePanel defaultSize={100} className="h-full">
                                     <ScrollArea className="h-full w-full">
                                         <div>
-                                            <TestResults />
+                                            <TestResults testData={currentQuestion} />
                                         </div>
                                     </ScrollArea>
                                 </ResizablePanel>
