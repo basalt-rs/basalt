@@ -97,15 +97,13 @@ const TestResults = ({
     testData,
 }: {
     testData: {
-        question: string;
-        description: string;
         input: string;
         output: string;
+        failedOutput: string;
         expectedOutput: string;
-        status: string;
     };
 }) => {
-    const { input, output, expectedOutput } = testData;
+    const { input, output, failedOutput, expectedOutput } = testData;
     return (
         <div className="w-full">
             <Accordion type="single" collapsible>
@@ -159,7 +157,7 @@ const TestResults = ({
                         <div className="flex h-full flex-grow flex-col gap-2">
                             <b>Output</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {output}
+                                {failedOutput}
                             </pre>
                         </div>
                         <div className="flex h-full flex-grow flex-col gap-2">
@@ -190,7 +188,7 @@ const TestResults = ({
                         <div className="flex h-full flex-grow flex-col gap-2">
                             <b>Output</b>
                             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {output}
+                                {failedOutput}
                             </pre>
                         </div>
                         <div className="flex h-full flex-grow flex-col gap-2">
@@ -212,6 +210,7 @@ export default function Competitor() {
         description: 'Sort an array of integers in ascending order and return it.',
         input: '2 11 15 0',
         output: '0 2 11 15',
+        failedOutput: '2 0 11 15',
         expectedOutput: '0 2 11 15',
         status: 'complete',
     });

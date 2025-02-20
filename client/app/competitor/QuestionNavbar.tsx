@@ -16,6 +16,7 @@ type Question = {
     description: string;
     input: string;
     output: string;
+    failedOutput: string;
     expectedOutput: string;
     status: string;
 };
@@ -31,6 +32,7 @@ export default function QuestionNavbar({
             description: 'Sort an array of integers in ascending order and return it.',
             input: '2 11 15 0',
             output: '0 2 11 15',
+            failedOutput: '2 0 11 15',
             expectedOutput: '0 2 11 15',
             status: 'complete',
         },
@@ -40,6 +42,7 @@ export default function QuestionNavbar({
                 'Sort an array of characters alphabetically and return them as a single string.',
             input: 'h e l o',
             output: 'e h l o',
+            failedOutput: 'h o e l',
             expectedOutput: 'e h l o',
             status: 'in-progress',
         },
@@ -49,6 +52,7 @@ export default function QuestionNavbar({
                 'Convert characters to hexadecimal values and return them in reverse order.',
             input: 'A B C D',
             output: '13 12 11 10',
+            failedOutput: '10 11 12 13',
             expectedOutput: '13 12 11 10',
             status: 'failed',
         },
@@ -58,6 +62,7 @@ export default function QuestionNavbar({
                 'Write a function that takes a positive integer as input and returns the sum of its digits.',
             input: '1 2 3 4',
             output: '10',
+            failedOutput: '5',
             expectedOutput: '10',
             status: '',
         },
