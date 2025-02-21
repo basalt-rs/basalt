@@ -2,7 +2,6 @@
 import { useTheme } from 'next-themes';
 import { Button } from './ui/button';
 import { User, Sun, Moon, SunMoon, LogOut } from 'lucide-react';
-import Link from 'next/link';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,9 +13,20 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import { useRouter } from 'next/navigation';
+import { useSetAtom } from 'jotai';
+import { tokenAtom } from '@/lib/auth';
+import { RESET } from 'jotai/utils';
 
 export default function UserMenu() {
     const { setTheme } = useTheme();
+    const setToken = useSetAtom(tokenAtom);
+    const router = useRouter();
+
+    const logout = () => {
+        setToken(RESET);
+        router.replace('/');
+    };
 
     return (
         <DropdownMenu>
@@ -46,9 +56,9 @@ export default function UserMenu() {
                         </DropdownMenuPortal>
                     </DropdownMenuSub>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout}>
                         <LogOut />
-                        <Link href="/">Log Out</Link>
+                        Log Out
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenuPortal>

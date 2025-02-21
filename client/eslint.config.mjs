@@ -23,7 +23,7 @@ const eslintConfig = [
                 {
                     props: 'never',
                     children: 'never',
-                    propElementValues: 'never',
+                    propElementValues: 'always',
                 },
             ],
             '@stylistic/jsx-pascal-case': [

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,6 +15,9 @@ import {
 } from '@/components/ui/form';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { login, roleAtom } from '@/lib/auth';
+import { Provider, useAtom } from 'jotai';
+import { Loader2 } from 'lucide-react';
 
 const LoginFormSchema = z.object({
     username: z.string().min(4, { message: 'Username must be at least 4 characters.' }),
@@ -22,7 +25,11 @@ const LoginFormSchema = z.object({
 });
 type LoginFormValues = z.infer<typeof LoginFormSchema>;
 
-export default function Home() {
+const Loading = () => {
+    return <Loader2 className="animate-spin" size={72} />;
+};
+
+const Login = () => {
     const router = useRouter();
     const [message, setMessage] = useState<string>('');
 
@@ -34,24 +41,21 @@ export default function Home() {
         },
     });
 
-    const onSubmit = () => {
-        const { username } = form.getValues();
-        const users: Record<string, string> = {
-            host: '/host',
-            team1: '/competitor',
-        };
+    const onSubmit = async () => {
+        const { username, password } = form.getValues();
 
-        if (users[username]) {
-            router.push(users[username]);
+        console.log(username, password);
+
+        const role = await login(username, password);
+        if (role) {
+            router.replace(`/${role}`);
         } else {
             setMessage('Invalid username or password.');
+            form.reset();
         }
-
-        form.reset();
     };
-
     return (
-        <div className="flex h-screen flex-col items-center justify-center">
+        <>
             <div className="flex flex-col flex-wrap items-center">
                 <h1 className="mb-1 text-6xl font-bold">Log In</h1>
                 <h2 className="mb-1.5">Please enter a username and password to get started!</h2>
@@ -99,6 +103,25 @@ export default function Home() {
                     <Link href="/leaderboard">Leaderboard</Link>
                 </Button>
             </div>
+        </>
+    );
+};
+
+export default function Home() {
+    const router = useRouter();
+    const [role] = useAtom(roleAtom);
+
+    useEffect(() => {
+        if (role) {
+            router.replace(`/${role}`);
+        }
+    }, [router, role]);
+
+    return (
+        <div className="flex h-screen flex-col items-center justify-center">
+            <Provider>
+                <Suspense fallback={<Loading />}>{role ? <Loading /> : <Login />}</Suspense>
+            </Provider>
         </div>
     );
 }
