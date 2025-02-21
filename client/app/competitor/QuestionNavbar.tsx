@@ -21,12 +21,14 @@ type Question = {
     status: string;
 };
 
+type QuestionState = 'complete' | 'in-progress' | 'not-attempted' | 'failed';
+
 export default function QuestionNavbar({
     setCurrentQuestion,
 }: {
     setCurrentQuestion: (question: Question) => void;
 }) {
-    const [questions] = useState([
+    const [questions] = useState<Question[]>([
         {
             question: 'Sort an Array of Integers',
             description: 'Sort an array of integers in ascending order and return it.',
@@ -64,35 +66,30 @@ export default function QuestionNavbar({
             output: '10',
             failedOutput: '5',
             expectedOutput: '10',
-            status: '',
+            status: 'not-attempted',
         },
     ]);
+
     const [selectedQuestion, setSelectedQuestion] = useState<Question>(questions[0]);
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'complete':
-                return 'border-green-500 hover:border-green-300';
-            case 'in-progress':
-                return 'border-blue-500 hover:border-blue-300';
-            case 'failed':
-                return 'border-red-500 hover:border-red-300';
-            default:
-                return 'border-gray-500 hover:border-gray-300';
-        }
+    const questionStatusColor = (questionState: QuestionState) => {
+        const classMap: Record<QuestionState, string> = {
+            complete: 'border-pass',
+            'in-progress': 'border-in-progress',
+            'not-attempted': 'border-not-attempted',
+            failed: 'border-fail ',
+        };
+        return classMap[questionState];
     };
 
-    const getActiveColor = (status: string) => {
-        switch (status) {
-            case 'complete':
-                return 'bg-green-300 dark:bg-green-700';
-            case 'in-progress':
-                return 'bg-blue-300 dark:bg-blue-700';
-            case 'failed':
-                return 'bg-red-300 dark:bg-red-700';
-            default:
-                return 'bg-gray-300 dark:bg-gray-700';
-        }
+    const selectedQuestionColor = (questionState: QuestionState) => {
+        const classMap: Record<QuestionState, string> = {
+            complete: 'bg-pass',
+            'in-progress': 'bg-in-progress',
+            'not-attempted': 'bg-not-attempted',
+            failed: 'bg-fail ',
+        };
+        return classMap[questionState];
     };
 
     return (
@@ -107,7 +104,7 @@ export default function QuestionNavbar({
                             setCurrentQuestion(q);
                             setSelectedQuestion(q);
                         }}
-                        className={`rounded-full border-2 p-1 font-bold ${getStatusColor(q.status)} ${q === selectedQuestion ? getActiveColor(q.status) : ''} size-9`}
+                        className={`size-9 rounded-full border-2 p-1 font-bold ${questionStatusColor(q.status as QuestionState)} ${q === selectedQuestion ? selectedQuestionColor(q.status as QuestionState) : ''}`}
                     >
                         {index + 1}
                     </Button>
