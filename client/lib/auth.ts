@@ -7,7 +7,7 @@ export interface User {
     role: Role;
 }
 
-const API = 'http://localhost:8517';
+export const API = 'http://localhost:8517';
 
 export const tokenAtom = atomWithStorage<string | null>('auth_token', null);
 export const currentUserAtom = atom(async (get) => await getCurrentUser(get(tokenAtom)));

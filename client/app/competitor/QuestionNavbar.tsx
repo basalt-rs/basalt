@@ -10,6 +10,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { allQuestionsAtom, currQuestionIdxAtom } from '@/lib/questions';
+import { useAtom } from 'jotai';
+import { TestState } from '@/lib/types';
 
 type Question = {
     question: string;
@@ -25,89 +28,48 @@ type Question = {
     status: string;
 };
 
-type QuestionState = 'complete' | 'in-progress' | 'not-attempted' | 'failed';
+export default function QuestionNavbar() {
+    const [allQuestions] = useAtom(allQuestionsAtom);
+    // hack so we can demo nicely
+    const qStatuses = [
+        'pass',
+        'in-progress',
+        'fail',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted',
+        'not-attempted'
+    ].slice(0, allQuestions.length);
+    allQuestions.map(() => 'pass' as const);
 
-export default function QuestionNavbar({
-    setCurrentQuestion,
-}: {
-    setCurrentQuestion: (question: Question) => void;
-}) {
-    const [questions] = useState<Question[]>([
-        {
-            question: 'Sort an Array of Integers',
-            description: 'Sort an array of integers in ascending order and return it.',
-            tests: [
-                {
-                    input: '2 11 15 0',
-                    output: '0 2 11 15',
-                    failedOutput: '2 0 11 15',
-                    expectedOutput: '0 2 11 15',
-                },
-            ],
-            status: 'complete',
-        },
-        {
-            question: 'Sort an Array of Characters Alphabetically',
-            description:
-                'Sort an array of characters alphabetically and return them as a single string.',
-            tests: [
-                {
-                    input: 'h e l o',
-                    output: 'e h l o',
-                    failedOutput: 'h o e l',
-                    expectedOutput: 'e h l o',
-                },
-            ],
-            status: 'in-progress',
-        },
-        {
-            question: 'Hexadecimal in Reverse Order',
-            description:
-                'Convert characters to hexadecimal values and return them in reverse order.',
-            tests: [
-                {
-                    input: 'A B C D',
-                    output: '13 12 11 10',
-                    failedOutput: '10 11 12 13',
-                    expectedOutput: '13 12 11 10',
-                },
-            ],
-            status: 'failed',
-        },
-        {
-            question: 'Some of Digits',
-            description:
-                'Write a function that takes a positive integer as input and returns the sum of its digits.',
-            tests: [
-                {
-                    input: '1 2 3 4',
-                    output: '10',
-                    failedOutput: '5',
-                    expectedOutput: '10',
-                },
-            ],
-            status: 'not-attempted',
-        },
-    ]);
+    const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
 
-    const [selectedQuestion, setSelectedQuestion] = useState<Question>(questions[0]);
-
-    const questionStatusColor = (questionState: QuestionState) => {
-        const classMap: Record<QuestionState, string> = {
-            complete: 'border-pass',
+    const questionStatusColor = (questionState: TestState) => {
+        const classMap: Record<TestState, string> = {
+            pass: 'border-pass',
             'in-progress': 'border-in-progress',
             'not-attempted': 'border-not-attempted',
-            failed: 'border-fail ',
+            fail: 'border-fail ',
         };
         return classMap[questionState];
     };
 
-    const selectedQuestionColor = (questionState: QuestionState) => {
-        const classMap: Record<QuestionState, string> = {
-            complete: 'bg-pass',
-            'in-progress': 'bg-in-progress',
-            'not-attempted': 'bg-not-attempted',
-            failed: 'bg-fail ',
+    const selectedQuestionColor = (questionState: TestState) => {
+        const classMap: Record<TestState, string> = {
+            pass: 'bg-pass/50',
+            'in-progress': 'bg-in-progress/50',
+            'not-attempted': 'bg-not-attempted/50',
+            fail: 'bg-fail/50',
         };
         return classMap[questionState];
     };
@@ -115,16 +77,13 @@ export default function QuestionNavbar({
     return (
         <div className="flex flex-row items-center border-t p-1">
             <div className="flex w-full flex-row flex-nowrap gap-1 overflow-x-auto">
-                {questions.map((q, index) => (
+                {allQuestions.map((_, index) => (
                     <Button
                         variant="ghost"
                         size="icon"
                         key={index}
-                        onClick={() => {
-                            setCurrentQuestion(q);
-                            setSelectedQuestion(q);
-                        }}
-                        className={`size-9 rounded-full border-2 p-1 font-bold ${questionStatusColor(q.status as QuestionState)} ${q === selectedQuestion ? selectedQuestionColor(q.status as QuestionState) : ''}`}
+                        onClick={() => setCurrQuestionIdx(index)}
+                        className={`size-9 rounded-full border-2 p-1 font-bold ${questionStatusColor(qStatuses[index])} ${index === currQuestion ? selectedQuestionColor(qStatuses[index]) : ''}`}
                     >
                         {index + 1}
                     </Button>

@@ -15,6 +15,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '../leaderboard/page';
 import QuestionNavbar from './QuestionNavbar';
+import { QuestionResponse, TestState } from '@/lib/types';
+import { useAtom } from 'jotai';
+import { currQuestionAtom } from '@/lib/questions';
 
 const TabContent = () => {
     const [selectedTab, setSelectedTab] = useState<'text-editor' | 'leaderboard'>('text-editor');
@@ -38,47 +41,31 @@ const TabContent = () => {
     }
 };
 
-// TODO: need to bring in Question Information from host component as am input for this func
-const QuestionDetails = ({
-    questionDetails,
-}: {
-    questionDetails: {
-        question: string;
-        description: string;
-        tests: {
-            input: string;
-            output: string;
-        }[];
-        status: string;
-    };
-}) => {
-    const { question, description, tests } = questionDetails;
+const QuestionDetails = ({ question: { title, description, tests } }: { question: QuestionResponse, status: TestState }) => {
     return (
         <div className="flex flex-col items-center justify-center gap-2">
             <h1>
                 <b>Question Title</b>
             </h1>
-            <h1>{question}</h1>
+            <h1>{title}</h1>
             <div>
-                <p>{description}</p>
+                <article className="prose prose-slate dark:prose-invert prose-code:before:content-[''] prose-code:after:content-['']" dangerouslySetInnerHTML={{ __html: description || '' }} />
 
                 <div className="flex flex-col gap-2">
-                    {tests.map((test, index) => (
-                        <div key={index}>
-                            <div>
-                                <strong>Input</strong>
-                                <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                    {test.input}
-                                </pre>
-                            </div>
-                            <div>
-                                <strong>Output</strong>
-                                <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                    {test.output}
-                                </pre>
-                            </div>
+                    {tests[0].input &&
+                        <div>
+                            <strong>Input</strong>
+                            <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                {tests[0].input}
+                            </pre>
                         </div>
-                    ))}
+                    }
+                    <div>
+                        <strong>Output</strong>
+                        <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                            {tests[0].output}
+                        </pre>
+                    </div>
                 </div>
             </div>
         </div>
@@ -215,19 +202,7 @@ const TestResults = ({
 };
 
 export default function Competitor() {
-    const [currentQuestion, setCurrentQuestion] = useState({
-        question: 'Sort an Array of Integers',
-        description: 'Sort an array of integers in ascending order and return it.',
-        tests: [
-            {
-                input: '2 11 15 0',
-                output: '0 2 11 15',
-                failedOutput: '2 0 11 15',
-                expectedOutput: '0 2 11 15',
-            },
-        ],
-        status: 'complete',
-    });
+    const [currentQuestion] = useAtom(currQuestionAtom);
 
     return (
         <div className="h-screen">
@@ -245,9 +220,9 @@ export default function Competitor() {
                         >
                             <ResizablePanelGroup direction="vertical" className="h-full">
                                 <div className="flex h-full flex-col pt-8">
-                                    <div className="box-border flex flex-col p-4">
-                                        <QuestionDetails questionDetails={currentQuestion} />
-                                    </div>
+                                    <ScrollArea className="flex-grow flex flex-col p-4">
+                                        <QuestionDetails question={currentQuestion} status="pass" />
+                                    </ScrollArea>
                                     <div className="mt-auto flex w-full flex-row justify-center">
                                         <RunTest />
                                     </div>
@@ -261,7 +236,7 @@ export default function Competitor() {
                         <ResizableHandle withHandle />
                         <ResizablePanel className="">
                             <span className="max-w-screen w-full">
-                                <QuestionNavbar setCurrentQuestion={setCurrentQuestion} />
+                                <QuestionNavbar />
                             </span>
                             <ResizablePanelGroup direction="vertical" className="h-full">
                                 <ResizablePanel defaultSize={400} className="h-full">
