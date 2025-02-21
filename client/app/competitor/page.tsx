@@ -45,12 +45,14 @@ const QuestionDetails = ({
     questionDetails: {
         question: string;
         description: string;
-        input: string;
-        output: string;
+        tests: {
+            input: string;
+            output: string;
+        }[];
         status: string;
     };
 }) => {
-    const { question, description, input, output } = questionDetails;
+    const { question, description, tests } = questionDetails;
     return (
         <div className="flex flex-col items-center justify-center gap-2">
             <h1>
@@ -61,18 +63,22 @@ const QuestionDetails = ({
                 <p>{description}</p>
 
                 <div className="flex flex-col gap-2">
-                    <div>
-                        <strong>Input</strong>
-                        <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                            {input}
-                        </pre>
-                    </div>
-                    <div>
-                        <strong>Output</strong>
-                        <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                            {output}
-                        </pre>
-                    </div>
+                    {tests.map((test, index) => (
+                        <div key={index}>
+                            <div>
+                                <strong>Input</strong>
+                                <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.input}
+                                </pre>
+                            </div>
+                            <div>
+                                <strong>Output</strong>
+                                <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.output}
+                                </pre>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -97,109 +103,113 @@ const TestResults = ({
     testData,
 }: {
     testData: {
-        input: string;
-        output: string;
-        failedOutput: string;
-        expectedOutput: string;
+        tests: {
+            input: string;
+            output: string;
+            failedOutput: string;
+            expectedOutput: string;
+        }[];
     };
 }) => {
-    const { input, output, failedOutput, expectedOutput } = testData;
+    const { tests } = testData;
     return (
         <div className="w-full">
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-1">
-                    <AccordionTrigger className="items-center justify-between px-8">
-                        <h1>
-                            <b>Test Case 1</b>
-                        </h1>
-                        <h1 className="flex items-center justify-center text-green-500">
-                            <b>PASS</b>
-                        </h1>
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-row gap-4 px-8">
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Input</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {input}
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {output}
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Expected Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {expectedOutput}
-                            </pre>
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
+            {tests.map((test, index) => (
+                <Accordion type="single" key={index} collapsible>
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger className="items-center justify-between px-8">
+                            <h1>
+                                <b>Test Case 1</b>
+                            </h1>
+                            <h1 className="flex items-center justify-center text-green-500">
+                                <b>PASS</b>
+                            </h1>
+                        </AccordionTrigger>
+                        <AccordionContent className="flex flex-row gap-4 px-8">
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Input</b>
+                                <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.input}
+                                </pre>
+                            </div>
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Output</b>
+                                <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.output}
+                                </pre>
+                            </div>
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Expected Output</b>
+                                <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.expectedOutput}
+                                </pre>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
 
-                <AccordionItem value="item-2">
-                    <AccordionTrigger className="items-center justify-between px-8">
-                        <h1>
-                            <b>Test Case 2</b>
-                        </h1>
-                        <h1 className="flex items-center justify-center text-red-700">
-                            <b>FAIL</b>
-                        </h1>
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-row gap-[10vw] px-8">
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Input</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {input}
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {failedOutput}
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Expected Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {expectedOutput}
-                            </pre>
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
+                    <AccordionItem value="item-2">
+                        <AccordionTrigger className="items-center justify-between px-8">
+                            <h1>
+                                <b>Test Case 2</b>
+                            </h1>
+                            <h1 className="flex items-center justify-center text-red-700">
+                                <b>FAIL</b>
+                            </h1>
+                        </AccordionTrigger>
+                        <AccordionContent className="flex flex-row gap-[10vw] px-8">
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Input</b>
+                                <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.input}
+                                </pre>
+                            </div>
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Output</b>
+                                <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.failedOutput}
+                                </pre>
+                            </div>
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Expected Output</b>
+                                <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.expectedOutput}
+                                </pre>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
 
-                <AccordionItem value="item-3">
-                    <AccordionTrigger className="items-center justify-between px-8">
-                        <h1>
-                            <b>Test Case 3</b>
-                        </h1>
-                        <h1 className="flex items-center justify-center text-red-700">
-                            <b>FAIL</b>
-                        </h1>
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-row gap-[10vw] px-8">
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Input</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {input}
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {failedOutput}
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Expected Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                {expectedOutput}
-                            </pre>
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
+                    <AccordionItem value="item-3">
+                        <AccordionTrigger className="items-center justify-between px-8">
+                            <h1>
+                                <b>Test Case 3</b>
+                            </h1>
+                            <h1 className="flex items-center justify-center text-red-700">
+                                <b>FAIL</b>
+                            </h1>
+                        </AccordionTrigger>
+                        <AccordionContent className="flex flex-row gap-[10vw] px-8">
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Input</b>
+                                <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.input}
+                                </pre>
+                            </div>
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Output</b>
+                                <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.failedOutput}
+                                </pre>
+                            </div>
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Expected Output</b>
+                                <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
+                                    {test.expectedOutput}
+                                </pre>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+            ))}
         </div>
     );
 };
@@ -208,10 +218,14 @@ export default function Competitor() {
     const [currentQuestion, setCurrentQuestion] = useState({
         question: 'Sort an Array of Integers',
         description: 'Sort an array of integers in ascending order and return it.',
-        input: '2 11 15 0',
-        output: '0 2 11 15',
-        failedOutput: '2 0 11 15',
-        expectedOutput: '0 2 11 15',
+        tests: [
+            {
+                input: '2 11 15 0',
+                output: '0 2 11 15',
+                failedOutput: '2 0 11 15',
+                expectedOutput: '0 2 11 15',
+            },
+        ],
         status: 'complete',
     });
 

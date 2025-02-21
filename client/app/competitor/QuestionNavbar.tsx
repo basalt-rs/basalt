@@ -14,10 +14,14 @@ import {
 type Question = {
     question: string;
     description: string;
-    input: string;
-    output: string;
-    failedOutput: string;
-    expectedOutput: string;
+    tests: [
+        {
+            input: string;
+            output: string;
+            failedOutput: string;
+            expectedOutput: string;
+        },
+    ];
     status: string;
 };
 
@@ -32,40 +36,56 @@ export default function QuestionNavbar({
         {
             question: 'Sort an Array of Integers',
             description: 'Sort an array of integers in ascending order and return it.',
-            input: '2 11 15 0',
-            output: '0 2 11 15',
-            failedOutput: '2 0 11 15',
-            expectedOutput: '0 2 11 15',
+            tests: [
+                {
+                    input: '2 11 15 0',
+                    output: '0 2 11 15',
+                    failedOutput: '2 0 11 15',
+                    expectedOutput: '0 2 11 15',
+                },
+            ],
             status: 'complete',
         },
         {
             question: 'Sort an Array of Characters Alphabetically',
             description:
                 'Sort an array of characters alphabetically and return them as a single string.',
-            input: 'h e l o',
-            output: 'e h l o',
-            failedOutput: 'h o e l',
-            expectedOutput: 'e h l o',
+            tests: [
+                {
+                    input: 'h e l o',
+                    output: 'e h l o',
+                    failedOutput: 'h o e l',
+                    expectedOutput: 'e h l o',
+                },
+            ],
             status: 'in-progress',
         },
         {
             question: 'Hexadecimal in Reverse Order',
             description:
                 'Convert characters to hexadecimal values and return them in reverse order.',
-            input: 'A B C D',
-            output: '13 12 11 10',
-            failedOutput: '10 11 12 13',
-            expectedOutput: '13 12 11 10',
+            tests: [
+                {
+                    input: 'A B C D',
+                    output: '13 12 11 10',
+                    failedOutput: '10 11 12 13',
+                    expectedOutput: '13 12 11 10',
+                },
+            ],
             status: 'failed',
         },
         {
             question: 'Some of Digits',
             description:
                 'Write a function that takes a positive integer as input and returns the sum of its digits.',
-            input: '1 2 3 4',
-            output: '10',
-            failedOutput: '5',
-            expectedOutput: '10',
+            tests: [
+                {
+                    input: '1 2 3 4',
+                    output: '10',
+                    failedOutput: '5',
+                    expectedOutput: '10',
+                },
+            ],
             status: 'not-attempted',
         },
     ]);
