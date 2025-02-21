@@ -6,15 +6,6 @@ import {
     NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
     Menubar,
     MenubarContent,
     MenubarItem,
@@ -95,23 +86,7 @@ export default function CompetitorNavbar() {
                     </NavigationMenuItem>
                 </NavigationMenuList>
             </NavigationMenu>
-
-            <div className="flex min-w-[10vw] gap-1">
-                <Select>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Programming Language" />
-                    </SelectTrigger>
-                    <SelectContent className="min-w-20">
-                        <SelectGroup>
-                            <SelectLabel>Languages</SelectLabel>
-                            <SelectItem value="Python">Python</SelectItem>
-                            <SelectItem value="Java">Java</SelectItem>
-                            <SelectItem value="JavaScript">JavaScript</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-                <UserMenu />
-            </div>
+            <UserMenu />
         </div>
     );
 }
