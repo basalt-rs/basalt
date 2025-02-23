@@ -4,7 +4,6 @@ import Timer from '@/components/Timer';
 import { Button } from '@/components/ui/button';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import CompetitorNavbar, { tabChangeEmitter } from '@/components/CompetitorNavbar';
-import { Textarea } from '@/components/ui/textarea';
 import {
     Accordion,
     AccordionContent,
@@ -14,6 +13,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '../leaderboard/page';
+import CodeEditor from '@/components/Editor';
 
 const TabContent = () => {
     const [selectedTab, setSelectedTab] = useState<'text-editor' | 'leaderboard'>('text-editor');
@@ -33,7 +33,7 @@ const TabContent = () => {
             </ScrollArea>
         );
     } else {
-        return <Textarea />;
+        return <CodeEditor />;
     }
 };
 
