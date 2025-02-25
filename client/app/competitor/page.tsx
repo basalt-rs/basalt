@@ -18,6 +18,9 @@ import QuestionNavbar from './QuestionNavbar';
 import { QuestionResponse, TestState } from '@/lib/types';
 import { useAtom } from 'jotai';
 import { currQuestionAtom } from '@/lib/questions';
+import { DropdownMenu } from '@radix-ui/react-dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Circle } from 'lucide-react';
 
 const TabContent = () => {
     const [selectedTab, setSelectedTab] = useState<'text-editor' | 'leaderboard'>('text-editor');
@@ -219,17 +222,28 @@ export default function Competitor() {
                             className="border-black-300 h-full border-t"
                         >
                             <ResizablePanelGroup direction="vertical" className="h-full">
-                                <div className="flex h-full flex-col pt-8">
-                                    <ScrollArea className="flex-grow flex flex-col p-4">
-                                        <QuestionDetails question={currentQuestion} status="pass" />
-                                    </ScrollArea>
-                                    <div className="mt-auto flex w-full flex-row justify-center">
-                                        <RunTest />
-                                    </div>
-                                    <div className="py-2.5">
-                                        <Separator className="mb-2.5 mt-2.5" />
-                                        <Timer isHost={false} startingTime={4500} isActive={true} />
-                                    </div>
+                                <ScrollArea className="flex flex-col items-center justify-center">
+                                    <Select defaultValue="1">
+                                        <SelectTrigger className="w-3/4 m-4 mx-auto">
+                                            <SelectValue placeholder="Question" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="1" >
+                                                <div className="flex flex-row">
+                                                    <span className="text-pass pr-2 h-full items-baseline"><Circle size={16} fill="currentColor" /></span>
+                                                    Question 1
+                                                </div>
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <QuestionDetails question={currentQuestion} status="pass" />
+                                </ScrollArea>
+                                <div className="mt-auto flex w-full flex-row justify-center">
+                                    <RunTest />
+                                </div>
+                                <div className="py-2.5">
+                                    <Separator className="mb-2.5 mt-2.5" />
+                                    <Timer isHost={false} startingTime={4500} isActive={true} />
                                 </div>
                             </ResizablePanelGroup>
                         </ResizablePanel>

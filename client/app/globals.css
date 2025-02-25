@@ -6,12 +6,19 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-svg use {
-    fill: currentColor;
-}
+.prose {
 
-svg > path {
-    fill: transparent;
+    p {
+        padding: .5rem 0;
+    }
+
+    svg use {
+        fill: currentColor;
+    }
+
+    svg > path {
+        fill: transparent;
+    }
 }
 
 @layer base {
