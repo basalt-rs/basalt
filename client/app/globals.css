@@ -12,13 +12,21 @@ body {
         padding: .5rem 0;
     }
 
-    svg use {
-        fill: currentColor;
-    }
-
     svg > path {
         fill: transparent;
     }
+
+    svg {
+        display: inline;
+        
+        use {
+            fill: currentColor;
+        }
+    }
+}
+
+article.prose svg {
+    display: inline;
 }
 
 @layer base {

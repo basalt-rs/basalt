@@ -47,10 +47,7 @@ const TabContent = () => {
 const QuestionDetails = ({ question: { title, description, tests } }: { question: QuestionResponse, status: TestState }) => {
     return (
         <div className="flex flex-col items-center justify-center gap-2">
-            <h1>
-                <b>Question Title</b>
-            </h1>
-            <h1>{title}</h1>
+            <h1 className="font-bold">{title}</h1>
             <div>
                 <article className="prose prose-slate dark:prose-invert prose-code:before:content-[''] prose-code:after:content-['']" dangerouslySetInnerHTML={{ __html: description || '' }} />
 
@@ -222,9 +219,9 @@ export default function Competitor() {
                             className="border-black-300 h-full border-t"
                         >
                             <ResizablePanelGroup direction="vertical" className="h-full">
-                                <ScrollArea className="flex flex-col items-center justify-center">
+                                <ScrollArea className="flex flex-col items-center justify-center p-4">
                                     <Select defaultValue="1">
-                                        <SelectTrigger className="w-3/4 m-4 mx-auto">
+                                        <SelectTrigger className="w-3/4 mx-auto">
                                             <SelectValue placeholder="Question" />
                                         </SelectTrigger>
                                         <SelectContent>
