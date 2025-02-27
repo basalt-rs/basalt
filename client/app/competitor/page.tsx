@@ -16,14 +16,17 @@ import { Separator } from '@/components/ui/separator';
 import Leaderboard from '../leaderboard/page';
 import QuestionNavbar from './QuestionNavbar';
 import { QuestionResponse, TestState } from '@/lib/types';
-import { useAtom } from 'jotai';
-import { currQuestionAtom } from '@/lib/questions';
-import { DropdownMenu } from '@radix-ui/react-dropdown-menu';
+import { atom, useAtom } from 'jotai';
+import { allQuestionsAtom, allStatesAtom, currQuestionAtom, currQuestionIdxAtom } from '@/lib/questions';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Circle } from 'lucide-react';
+import { testColor } from '@/lib/utils';
+
+type SelectedTab = 'text-editor' | 'leaderboard';
+const selectedTabAtom = atom('text-editor' as SelectedTab);
 
 const TabContent = () => {
-    const [selectedTab, setSelectedTab] = useState<'text-editor' | 'leaderboard'>('text-editor');
+    const [selectedTab, setSelectedTab] = useAtom(selectedTabAtom);
 
     useEffect(() => {
         tabChangeEmitter.on('tabChange', setSelectedTab);
@@ -40,7 +43,7 @@ const TabContent = () => {
             </ScrollArea>
         );
     } else {
-        return <Textarea />;
+        return <Textarea className="font-mono" />;
     }
 };
 
@@ -203,6 +206,9 @@ const TestResults = ({
 
 export default function Competitor() {
     const [currentQuestion] = useAtom(currQuestionAtom);
+    const [allQuestions] = useAtom(allQuestionsAtom);
+    const [allStates] = useAtom(allStatesAtom);
+    const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
 
     return (
         <div className="h-screen">
@@ -214,30 +220,32 @@ export default function Competitor() {
                 <div className="flex-grow">
                     <ResizablePanelGroup direction="horizontal">
                         <ResizablePanel
-                            defaultSize={20}
-                            maxSize={25}
+                            defaultSize={35}
+                            maxSize={55}
+                            collapsible={true}
+                            collapsedSize={0}
+                            minSize={10}
                             className="border-black-300 h-full border-t"
                         >
                             <ResizablePanelGroup direction="vertical" className="h-full">
                                 <ScrollArea className="flex flex-col items-center justify-center p-4">
-                                    <Select defaultValue="1">
-                                        <SelectTrigger className="w-3/4 mx-auto">
-                                            <SelectValue placeholder="Question" />
+                                    <Select defaultValue={`${currQuestion}`} onValueChange={v => setCurrQuestionIdx(+v)}>
+                                        <SelectTrigger className="w-1/2 mx-auto my-2">
+                                            <SelectValue placeholder="Select a Question..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="1" >
-                                                <div className="flex flex-row">
-                                                    <span className="text-pass pr-2 h-full items-baseline"><Circle size={16} fill="currentColor" /></span>
-                                                    Question 1
-                                                </div>
-                                            </SelectItem>
+                                            {allQuestions.map((q, i) => (
+                                                <SelectItem key={i} value={`${i}`} >
+                                                    <div className="flex flex-row items-center">
+                                                        <Circle fill="currentColor" className={`${testColor(allStates[i])} pr-2 w-6 h-6`} />
+                                                        {q.title}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <QuestionDetails question={currentQuestion} status="pass" />
                                 </ScrollArea>
-                                <div className="mt-auto flex w-full flex-row justify-center">
-                                    <RunTest />
-                                </div>
                                 <div className="py-2.5">
                                     <Separator className="mb-2.5 mt-2.5" />
                                     <Timer isHost={false} startingTime={4500} isActive={true} />

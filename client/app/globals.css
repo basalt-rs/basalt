@@ -16,8 +16,19 @@ body {
         fill: transparent;
     }
 
+    table {
+        width: 100%;
+
+        td {
+            text-align: center;
+        }
+    }
+
     svg {
         display: inline;
+        height: 1em;
+        width: auto;
+        transform: translateY(-.15em);
         
         use {
             fill: currentColor;
@@ -91,5 +102,16 @@ article.prose svg {
     }
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
     }
 }

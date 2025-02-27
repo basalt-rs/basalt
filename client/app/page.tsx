@@ -18,6 +18,14 @@ import Link from 'next/link';
 import { login, roleAtom } from '@/lib/auth';
 import { Provider, useAtom } from 'jotai';
 import { Loader2 } from 'lucide-react';
+import { Role } from '../lib/auth.ts';
+
+const foo = (role: Role): string => {
+    return ({
+        admin: 'host',
+        competitor: 'competitor',
+    })[role]
+};
 
 const LoginFormSchema = z.object({
     username: z.string().min(4, { message: 'Username must be at least 4 characters.' }),
@@ -48,7 +56,7 @@ const Login = () => {
 
         const role = await login(username, password);
         if (role) {
-            router.replace(`/${role}`);
+            router.replace(`/${foo(role)}`);
         } else {
             setMessage('Invalid username or password.');
             form.reset();
@@ -57,7 +65,7 @@ const Login = () => {
     return (
         <>
             <div className="flex flex-col flex-wrap items-center">
-                <h1 className="mb-1 text-6xl font-bold">Log In</h1>
+                <h1 className="mb-1 text-6xl font-bold small-caps">Log In</h1>
                 <h2 className="mb-1.5">Please enter a username and password to get started!</h2>
 
                 <Form {...form}>
@@ -113,7 +121,7 @@ export default function Home() {
 
     useEffect(() => {
         if (role) {
-            router.replace(`/${role}`);
+            router.replace(`/${foo(role)}`);
         }
     }, [router, role]);
 

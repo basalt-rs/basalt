@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Circle, Trophy } from 'lucide-react';
 import Timer from '@/components/Timer';
+import { testColor } from '@/lib/utils';
 
 type TestState = 'pass' | 'fail' | 'in-progress' | 'not-attempted';
 
@@ -13,18 +14,6 @@ interface Data {
 }
 
 const trophyColor = (rank: number) => ['text-yellow-500', 'text-gray-500', 'text-amber-600'][rank];
-
-const testColor = (testOutput: TestState) => {
-    // See: https://tailwindcss.com/docs/detecting-classes-in-source-files#dynamic-class-names
-    const classMap: Record<TestState, string> = {
-        pass: 'text-pass',
-        fail: 'text-fail',
-        'in-progress': 'text-in-progress',
-        'not-attempted': 'text-not-attempted',
-    };
-
-    return classMap[testOutput];
-};
 
 const TeamRank = () => {
     const data: Data[] = [
