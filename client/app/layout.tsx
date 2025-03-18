@@ -20,7 +20,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                         enableSystem
                         disableTransitionOnChange
                     >
-                        { children }
+                        {children}
                         <Toaster />
                     </ThemeProvider>
                 </body>

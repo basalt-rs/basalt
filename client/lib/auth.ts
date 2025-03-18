@@ -12,11 +12,14 @@ export const tokenAtom = atomWithStorage<string | null>('auth_token', null);
 export const currentUserAtom = atom(async (get) => {
     const ip = get(ipAtom);
     if (!ip) return null;
-    return await getCurrentUser(ip, get(tokenAtom))
+    return await getCurrentUser(ip, get(tokenAtom));
 });
 export const roleAtom = atom(async (get) => (await get(currentUserAtom))?.role);
 
-export const getCurrentUser = async (ip: string, token: string | null = null): Promise<User | null> => {
+export const getCurrentUser = async (
+    ip: string,
+    token: string | null = null
+): Promise<User | null> => {
     const store = createStore();
     if (token === null) {
         token = store.get(tokenAtom);
@@ -35,7 +38,11 @@ export const getCurrentUser = async (ip: string, token: string | null = null): P
     return (await res.json()) as User;
 };
 
-export const login = async (ip: string, username: string, password: string): Promise<Role | null> => {
+export const login = async (
+    ip: string,
+    username: string,
+    password: string
+): Promise<Role | null> => {
     const store = createStore();
     const res = await fetch(`${ip}/auth/login`, {
         method: 'POST',
