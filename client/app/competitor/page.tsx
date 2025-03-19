@@ -1,8 +1,7 @@
 'use client';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
-import { useEffect, useState } from 'react';
-import CompetitorNavbar, { tabChangeEmitter } from '@/components/CompetitorNavbar';
+import CompetitorNavbar from '@/components/CompetitorNavbar';
 import { Textarea } from '@/components/ui/textarea';
 import {
     Accordion,
@@ -16,42 +15,93 @@ import {
     SelectValue,
     SelectContent,
     SelectItem,
+    SelectGroup,
+    SelectLabel,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '../leaderboard/page';
 import { QuestionResponse, TestState } from '@/lib/types';
 import { allQuestionsAtom, allStatesAtom, currQuestionAtom, currQuestionIdxAtom } from '@/lib/services/questions';
-import { useAtom } from 'jotai';
-import { Circle } from 'lucide-react';
+import { ExtractAtomValue, useAtom } from 'jotai';
+import { Circle, FileDown, FlaskConical, SendHorizonal, Upload } from 'lucide-react';
 import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
+import { CodeBlock, Tooltip } from '@/components/util';
+import { Button } from '@/components/ui/button';
+import { currentTabAtom } from '@/lib/competitor-state';
+import { toast } from '@/hooks/use-toast';
 
-const TabContent = () => {
-    const [selectedTab, setSelectedTab] = useState<'text-editor' | 'leaderboard'>('text-editor');
+const EditorButtons = () => {
+    const notImplemented = () => toast({
+        title: 'Not Yet Implemented',
+        description: 'Check back later!',
+        variant: 'destructive'
+    });
+    return (
+        <div className="flex flex-row items-center border-t p-1 gap-3 justify-between">
+            <div className="flex flex-row">
+                <Tooltip tooltip="Load File">
+                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                        <Upload />
+                    </Button>
+                </Tooltip>
+                <Tooltip tooltip="Download Packet">
+                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                        <FileDown />
+                    </Button>
+                </Tooltip>
+            </div>
+            <div className="flex flex-row">
+                <Tooltip tooltip="Run Tests">
+                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                        <FlaskConical className="text-in-progress" />
+                    </Button>
+                </Tooltip>
+                <Tooltip tooltip="Submit Solution">
+                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                        <SendHorizonal className="text-pass" />
+                    </Button>
+                </Tooltip>
+                <span className="ml-auto">
+                    <Select>
+                        <SelectTrigger className="w-56">
+                            <SelectValue placeholder="Programming Language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>Languages</SelectLabel>
+                                <SelectItem value="Python">Python</SelectItem>
+                                <SelectItem value="Java">Java</SelectItem>
+                                <SelectItem value="JavaScript">JavaScript</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </span>
+            </div>
+        </div>
+    );
+}
 
-    useEffect(() => {
-        tabChangeEmitter.on('tabChange', setSelectedTab);
-
-        return () => {
-            tabChangeEmitter.off('tabChange', setSelectedTab);
-        };
-    }, []);
-
-    if (selectedTab === 'leaderboard') {
-        return (
-            <ScrollArea className="h-full w-full border">
-                <Leaderboard showTimer={false} />
-            </ScrollArea>
-        );
-    } else {
-        return <Textarea />;
+const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
+    switch (tab) {
+        case 'text-editor':
+            return (
+                <div className="flex flex-col h-full">
+                    <EditorButtons />
+                    <Textarea className="flex-grow" />
+                </div>
+            );
+        case 'leaderboard':
+            return (
+                <ScrollArea className="h-full w-full border">
+                    <Leaderboard showTimer={false} />
+                </ScrollArea>
+            );
+        default:
+            return 'unreachable';
     }
 };
-
-const CodeBlock = ({ text }: { text: string }) => (
-    <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">{text}</pre>
-);
 
 const TestResults = () => {
     const [currQuestion] = useAtom(currQuestionAtom);
@@ -122,6 +172,7 @@ export default function Competitor() {
     const [allQuestions] = useAtom(allQuestionsAtom);
     const [allStates] = useAtom(allStatesAtom);
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
+    const [tab] = useAtom(currentTabAtom);
 
     return (
         <div className="h-screen">
@@ -169,16 +220,12 @@ export default function Competitor() {
                         <ResizablePanel className="">
                             <ResizablePanelGroup direction="vertical" className="h-full">
                                 <ResizablePanel defaultSize={400} className="h-full">
-                                    <div className="flex h-full">
-                                        <TabContent />
-                                    </div>
+                                    <TabContent tab={tab} />
                                 </ResizablePanel>
                                 <ResizableHandle />
                                 <ResizablePanel defaultSize={100} className="h-full">
                                     <ScrollArea className="h-full w-full">
-                                        <div>
-                                            <TestResults />
-                                        </div>
+                                        <TestResults />
                                     </ScrollArea>
                                 </ResizablePanel>
                             </ResizablePanelGroup>
