@@ -115,40 +115,35 @@ const TestResults = () => {
         <div className="w-full">
             <Accordion type="single" collapsible>
                 {currQuestion.tests
-                    .flatMap((t) => [t, t, t])
-                    .map(
-                        (
-                            test,
-                            i // TODO: remove flatmap once this uses the actual test output
-                        ) => (
-                            <AccordionItem key={i} value={`test-${i}`}>
-                                <AccordionTrigger className="items-center justify-between px-8">
-                                    <h1>
-                                        <b>Test Case {i + 1}</b>
-                                    </h1>
-                                    <h1 className="flex items-center justify-center text-green-500">
-                                        <b>PASS</b>
-                                    </h1>
-                                </AccordionTrigger>
-                                <AccordionContent className="flex flex-row gap-4 px-8">
-                                    {test.input && (
-                                        <div className="flex h-full flex-grow flex-col gap-2">
-                                            <b>Input</b>
-                                            <CodeBlock text={test.input} />
-                                        </div>
-                                    )}
+                    .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
+                    .map((test, i) => (
+                        <AccordionItem key={i} value={`test-${i}`}>
+                            <AccordionTrigger className="items-center justify-between px-8">
+                                <h1>
+                                    <b>Test Case {i + 1}</b>
+                                </h1>
+                                <h1 className="flex items-center justify-center text-green-500">
+                                    <b>PASS</b>
+                                </h1>
+                            </AccordionTrigger>
+                            <AccordionContent className="flex flex-row gap-4 px-8">
+                                {test.input && (
                                     <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Expected Output</b>
-                                        <CodeBlock text={test.output} />
+                                        <b>Input</b>
+                                        <CodeBlock text={test.input} />
                                     </div>
-                                    <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Actual Output</b>
-                                        <CodeBlock text="Not yet implemented" />
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        )
-                    )}
+                                )}
+                                <div className="flex h-full flex-grow flex-col gap-2">
+                                    <b>Expected Output</b>
+                                    <CodeBlock text={test.output} />
+                                </div>
+                                <div className="flex h-full flex-grow flex-col gap-2">
+                                    <b>Actual Output</b>
+                                    <CodeBlock text="Not yet implemented" />
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
             </Accordion>
         </div>
     );
