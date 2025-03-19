@@ -6,6 +6,39 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+.prose {
+    p {
+        padding: .5rem 0;
+    }
+    svg > path {
+        fill: transparent;
+    }
+    table {
+        width: 100%;
+
+        td {
+            text-align: center;
+        }
+    }
+    svg {
+        display: inline;
+        height: .85em;
+        width: auto;
+        
+        use {
+            fill: currentColor;
+        }
+    }
+    pre {
+        background: rgb(30, 41, 59); /* Slate 800 */
+        padding: .5rem 1rem;
+        border-radius: .5rem;
+        margin: .25rem;
+        color: #ccc;
+        width: auto;
+    }
+}
+
 @layer base {
     :root {
         --background: 0 0% 100%;

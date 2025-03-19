@@ -15,7 +15,7 @@ import {
 } from './ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 import { useSetAtom } from 'jotai';
-import { tokenAtom } from '@/lib/auth';
+import { tokenAtom } from '@/lib/services/auth';
 import { RESET } from 'jotai/utils';
 
 export default function UserMenu() {
