@@ -122,7 +122,7 @@ const TestResults = () => {
                                 <h1>
                                     <b>Test Case {i + 1}</b>
                                 </h1>
-                                <h1 className="flex items-center justify-center text-green-500">
+                                <h1 className="flex items-center justify-center text-pass">
                                     <b>PASS</b>
                                 </h1>
                             </AccordionTrigger>
@@ -209,7 +209,7 @@ export default function Competitor() {
                                         defaultValue={`${currQuestion}`}
                                         onValueChange={(v) => setCurrQuestionIdx(+v)}
                                     >
-                                        <SelectTrigger className="mx-auto my-2 w-1/2">
+                                        <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
                                             <SelectValue placeholder="Select a Question..." />
                                         </SelectTrigger>
                                         <SelectContent>
