@@ -1,12 +1,14 @@
 import * as CnTooltip from '@/components/ui/tooltip';
 import { PropsWithChildren } from 'react';
 
-export const Tooltip = ({ tooltip, children, side = 'bottom' }: PropsWithChildren<{ tooltip: string, side?: 'top' | 'right' | 'bottom' | 'left' }>) => (
+export const Tooltip = ({
+    tooltip,
+    children,
+    side = 'bottom',
+}: PropsWithChildren<{ tooltip: string; side?: 'top' | 'right' | 'bottom' | 'left' }>) => (
     <CnTooltip.TooltipProvider>
         <CnTooltip.Tooltip>
-            <CnTooltip.TooltipTrigger asChild>
-                {children}
-            </CnTooltip.TooltipTrigger>
+            <CnTooltip.TooltipTrigger asChild>{children}</CnTooltip.TooltipTrigger>
             <CnTooltip.TooltipContent side={side}>
                 <p>{tooltip}</p>
             </CnTooltip.TooltipContent>

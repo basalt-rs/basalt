@@ -8,7 +8,7 @@ body {
 
 .prose {
     p {
-        padding: .5rem 0;
+        padding: 0.5rem 0;
     }
     svg > path {
         fill: transparent;
@@ -22,18 +22,18 @@ body {
     }
     svg {
         display: inline;
-        height: .85em;
+        height: 0.85em;
         width: auto;
-        
+
         use {
             fill: currentColor;
         }
     }
     pre {
         background: rgb(30, 41, 59); /* Slate 800 */
-        padding: .5rem 1rem;
-        border-radius: .5rem;
-        margin: .25rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        margin: 0.25rem;
         color: #ccc;
         width: auto;
     }

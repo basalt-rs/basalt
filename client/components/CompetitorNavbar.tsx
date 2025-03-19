@@ -24,7 +24,7 @@ export default function CompetitorNavbar() {
 
     return (
         <div className="item-center flex w-full justify-between p-1.5">
-            <div className="w-1/6 flex">
+            <div className="flex w-1/6">
                 <Menubar>
                     <MenubarMenu>
                         <MenubarTrigger>File</MenubarTrigger>
@@ -63,7 +63,13 @@ export default function CompetitorNavbar() {
             <NavigationMenu className="flex-grow">
                 <NavigationMenuList>
                     <NavigationMenuItem>
-                        <Tabs defaultValue="text-editor" value={tab} onValueChange={t => setTab(t as ExtractAtomValue<typeof currentTabAtom>)}>
+                        <Tabs
+                            defaultValue="text-editor"
+                            value={tab}
+                            onValueChange={(t) =>
+                                setTab(t as ExtractAtomValue<typeof currentTabAtom>)
+                            }
+                        >
                             <TabsList>
                                 <TabsTrigger value="text-editor">Text Editor</TabsTrigger>
                                 <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>

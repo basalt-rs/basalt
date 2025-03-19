@@ -22,7 +22,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '../leaderboard/page';
 import { QuestionResponse, TestState } from '@/lib/types';
-import { allQuestionsAtom, allStatesAtom, currQuestionAtom, currQuestionIdxAtom } from '@/lib/services/questions';
+import {
+    allQuestionsAtom,
+    allStatesAtom,
+    currQuestionAtom,
+    currQuestionIdxAtom,
+} from '@/lib/services/questions';
 import { ExtractAtomValue, useAtom } from 'jotai';
 import { Circle, FileDown, FlaskConical, SendHorizonal, Upload } from 'lucide-react';
 import { testColor } from '@/lib/utils';
@@ -33,13 +38,14 @@ import { currentTabAtom } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 
 const EditorButtons = () => {
-    const notImplemented = () => toast({
-        title: 'Not Yet Implemented',
-        description: 'Check back later!',
-        variant: 'destructive'
-    });
+    const notImplemented = () =>
+        toast({
+            title: 'Not Yet Implemented',
+            description: 'Check back later!',
+            variant: 'destructive',
+        });
     return (
-        <div className="flex flex-row items-center border-t p-1 gap-3 justify-between">
+        <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
                 <Tooltip tooltip="Load File">
                     <Button size="icon" variant="ghost" onClick={notImplemented}>
@@ -81,13 +87,13 @@ const EditorButtons = () => {
             </div>
         </div>
     );
-}
+};
 
 const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
     switch (tab) {
         case 'text-editor':
             return (
-                <div className="flex flex-col h-full">
+                <div className="flex h-full flex-col">
                     <EditorButtons />
                     <Textarea className="flex-grow" />
                 </div>
@@ -108,55 +114,66 @@ const TestResults = () => {
     return (
         <div className="w-full">
             <Accordion type="single" collapsible>
-                { currQuestion.tests.flatMap(t => [t, t, t]).map((test, i) => ( // TODO: remove flatmap once this uses the actual test output
-                    <AccordionItem key={i} value={`test-${i}`}>
-                        <AccordionTrigger className="items-center justify-between px-8">
-                            <h1>
-                                <b>Test Case {i+1}</b>
-                            </h1>
-                            <h1 className="flex items-center justify-center text-green-500">
-                                <b>PASS</b>
-                            </h1>
-                        </AccordionTrigger>
-                        <AccordionContent className="flex flex-row gap-4 px-8">
-                            { test.input &&
-                                <div className="flex h-full flex-grow flex-col gap-2">
-                                    <b>Input</b>
-                                    <CodeBlock text={test.input} />
-                                </div>
-                            }
-                            <div className="flex h-full flex-grow flex-col gap-2">
-                                <b>Expected Output</b>
-                                <CodeBlock text={test.output} />
-                            </div>
-                            <div className="flex h-full flex-grow flex-col gap-2">
-                                <b>Actual Output</b>
-                                <CodeBlock text="Not yet implemented" />
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                ))
-            }
+                {currQuestion.tests
+                    .flatMap((t) => [t, t, t])
+                    .map(
+                        (
+                            test,
+                            i // TODO: remove flatmap once this uses the actual test output
+                        ) => (
+                            <AccordionItem key={i} value={`test-${i}`}>
+                                <AccordionTrigger className="items-center justify-between px-8">
+                                    <h1>
+                                        <b>Test Case {i + 1}</b>
+                                    </h1>
+                                    <h1 className="flex items-center justify-center text-green-500">
+                                        <b>PASS</b>
+                                    </h1>
+                                </AccordionTrigger>
+                                <AccordionContent className="flex flex-row gap-4 px-8">
+                                    {test.input && (
+                                        <div className="flex h-full flex-grow flex-col gap-2">
+                                            <b>Input</b>
+                                            <CodeBlock text={test.input} />
+                                        </div>
+                                    )}
+                                    <div className="flex h-full flex-grow flex-col gap-2">
+                                        <b>Expected Output</b>
+                                        <CodeBlock text={test.output} />
+                                    </div>
+                                    <div className="flex h-full flex-grow flex-col gap-2">
+                                        <b>Actual Output</b>
+                                        <CodeBlock text="Not yet implemented" />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        )
+                    )}
             </Accordion>
         </div>
     );
 };
 
-const QuestionDetails = ({ question: { title, description, tests } }: { question: QuestionResponse, status: TestState }) => {
+const QuestionDetails = ({
+    question: { title, description, tests },
+}: {
+    question: QuestionResponse;
+    status: TestState;
+}) => {
     return (
         <div className="flex flex-col items-center justify-center gap-2">
             <h1 className="font-bold">{title}</h1>
             <div>
                 <Markdown markdown={description || ''} />
 
-                <h1 className="font-bold w-full text-center mt-2">Example</h1>
+                <h1 className="mt-2 w-full text-center font-bold">Example</h1>
                 <div className="flex flex-col gap-2">
-                    {tests[0].input &&
+                    {tests[0].input && (
                         <div>
                             <strong>Input</strong>
                             <CodeBlock text={tests[0].input} />
                         </div>
-                    }
+                    )}
                     <div>
                         <strong>Output</strong>
                         <CodeBlock text={tests[0].output} />
@@ -192,16 +209,22 @@ export default function Competitor() {
                             className="border-black-300 h-full border-t"
                         >
                             <ResizablePanelGroup direction="vertical" className="h-full">
-                                <ScrollArea className="flex flex-col items-center justify-center p-4 flex-grow">
-                                    <Select defaultValue={`${currQuestion}`} onValueChange={v => setCurrQuestionIdx(+v)}>
-                                        <SelectTrigger className="w-1/2 mx-auto my-2">
+                                <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
+                                    <Select
+                                        defaultValue={`${currQuestion}`}
+                                        onValueChange={(v) => setCurrQuestionIdx(+v)}
+                                    >
+                                        <SelectTrigger className="mx-auto my-2 w-1/2">
                                             <SelectValue placeholder="Select a Question..." />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {allQuestions.map((q, i) => (
-                                                <SelectItem key={i} value={`${i}`} >
+                                                <SelectItem key={i} value={`${i}`}>
                                                     <div className="flex flex-row items-center">
-                                                        <Circle fill="currentColor" className={`${testColor(allStates[i])} pr-2 w-6 h-6`} />
+                                                        <Circle
+                                                            fill="currentColor"
+                                                            className={`${testColor(allStates[i])} h-6 w-6 pr-2`}
+                                                        />
                                                         {q.title}
                                                     </div>
                                                 </SelectItem>
