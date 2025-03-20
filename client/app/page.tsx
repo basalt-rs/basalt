@@ -44,7 +44,6 @@ const Loading = () => {
 const Login = () => {
     const router = useRouter();
     const [message, setMessage] = useState<string>('');
-    const [ip] = useAtom(ipAtom);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(LoginFormSchema),
@@ -59,7 +58,7 @@ const Login = () => {
 
         console.log(username, password);
 
-        const role = await login(ip!, username, password);
+        const role = await login(username, password);
         if (role) {
             router.replace(`/${role}`);
         } else {

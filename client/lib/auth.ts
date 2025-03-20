@@ -1,4 +1,4 @@
-import { atom, createStore } from 'jotai';
+import { atom, getDefaultStore } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { ipAtom } from './api';
 
@@ -9,18 +9,12 @@ export interface User {
 }
 
 export const tokenAtom = atomWithStorage<string | null>('auth_token', null);
-export const currentUserAtom = atom(async (get) => {
-    const ip = get(ipAtom);
-    if (!ip) return null;
-    return await getCurrentUser(ip, get(tokenAtom));
-});
+export const currentUserAtom = atom(async (get) => await getCurrentUser(get(tokenAtom)));
 export const roleAtom = atom(async (get) => (await get(currentUserAtom))?.role);
 
-export const getCurrentUser = async (
-    ip: string,
-    token: string | null = null
-): Promise<User | null> => {
-    const store = createStore();
+export const getCurrentUser = async (token: string | null = null): Promise<User | null> => {
+    const store = getDefaultStore();
+    const ip = store.get(ipAtom);
     if (token === null) {
         token = store.get(tokenAtom);
         if (token === null) return null;
@@ -39,11 +33,11 @@ export const getCurrentUser = async (
 };
 
 export const login = async (
-    ip: string,
     username: string,
     password: string
 ): Promise<Role | null> => {
-    const store = createStore();
+    const store = getDefaultStore();
+    const ip = store.get(ipAtom);
     const res = await fetch(`${ip}/auth/login`, {
         method: 'POST',
         body: JSON.stringify({ username, password }),

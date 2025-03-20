@@ -1,4 +1,4 @@
-import { createStore } from 'jotai';
+import { getDefaultStore } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
 export const ipAtom = atomWithStorage<string | null>('ip', null);
@@ -21,7 +21,7 @@ const parseGameCode = (gameCode: string): string | null => {
 };
 
 export const setIp = (ipOrGameCode: string) => {
-    const store = createStore();
+    const store = getDefaultStore();
     if (/^(https?:\/\/)?(\d{1,3}\.){3}\d{1,3}:\d{1,4}$/.test(ipOrGameCode)) {
         const ip = ipOrGameCode;
         store.set(ipAtom, ip.startsWith('http') ? ip : `http://${ip}`);
@@ -31,7 +31,7 @@ export const setIp = (ipOrGameCode: string) => {
     const gc = parseGameCode(ipOrGameCode);
     if (gc) {
         store.set(ipAtom, 'http://' + gc);
-        console.log('game code', ipOrGameCode, '=>', gc);
+        console.log('game code', ipOrGameCode, '=>', store.get(ipAtom));
         return true;
     }
 
