@@ -32,10 +32,7 @@ export const getCurrentUser = async (token: string | null = null): Promise<User 
     return (await res.json()) as User;
 };
 
-export const login = async (
-    username: string,
-    password: string
-): Promise<Role | null> => {
+export const login = async (username: string, password: string): Promise<Role | null> => {
     const store = getDefaultStore();
     const ip = store.get(ipAtom);
     const res = await fetch(`${ip}/auth/login`, {
