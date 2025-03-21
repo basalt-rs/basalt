@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import QuestionAccordion from './QuestionAccordion';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
@@ -17,9 +17,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Ellipsis, Copy } from 'lucide-react';
 import Timer from '@/components/Timer';
-import HostNavbar from '@/components/HostNavbar';
+import HostNavbar, { tabChangeEmitter } from '@/components/HostNavbar';
+import TeamInspector from './TeamInspector';
 
 export default function Host() {
+    const [selectedTab, setSelectedTab] = useState<'questions' | 'teams'>('questions');
+    const [tabChange, setTabChange] = useState<string | null>();
+    const [selectedTeam, setSelectedTeam] = useState<{
+        name: string;
+        password: string;
+        points: number;
+        status: boolean;
+    } | null>(null);
     const [questions, setQuestions] = useState([
         {
             question: 'Sort an Array of Integers',
@@ -69,6 +78,14 @@ export default function Host() {
         { name: 'Team6', password: 'password6', points: 5, status: false },
         { name: 'Team7', password: 'password7', points: 125, status: true },
     ]);
+
+    useEffect(() => {
+        tabChangeEmitter.on('tabChange', setSelectedTab);
+
+        return () => {
+            tabChangeEmitter.off('tabChange', setSelectedTab);
+        };
+    }, []);
 
     const disconnectAllTeams = () => {
         const updatedTeams = teamList.map((team) => ({
@@ -130,6 +147,15 @@ export default function Host() {
                                         {team.status ? (
                                             <div>
                                                 <DropdownMenuItem>Message</DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setSelectedTeam(team);
+                                                        setSelectedTab('teams');
+                                                        setTabChange('teams');
+                                                    }}
+                                                >
+                                                    Inspect
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSub>
                                                     <DropdownMenuSubTrigger>
                                                         Info
@@ -201,22 +227,33 @@ export default function Host() {
             <ResizableHandle withHandle />
 
             <ResizablePanel
-                className="flex h-full min-h-screen w-full flex-col items-center"
+                className="flex min-h-screen w-full flex-col items-center"
                 defaultSize={70}
             >
                 <span className="flex w-full justify-start p-1.5">
-                    <HostNavbar />
+                    <HostNavbar tabUpdate={tabChange} />
                 </span>
 
                 <Separator />
 
-                <div className="flex max-h-full w-full flex-grow flex-col justify-start overflow-y-auto">
-                    <ul className="mt-2.5 flex flex-col">
-                        <QuestionAccordion
-                            questions={questions}
-                            handleQuestionSwitch={handleQuestionSwitch}
-                        />
-                    </ul>
+                <div className="flex h-full w-full flex-col justify-start overflow-y-auto">
+                    {selectedTab === 'questions' && (
+                        <ul className="mt-2.5 flex flex-col">
+                            <QuestionAccordion
+                                questions={questions}
+                                handleQuestionSwitch={handleQuestionSwitch}
+                            />
+                        </ul>
+                    )}
+                    {selectedTab === 'teams' && (
+                        <div className="m-2.5 flex h-full max-h-full flex-col">
+                            <TeamInspector
+                                teams={teamList}
+                                selectedTeam={selectedTeam}
+                                setSelectedTeam={setSelectedTeam}
+                            />
+                        </div>
+                    )}
                 </div>
             </ResizablePanel>
         </ResizablePanelGroup>
