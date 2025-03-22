@@ -7,10 +7,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Wifi, WifiOff } from 'lucide-react';
+import { Send, Wifi, WifiOff } from 'lucide-react';
 import { useTeamsAtom, useCurrentTeam } from '@/lib/host-state';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function TeamInspector() {
     const { teamList } = useTeamsAtom();
@@ -19,27 +21,27 @@ export default function TeamInspector() {
     return (
         <div className="flex h-full w-full flex-col items-center">
             <Select
-                onValueChange={(value) =>
-                    setSelectedTeam(teamList.find((team) => team.name === value) || null)
-                }
+                value={selectedTeam?.name || ''}
+                onValueChange={(value) => {
+                    const team = teamList.find((t) => t.name === value);
+                    if (team) setSelectedTeam(team);
+                }}
             >
                 <SelectTrigger className="flex w-fit">
-                    <SelectValue
-                        placeholder={
-                            selectedTeam ? (
-                                <span className="flex gap-1">
-                                    {selectedTeam.status ? (
-                                        <Wifi className="text-green-500" />
-                                    ) : (
-                                        <WifiOff className="text-gray-300 dark:text-gray-500" />
-                                    )}
-                                    {selectedTeam.name}
-                                </span>
-                            ) : (
-                                'Select A Team'
-                            )
-                        }
-                    />
+                    <SelectValue placeholder="Select A Team">
+                        {selectedTeam ? (
+                            <span className="flex gap-1">
+                                {selectedTeam.status ? (
+                                    <Wifi className="text-green-500" />
+                                ) : (
+                                    <WifiOff className="text-gray-300 dark:text-gray-500" />
+                                )}
+                                {selectedTeam.name}
+                            </span>
+                        ) : (
+                            'Select A Team'
+                        )}
+                    </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                     {teamList.map((team, index) => (
@@ -58,9 +60,9 @@ export default function TeamInspector() {
             </Select>
             <Separator className="my-2" />
             {selectedTeam && (
-                <Card className="flex h-full w-full">
+                <Card className="flex h-full w-full flex-col">
                     <CardHeader className="w-full">
-                        <CardTitle className="flex justify-between">
+                        <CardTitle className="flex items-center justify-between text-2xl">
                             {selectedTeam.name}
                             {selectedTeam.status ? (
                                 <p className="text-green-500">Connected</p>
@@ -69,6 +71,23 @@ export default function TeamInspector() {
                             )}
                         </CardTitle>
                     </CardHeader>
+                    <CardContent className="flex h-full w-full flex-col gap-4 text-lg">
+                        <span className="flex justify-between align-middle">
+                            <p>
+                                <strong>Points: </strong>
+                                {selectedTeam.points}
+                            </p>
+                            <Button variant="outline">Submission History</Button>
+                        </span>
+                        <div className="flex h-full flex-col rounded border p-4">
+                            <span className="mt-auto flex w-auto gap-1 align-middle">
+                                <Input type="text" placeholder="Message..." />
+                                <Button variant="secondary">
+                                    <Send />
+                                </Button>
+                            </span>
+                        </div>
+                    </CardContent>
                 </Card>
             )}
         </div>
