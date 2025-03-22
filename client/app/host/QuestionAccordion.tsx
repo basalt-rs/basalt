@@ -30,14 +30,14 @@ export default function QuestionAccordion() {
                     <AccordionContent className="pr-1.5">
                         <div>
                             <div className="flex justify-between">
-                                {['Rust', 'Foo', 'Bar'] && (
+                                {q.languages && (
                                     <div>
                                         <span className="font-bold">
-                                            {['Rust', 'Foo', 'Bar'].length !== 1
+                                            {q.languages.length !== 1
                                                 ? 'Languages: '
                                                 : 'Language: '}
                                         </span>
-                                        {['Rust', 'Foo', 'Bar'].join(', ')}
+                                        {q.languages.join(', ')}
                                     </div>
                                 )}
                                 <div className="flex items-center gap-1">
