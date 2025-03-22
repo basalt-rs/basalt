@@ -22,10 +22,10 @@ export default function QuestionAccordion() {
                     className={`mb-1 rounded border px-2.5 duration-200 ${true ? '' : 'bg-[#6664] text-[#333] dark:text-muted-foreground'}`}
                 >
                     <AccordionTrigger className="text-md flex justify-between">
-                        <p className="text-xl w-2/3 truncate">
-                            {q.title}
+                        <p className="w-2/3 truncate text-xl">{q.title}</p>
+                        <p>
+                            {q.points} {q.points === 1 ? 'point' : 'points'}
                         </p>
-                        <p>{q.points} {q.points === 1 ? 'point' : 'points'}</p>
                     </AccordionTrigger>
                     <AccordionContent className="pr-1.5">
                         <div>
@@ -33,12 +33,14 @@ export default function QuestionAccordion() {
                                 {['Rust', 'Foo', 'Bar'] && (
                                     <div>
                                         <span className="font-bold">
-                                            {['Rust', 'Foo', 'Bar'].length !== 1 ? 'Languages: ' : 'Language: '}
+                                            {['Rust', 'Foo', 'Bar'].length !== 1
+                                                ? 'Languages: '
+                                                : 'Language: '}
                                         </span>
                                         {['Rust', 'Foo', 'Bar'].join(', ')}
                                     </div>
                                 )}
-                                <div className="flex gap-1 items-center">
+                                <div className="flex items-center gap-1">
                                     <Label>Enabled</Label>
                                     <Switch disabled checked={true} />
                                 </div>
@@ -51,9 +53,15 @@ export default function QuestionAccordion() {
                                     {q.tests.map((test, i) => (
                                         <AccordionItem key={i} value={`test-${i}`}>
                                             <AccordionTrigger>
-                                                <div className="w-full flex items-center justify-between ml-1 mr-2">
-                                                    <h1 className="font-bold text-xl">Test Case #{i + 1}</h1>
-                                                    {test.visible || <span className="text-gray-400">Hidden</span>}
+                                                <div className="ml-1 mr-2 flex w-full items-center justify-between">
+                                                    <h1 className="text-xl font-bold">
+                                                        Test Case #{i + 1}
+                                                    </h1>
+                                                    {test.visible || (
+                                                        <span className="text-gray-400">
+                                                            Hidden
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </AccordionTrigger>
                                             <AccordionContent>

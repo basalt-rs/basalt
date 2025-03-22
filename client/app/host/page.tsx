@@ -155,7 +155,7 @@ export default function Host() {
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel defaultSize={70} className="h-screen flex flex-col">
+            <ResizablePanel defaultSize={70} className="flex h-screen flex-col">
                 <span className="flex w-full justify-start p-1.5">
                     <HostNavbar />
                 </span>

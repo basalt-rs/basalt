@@ -80,7 +80,7 @@ export default function CompetitorNavbar() {
                 </NavigationMenuList>
             </NavigationMenu>
 
-            <div className="w-1/6 flex justify-end">
+            <div className="flex w-1/6 justify-end">
                 <UserMenu />
             </div>
         </div>
