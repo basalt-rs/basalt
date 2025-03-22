@@ -1,95 +1,73 @@
 'use client';
 
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Dispatch, SetStateAction } from 'react';
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Wifi, WifiOff } from 'lucide-react';
+import { useTeamsAtom, useCurrentTeam } from '@/lib/host-state';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dot } from 'lucide-react';
-interface TeamInspectorProps {
-    teams: {
-        name: string;
-        password: string;
-        points: number;
-        status: boolean;
-    }[];
-    selectedTeam?: {
-        name: string;
-        password: string;
-        points: number;
-        status: boolean;
-    } | null;
-    setSelectedTeam: Dispatch<
-        SetStateAction<{ name: string; password: string; points: number; status: boolean } | null>
-    >;
-}
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function TeamInspector({
-    teams,
-    selectedTeam,
-    setSelectedTeam,
-}: TeamInspectorProps) {
-    const teamList = teams;
+export default function TeamInspector() {
+    const { teamList } = useTeamsAtom();
+    const { selectedTeam, setSelectedTeam } = useCurrentTeam();
+
     return (
         <div className="flex h-full w-full flex-col items-center">
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button className="w-fit" variant="outline">
-                        {selectedTeam && (
-                            <Dot
-                                className={`${selectedTeam.status ? 'text-green-500' : 'text-gray-300 dark:text-gray-500'}`}
-                            />
-                        )}
-                        {selectedTeam?.name || 'Select A Team'}
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem
-                        onClick={() => {
-                            setSelectedTeam(null);
-                        }}
-                    >
-                        Select A Team
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+            <Select
+                onValueChange={(value) =>
+                    setSelectedTeam(teamList.find((team) => team.name === value) || null)
+                }
+            >
+                <SelectTrigger className="flex w-fit">
+                    <SelectValue
+                        placeholder={
+                            selectedTeam ? (
+                                <span className="flex gap-1">
+                                    {selectedTeam.status ? (
+                                        <Wifi className="text-green-500" />
+                                    ) : (
+                                        <WifiOff className="text-gray-300 dark:text-gray-500" />
+                                    )}
+                                    {selectedTeam.name}
+                                </span>
+                            ) : (
+                                'Select A Team'
+                            )
+                        }
+                    />
+                </SelectTrigger>
+                <SelectContent>
                     {teamList.map((team, index) => (
-                        <DropdownMenuItem
-                            key={index}
-                            onClick={() => {
-                                setSelectedTeam(team);
-                            }}
-                        >
-                            <Dot
-                                className={`${team.status ? 'text-green-500' : 'text-gray-300 dark:text-gray-500'}`}
-                            />
-                            {team.name}
-                        </DropdownMenuItem>
+                        <SelectItem value={team.name} key={index}>
+                            <span className="flex gap-1">
+                                {team.status ? (
+                                    <Wifi className="text-green-500" />
+                                ) : (
+                                    <WifiOff className="text-gray-300 dark:text-gray-500" />
+                                )}
+                                {team.name}
+                            </span>
+                        </SelectItem>
                     ))}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                </SelectContent>
+            </Select>
+            <Separator className="my-2" />
             {selectedTeam && (
-                <Card className="mt-2 flex h-full w-full flex-col">
-                    <CardHeader>
-                        <CardTitle className="flex items-center">
-                            <p className="text-lg">{selectedTeam?.name}</p>
-                            <p
-                                className={`ml-auto ${selectedTeam.status ? 'text-green-500' : 'text-gray-300 dark:text-gray-500'}`}
-                            >
-                                {selectedTeam.status ? 'Connected' : 'Disconnected'}
-                            </p>
+                <Card className="flex h-full w-full">
+                    <CardHeader className="w-full">
+                        <CardTitle className="flex justify-between">
+                            {selectedTeam.name}
+                            {selectedTeam.status ? (
+                                <p className="text-green-500">Connected</p>
+                            ) : (
+                                <p className="text-gray-300 dark:text-gray-500">Disconnected</p>
+                            )}
                         </CardTitle>
-                        <CardContent className="flex flex-col">
-                            <Separator className="my-1" />
-                            <p>
-                                <strong>points:</strong> {selectedTeam.points}
-                            </p>
-                        </CardContent>
                     </CardHeader>
                 </Card>
             )}

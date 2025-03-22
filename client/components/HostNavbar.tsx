@@ -2,38 +2,16 @@
 import UserMenu from '@/components/UserMenu';
 import { Button } from '@/components/ui/button';
 import { FileDown } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import {
     NavigationMenu,
     NavigationMenuItem,
     NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EventEmitter } from 'events';
+import { useCurrentHostTab } from '@/lib/host-state';
 
-const tabChangeEmitter = new EventEmitter();
-
-interface HostNavbarProps {
-    tabUpdate?: string | null;
-}
-
-export default function HostNavbar({ tabUpdate }: HostNavbarProps) {
-    const [tabValue, setTabValue] = useState('questions');
-
-    const handleTabChange = (value: string) => {
-        setTabValue(value);
-        tabChangeEmitter.emit('tabChange', value);
-    };
-
-    useEffect(() => {
-        if (tabUpdate) {
-            handleTabChange(tabUpdate);
-        }
-    }, [tabUpdate]);
-
-    useEffect(() => {
-        tabChangeEmitter.emit('tabChange', tabValue);
-    }, [tabValue]);
+export default function HostNavbar() {
+    const { currentTab, setCurrentTab } = useCurrentHostTab();
 
     return (
         <div className="flex w-full justify-between">
@@ -46,14 +24,20 @@ export default function HostNavbar({ tabUpdate }: HostNavbarProps) {
                 <NavigationMenu>
                     <NavigationMenuList>
                         <NavigationMenuItem>
-                            <Tabs
-                                defaultValue="text-editor"
-                                value={tabValue}
-                                onValueChange={handleTabChange}
-                            >
+                            <Tabs defaultValue="text-editor" value={currentTab}>
                                 <TabsList>
-                                    <TabsTrigger value="questions">Questions</TabsTrigger>
-                                    <TabsTrigger value="teams">Teams</TabsTrigger>
+                                    <TabsTrigger
+                                        value="questions"
+                                        onClick={() => setCurrentTab('questions')}
+                                    >
+                                        Questions
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="teams"
+                                        onClick={() => setCurrentTab('teams')}
+                                    >
+                                        Teams
+                                    </TabsTrigger>
                                 </TabsList>
                             </Tabs>
                         </NavigationMenuItem>
@@ -66,5 +50,3 @@ export default function HostNavbar({ tabUpdate }: HostNavbarProps) {
         </div>
     );
 }
-
-export { tabChangeEmitter };

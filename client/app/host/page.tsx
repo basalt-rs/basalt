@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import QuestionAccordion from './QuestionAccordion';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
@@ -17,18 +17,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Ellipsis, Copy } from 'lucide-react';
 import Timer from '@/components/Timer';
-import HostNavbar, { tabChangeEmitter } from '@/components/HostNavbar';
+import HostNavbar from '@/components/HostNavbar';
 import TeamInspector from './TeamInspector';
+import { useCurrentTeam, useTeamsAtom, useCurrentHostTab } from '@/lib/host-state';
 
 export default function Host() {
-    const [selectedTab, setSelectedTab] = useState<'questions' | 'teams'>('questions');
-    const [tabChange, setTabChange] = useState<string | null>();
-    const [selectedTeam, setSelectedTeam] = useState<{
-        name: string;
-        password: string;
-        points: number;
-        status: boolean;
-    } | null>(null);
     const [questions, setQuestions] = useState([
         {
             question: 'Sort an Array of Integers',
@@ -69,23 +62,9 @@ export default function Host() {
             enabled: true,
         },
     ]);
-    const [teamList, setTeamList] = useState([
-        { name: 'Team1', password: 'password1', points: 300, status: true },
-        { name: 'Team2', password: 'password2', points: 126, status: true },
-        { name: 'Team3', password: 'password3', points: 0, status: false },
-        { name: 'Team4', password: 'password4', points: 299, status: true },
-        { name: 'Team5', password: 'password5', points: 0, status: true },
-        { name: 'Team6', password: 'password6', points: 5, status: false },
-        { name: 'Team7', password: 'password7', points: 125, status: true },
-    ]);
-
-    useEffect(() => {
-        tabChangeEmitter.on('tabChange', setSelectedTab);
-
-        return () => {
-            tabChangeEmitter.off('tabChange', setSelectedTab);
-        };
-    }, []);
+    const { teamList, setTeamList } = useTeamsAtom();
+    const { setSelectedTeam } = useCurrentTeam();
+    const { currentTab, setCurrentTab } = useCurrentHostTab();
 
     const disconnectAllTeams = () => {
         const updatedTeams = teamList.map((team) => ({
@@ -98,6 +77,9 @@ export default function Host() {
     const handleDisconnectTeam = (teamName: string) => {
         setTeamList((prev) =>
             prev.map((team) => (team.name === teamName ? { ...team, status: false } : team))
+        );
+        setSelectedTeam((prev) =>
+            prev && prev.name === teamName ? { ...prev, status: false } : prev
         );
     };
 
@@ -150,11 +132,10 @@ export default function Host() {
                                                 <DropdownMenuItem
                                                     onClick={() => {
                                                         setSelectedTeam(team);
-                                                        setSelectedTab('teams');
-                                                        setTabChange('teams');
+                                                        setCurrentTab('teams');
                                                     }}
                                                 >
-                                                    Inspect
+                                                    View
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSub>
                                                     <DropdownMenuSubTrigger>
@@ -231,13 +212,13 @@ export default function Host() {
                 defaultSize={70}
             >
                 <span className="flex w-full justify-start p-1.5">
-                    <HostNavbar tabUpdate={tabChange} />
+                    <HostNavbar />
                 </span>
 
                 <Separator />
 
                 <div className="flex h-full w-full flex-col justify-start overflow-y-auto">
-                    {selectedTab === 'questions' && (
+                    {currentTab === 'questions' && (
                         <ul className="mt-2.5 flex flex-col">
                             <QuestionAccordion
                                 questions={questions}
@@ -245,13 +226,9 @@ export default function Host() {
                             />
                         </ul>
                     )}
-                    {selectedTab === 'teams' && (
+                    {currentTab === 'teams' && (
                         <div className="m-2.5 flex h-full max-h-full flex-col">
-                            <TeamInspector
-                                teams={teamList}
-                                selectedTeam={selectedTeam}
-                                setSelectedTeam={setSelectedTeam}
-                            />
+                            <TeamInspector />
                         </div>
                     )}
                 </div>
