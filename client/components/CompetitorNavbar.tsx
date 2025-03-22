@@ -18,6 +18,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { currentTabAtom } from '@/lib/competitor-state';
 import { ExtractAtomValue, useAtom } from 'jotai';
+import UserMenu from './UserMenu';
 
 export default function CompetitorNavbar() {
     const [tab, setTab] = useAtom(currentTabAtom);
@@ -79,7 +80,9 @@ export default function CompetitorNavbar() {
                 </NavigationMenuList>
             </NavigationMenu>
 
-            <div className="w-1/6" />
+            <div className="w-1/6 flex justify-end">
+                <UserMenu />
+            </div>
         </div>
     );
 }
