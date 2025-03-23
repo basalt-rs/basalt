@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCurrentHostTab } from '@/lib/host-state';
+import { toast } from '@/hooks/use-toast';
 
 export default function HostNavbar() {
     const { currentTab, setCurrentTab } = useCurrentHostTab();
@@ -16,7 +17,17 @@ export default function HostNavbar() {
     return (
         <div className="flex w-full justify-between">
             <span>
-                <Button size="icon" variant="ghost">
+                <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => {
+                        toast({
+                            title: 'Coming Soon',
+                            description: 'This feature is coming soon!',
+                            variant: 'destructive',
+                        });
+                    }}
+                >
                     <FileDown />
                 </Button>
             </span>

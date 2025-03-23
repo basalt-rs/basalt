@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
 
 export default function TeamInspector() {
     const { teamList } = useTeamsAtom();
@@ -77,7 +78,18 @@ export default function TeamInspector() {
                                 <strong>Points: </strong>
                                 {selectedTeam.points}
                             </p>
-                            <Button variant="outline">Submission History</Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    toast({
+                                        title: 'Coming Soon',
+                                        description: 'This feature is coming soon!',
+                                        variant: 'destructive',
+                                    });
+                                }}
+                            >
+                                Submission History
+                            </Button>
                         </span>
                         <div className="flex h-full flex-col rounded border p-4">
                             <span className="mt-auto flex w-auto gap-1 align-middle">
