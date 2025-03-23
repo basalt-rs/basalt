@@ -94,7 +94,16 @@ export default function TeamInspector() {
                         <div className="flex h-full flex-col rounded border p-4">
                             <span className="mt-auto flex w-auto gap-1 align-middle">
                                 <Input type="text" placeholder="Message..." />
-                                <Button variant="secondary">
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => {
+                                        toast({
+                                            title: 'Coming Soon',
+                                            description: 'This feature is coming soon!',
+                                            variant: 'destructive',
+                                        });
+                                    }}
+                                >
                                     <Send />
                                 </Button>
                             </span>
