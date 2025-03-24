@@ -2,7 +2,7 @@
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { User, Sun, Moon, SunMoon, LogOut } from 'lucide-react';
+import { User, Sun, Moon, SunMoon, LogOut, Settings } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -61,7 +61,10 @@ export default function UserMenu() {
                         </DropdownMenuSub>
                         <DropdownMenuSeparator />
 
-                        <DropdownMenuItem onClick={() => setOpen(true)}>Settings</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setOpen(true)}>
+                            <Settings className="pr-0.5" />
+                            Settings
+                        </DropdownMenuItem>
 
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={logout}>

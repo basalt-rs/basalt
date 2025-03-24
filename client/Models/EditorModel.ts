@@ -1,7 +1,7 @@
-import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
 // Default Editor Configurations
-export const editorSettingsAtom = atom({
+export const editorSettingsAtom = atomWithStorage('editor-settings', {
     theme: 'monokai',
     options: [
         'enable-auto-indent',
