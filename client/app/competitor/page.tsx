@@ -115,7 +115,6 @@ const TestResults = () => {
         <div className="w-full">
             <Accordion type="single" collapsible>
                 {currQuestion.tests
-                    .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
                     .map((test, i) => (
                         <AccordionItem key={i} value={`test-${i}`}>
                             <AccordionTrigger className="items-center justify-between px-8">
@@ -149,14 +148,9 @@ const TestResults = () => {
     );
 };
 
-const QuestionDetails = ({
-    question: { title, description, tests },
-}: {
-    question: QuestionResponse;
-    status: TestState;
-}) => {
-    return (
-        <div className="flex flex-col items-center justify-center gap-2">
+const QuestionDetails = ({ question }) => {
+    const { title, description, tests } = question;
+    return <div className="flex flex-col items-center justify-center gap-2">
             <h1 className="font-bold">{title}</h1>
             <div>
                 <Markdown markdown={description || ''} />
@@ -175,8 +169,7 @@ const QuestionDetails = ({
                     </div>
                 </div>
             </div>
-        </div>
-    );
+        </div>;
 };
 
 export default function Competitor() {

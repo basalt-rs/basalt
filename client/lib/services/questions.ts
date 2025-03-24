@@ -2,10 +2,17 @@ import { atom } from 'jotai';
 import { QuestionResponse, TestState } from '../types';
 import { toast } from '@/hooks/use-toast';
 import { ipAtom } from './api';
+import { tokenAtom } from './auth';
 
 export const currQuestionIdxAtom = atom(0);
 export const allQuestionsAtom = atom(async (get) => {
-    const res = await fetch(`${get(ipAtom)}/questions`);
+    const res = await fetch(
+        `${get(ipAtom)}/questions`,
+        {
+            headers: {
+                Authorization: `Bearer ${get(tokenAtom)}`,
+            },
+        });
     if (!res.ok) {
         toast({
             title: 'Error',

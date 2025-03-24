@@ -93,21 +93,21 @@ export function SettingsPanel() {
     };
 
     return (
-        <div className="flex h-full w-full flex-row justify-between">
-            <div className="flex h-full w-1/3 flex-col space-y-2">
+        <div className="flex h-full w-full flex-row justify-between gap-8">
+            <div className="flex h-full w-1/4 flex-col space-y-2">
                 <h1 className="flex justify-center font-bold">Configuration Options</h1>
-                <Button variant="outline" onClick={() => setSelectedItem('general')} disabled>
+                <Button variant="ghost" onClick={() => setSelectedItem('general')} disabled>
                     General Configurations
                 </Button>
                 <Button
-                    variant={selectedItem === 'editor' ? 'solid' : 'outline'}
+                    variant={selectedItem === 'editor' ? 'secondary' : 'ghost'}
                     onClick={() => setSelectedItem('editor')}
                 >
                     Editor Configurations
                 </Button>
             </div>
 
-            <div className="h-full w-1/2">
+            <div className="h-full flex-grow">
                 {selectedItem === 'editor' && (
                     <div className="flex flex-col gap-3">
                         <div className="flex flex-col gap-1">
