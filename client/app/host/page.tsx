@@ -19,17 +19,13 @@ import { Ellipsis, Copy } from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import TeamInspector from './TeamInspector';
+import { useCurrentTeam, useTeamsAtom, useCurrentHostTab } from '@/lib/host-state';
 
 export default function Host() {
-    const [teamList, setTeamList] = useState([
-        { name: 'Team1', password: 'password1', points: 300, status: true },
-        { name: 'Team2', password: 'password2', points: 126, status: true },
-        { name: 'Team3', password: 'password3', points: 0, status: false },
-        { name: 'Team4', password: 'password4', points: 299, status: true },
-        { name: 'Team5', password: 'password5', points: 0, status: true },
-        { name: 'Team6', password: 'password6', points: 5, status: false },
-        { name: 'Team7', password: 'password7', points: 125, status: true },
-    ]);
+    const { teamList, setTeamList } = useTeamsAtom();
+    const { setSelectedTeam } = useCurrentTeam();
+    const { currentTab, setCurrentTab } = useCurrentHostTab();
 
     const disconnectAllTeams = () => {
         const updatedTeams = teamList.map((team) => ({
@@ -42,6 +38,9 @@ export default function Host() {
     const handleDisconnectTeam = (teamName: string) => {
         setTeamList((prev) =>
             prev.map((team) => (team.name === teamName ? { ...team, status: false } : team))
+        );
+        setSelectedTeam((prev) =>
+            prev && prev.name === teamName ? { ...prev, status: false } : prev
         );
     };
 
@@ -85,6 +84,14 @@ export default function Host() {
                                         {team.status ? (
                                             <div>
                                                 <DropdownMenuItem>Message</DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setSelectedTeam(team);
+                                                        setCurrentTab('teams');
+                                                    }}
+                                                >
+                                                    View
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSub>
                                                     <DropdownMenuSubTrigger>
                                                         Info
@@ -163,7 +170,8 @@ export default function Host() {
                 <Separator />
 
                 <ScrollArea className="w-full flex-grow pt-2">
-                    <QuestionAccordion />
+                    {currentTab === 'questions' && <QuestionAccordion />}
+                    {currentTab === 'teams' && <TeamInspector /> }
                 </ScrollArea>
             </ResizablePanel>
         </ResizablePanelGroup>
