@@ -61,9 +61,7 @@ export default function UserMenu() {
                         </DropdownMenuSub>
                         <DropdownMenuSeparator />
 
-                        <DropdownMenuItem onClick={() => setOpen(true)}>
-                            Editor Configurations
-                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setOpen(true)}>Settings</DropdownMenuItem>
 
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={logout}>
@@ -75,7 +73,7 @@ export default function UserMenu() {
             </DropdownMenu>
 
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="justify-center">
+                <DialogContent className="max-w-[40vw]">
                     <DialogHeader>
                         <DialogTitle className="flex justify-center">Settings</DialogTitle>
                     </DialogHeader>
