@@ -114,7 +114,7 @@ const TestResults = () => {
     return (
         <div className="w-full">
             <Accordion type="single" collapsible>
-                {currQuestion.tests
+                {currQuestion?.tests
                     .map((test, i) => (
                         <AccordionItem key={i} value={`test-${i}`}>
                             <AccordionTrigger className="items-center justify-between px-8">
@@ -148,8 +148,9 @@ const TestResults = () => {
     );
 };
 
-const QuestionDetails = ({ question }) => {
-    const { title, description, tests } = question;
+const QuestionDetails = (x: { question: QuestionResponse, status: string }) => {
+    if (!x || !x.question) return null
+    const { title, description, tests } = x.question;
     return <div className="flex flex-col items-center justify-center gap-2">
             <h1 className="font-bold">{title}</h1>
             <div>
