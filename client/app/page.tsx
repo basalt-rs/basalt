@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/form';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { login, roleAtom } from '@/lib/auth';
+import { login, roleAtom } from '@/lib/services/auth';
 import { atom, Provider, useAtom, useSetAtom } from 'jotai';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,7 +28,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { ipAtom, setIp } from '@/lib/api';
+import { ipAtom, setIp } from '@/lib/services/api';
 import { atomWithStorage } from 'jotai/utils';
 
 const LoginFormSchema = z.object({
