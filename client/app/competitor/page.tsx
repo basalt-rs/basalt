@@ -38,6 +38,7 @@ import { currentTabAtom } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 
 const EditorButtons = () => {
+    const [currQuestion] = useAtom(currQuestionAtom);
     const notImplemented = () =>
         toast({
             title: 'Not Yet Implemented',
@@ -71,16 +72,13 @@ const EditorButtons = () => {
                 </Tooltip>
                 <span className="ml-auto">
                     <Select>
-                        <SelectTrigger className="w-56">
+                        <SelectTrigger className="w-56" value={currQuestion.languages?.[0]}>
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Languages</SelectLabel>
-                                <SelectItem value="Python">Python</SelectItem>
-                                <SelectItem value="Java">Java</SelectItem>
-                                <SelectItem value="JavaScript">JavaScript</SelectItem>
-                            </SelectGroup>
+                            {currQuestion.languages?.map(l =>
+                                <SelectItem key={l} value={l}>{l}</SelectItem>
+                            )}
                         </SelectContent>
                     </Select>
                 </span>
