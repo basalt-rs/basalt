@@ -15,8 +15,6 @@ import {
     SelectValue,
     SelectContent,
     SelectItem,
-    SelectGroup,
-    SelectLabel,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -72,13 +70,15 @@ const EditorButtons = () => {
                 </Tooltip>
                 <span className="ml-auto">
                     <Select>
-                        <SelectTrigger className="w-56" value={currQuestion.languages?.[0]}>
+                        <SelectTrigger className="w-56" defaultValue={currQuestion?.languages?.[0]}>
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
                         <SelectContent>
-                            {currQuestion.languages?.map(l =>
-                                <SelectItem key={l} value={l}>{l}</SelectItem>
-                            )}
+                            {currQuestion?.languages?.map((l) => (
+                                <SelectItem key={l} value={l}>
+                                    {l}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </span>
