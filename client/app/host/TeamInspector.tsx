@@ -75,7 +75,7 @@ export default function TeamInspector() {
                                             )}
                                             {team.name}
                                         </span>
-                                        {team.points}
+                                        <p>{team.points} points</p>
                                     </CardTitle>
                                 </CardHeader>
                             </Card>
