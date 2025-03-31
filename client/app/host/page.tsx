@@ -15,11 +15,11 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Ellipsis, Copy } from 'lucide-react';
+import { Ellipsis, Copy, Wifi, WifiOff } from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
 import TeamInspector from './TeamInspector';
-import { useCurrentTeam, useTeamsAtom, useCurrentHostTab } from '@/lib/host-state';
+import { useSelectedTeam, useTeams, useCurrentHostTab } from '@/lib/host-state';
 
 export default function Host() {
     const [questions, setQuestions] = useState([
@@ -62,8 +62,8 @@ export default function Host() {
             enabled: true,
         },
     ]);
-    const { teamList, setTeamList } = useTeamsAtom();
-    const { setSelectedTeam } = useCurrentTeam();
+    const { teamList, setTeamList } = useTeams();
+    const { setSelectedTeam } = useSelectedTeam();
     const { currentTab, setCurrentTab } = useCurrentHostTab();
 
     const disconnectAllTeams = () => {
@@ -116,10 +116,19 @@ export default function Host() {
                         .sort((a, b) => b.points - a.points)
                         .map((team, index) => (
                             <span
-                                className={`flex w-full justify-between p-1.5 ${team.status ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-500'}`}
+                                className="flex w-full justify-between rounded border p-1.5"
                                 key={index}
                             >
-                                <p className="w-1/2 truncate">{team.name}</p>
+                                <p className="w-1/2 truncate">
+                                    <span className="flex gap-1">
+                                        {team.status ? (
+                                            <Wifi className="text-green-500" />
+                                        ) : (
+                                            <WifiOff className="text-gray-300 dark:text-gray-500" />
+                                        )}
+                                        {team.name}
+                                    </span>
+                                </p>
                                 <p>{team.points} pts</p>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger className="pr-0.5">
