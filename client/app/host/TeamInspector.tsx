@@ -31,17 +31,14 @@ export default function TeamInspector() {
                 )}
                 <Select
                     value={selectedTeam?.name || ''}
-                    onValueChange={(value) => {
-                        const team = teamList.find((t) => t.name === value);
-                        if (team) setSelectedTeam(team);
-                    }}
+                    onValueChange={(value) => setSelectedTeam(teamList[+value])}
                 >
                     <SelectTrigger className="flex w-fit">
                         <SelectValue placeholder="Select A Team" />
                     </SelectTrigger>
                     <SelectContent>
                         {teamList.map((team, index) => (
-                            <SelectItem value={team.name} key={index}>
+                            <SelectItem value={`${index}`} key={index}>
                                 <span className="flex gap-1">
                                     {team.status ? (
                                         <Wifi className="text-green-500" />
