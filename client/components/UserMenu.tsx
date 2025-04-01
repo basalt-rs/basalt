@@ -19,7 +19,7 @@ import { useRouter } from 'next/navigation';
 import { useSetAtom } from 'jotai';
 import { tokenAtom } from '@/lib/auth';
 import { RESET } from 'jotai/utils';
-import { SettingsPanel } from './Settings';
+import { Editor } from './Settings';
 
 export default function UserMenu() {
     const { setTheme } = useTheme();
@@ -77,7 +77,7 @@ export default function UserMenu() {
                     <DialogHeader>
                         <DialogTitle className="flex justify-center">Settings</DialogTitle>
                     </DialogHeader>
-                    <SettingsPanel />
+                    <Editor />
                 </DialogContent>
             </Dialog>
         </>

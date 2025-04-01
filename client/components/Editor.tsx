@@ -61,10 +61,13 @@ export default function CodeEditor() {
     const [editorValue, setEditorValue] = useState('');
 
     useEffect(() => {
-        import(`ace-builds/src-noconflict/theme-${editorSettings.theme}`).then(() => {
+        const loadTheme = async () => {
+            await import(`ace-builds/src-noconflict/theme-${editorSettings.theme}`);
             setEditorTheme(editorSettings.theme);
-        });
-    }, [editorSettings.theme, editorSettings.options]);
+        };
+
+        loadTheme();
+    }, [editorSettings.theme]);
 
     return (
         <AceEditor

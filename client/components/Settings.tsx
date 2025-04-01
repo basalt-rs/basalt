@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { editorSettingsAtom } from '@/Models/EditorModel';
 
-const EditorOptions = [
+const EDITOR_OPTIONS = [
     { id: 'highlight-active-line', label: 'Highlight Active Line' },
     { id: 'auto-indent', label: 'Enable Auto Indent' },
     { id: 'relative-line', label: 'Relative Line Numbers' },
@@ -24,7 +24,7 @@ const EditorOptions = [
     { id: 'read-only', label: 'Read-Only Mode' },
 ] as const;
 
-const Themes = [
+const THEMES = [
     { id: 'monokai', label: 'Monokai' },
     { id: 'github', label: 'GitHub' },
     { id: 'tomorrow', label: 'Tomorrow' },
@@ -37,7 +37,7 @@ const Themes = [
     { id: 'terminal', label: 'Terminal' },
 ] as const;
 
-const Keybinds = [
+const KEYBINDS = [
     { id: 'ace', label: 'Ace (Default)' },
     { id: 'vscode', label: 'VSCode' },
     { id: 'vim', label: 'Vim' },
@@ -45,7 +45,7 @@ const Keybinds = [
     { id: 'sublime', label: 'Sublime' },
 ] as const;
 
-const CursoryStyles = [
+const CURSOR_STYLES = [
     { id: 'ace', label: 'Ace (Default)' },
     { id: 'slim', label: 'Slim' },
     { id: 'smooth', label: 'Smooth' },
@@ -53,13 +53,13 @@ const CursoryStyles = [
     { id: 'wide', label: 'Wide' },
 ] as const;
 
-const Folds = [
+const FOLDS = [
     { id: 'manual', label: 'Manual' },
     { id: 'markbegin', label: 'Mark Begin' },
     { id: 'markbeginend', label: 'Mark Begin and End' },
 ] as const;
 
-export function SettingsPanel() {
+export function Editor() {
     const [selectedItem, setSelectedItem] = useState<string>('general');
     const [editorSettings, setEditorSettings] = useAtom(editorSettingsAtom);
     const [selectedOptions, setSelectedOptions] = useState<string[]>(editorSettings.options || []);
@@ -100,7 +100,7 @@ export function SettingsPanel() {
                     General Configurations
                 </Button>
                 <Button
-                    variant={selectedItem === 'editor' ? 'solid' : 'outline'}
+                    variant={selectedItem === 'editor' ? 'secondary' : 'ghost'}
                     onClick={() => setSelectedItem('editor')}
                 >
                     Editor Configurations
@@ -121,7 +121,7 @@ export function SettingsPanel() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        {Themes.map((theme) => (
+                                        {THEMES.map((theme) => (
                                             <SelectItem key={theme.id} value={theme.id}>
                                                 {theme.label}
                                             </SelectItem>
@@ -134,7 +134,7 @@ export function SettingsPanel() {
                         <div className="flex flex-col gap-1">
                             <label>Editor Configurations:</label>
                             <ul>
-                                {EditorOptions.map((option) => (
+                                {EDITOR_OPTIONS.map((option) => (
                                     <li
                                         key={option.id}
                                         className="flex items-center space-x-2 text-sm"
@@ -186,7 +186,7 @@ export function SettingsPanel() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        {Keybinds.map((keybind) => (
+                                        {KEYBINDS.map((keybind) => (
                                             <SelectItem key={keybind.id} value={keybind.id}>
                                                 {keybind.label}
                                             </SelectItem>
@@ -207,7 +207,7 @@ export function SettingsPanel() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        {CursoryStyles.map((cursor) => (
+                                        {CURSOR_STYLES.map((cursor) => (
                                             <SelectItem key={cursor.id} value={cursor.id}>
                                                 {cursor.label}
                                             </SelectItem>
@@ -230,7 +230,7 @@ export function SettingsPanel() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        {Folds.map((fold) => (
+                                        {FOLDS.map((fold) => (
                                             <SelectItem key={fold.id} value={fold.id}>
                                                 {fold.label}
                                             </SelectItem>
