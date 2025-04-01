@@ -34,7 +34,21 @@ export default function TeamInspector() {
                     onValueChange={(value) => setSelectedTeam(teamList[+value])}
                 >
                     <SelectTrigger className="flex w-fit">
-                        <SelectValue placeholder="Select A Team" />
+                        <SelectValue placeholder="Select A Team">
+                            {selectedTeam === null ? (
+                                ''
+                            ) : (
+                                <span className="flex gap-1">
+                                    {selectedTeam.status ? (
+                                        <Wifi className="text-green-500" />
+                                    ) : (
+                                        <WifiOff className="text-gray-300 dark:text-gray-500" />
+                                    )}
+                                    {selectedTeam.name}
+                                </span>
+                            )}
+                            {selectedTeam?.name || 'Select A Team'}
+                        </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                         {teamList.map((team, index) => (
