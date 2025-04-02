@@ -8,30 +8,31 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Wifi, WifiOff } from 'lucide-react';
-import { useTeams, useSelectedTeam } from '@/lib/host-state';
-import { Separator } from '@/components/ui/separator';
+import { useTeams, useSelectedTeam, useSelectedTeamIdx } from '@/lib/host-state';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import TeamInfo from './TeamInfo';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 export default function TeamInspector() {
     const { teamList } = useTeams();
-    const { selectedTeam, setSelectedTeam } = useSelectedTeam();
+    const { selectedTeam } = useSelectedTeam();
+    const { setSelectedTeamIdx } = useSelectedTeamIdx();
 
     return (
         <div className="flex flex-col">
             <div
-                className={`flex h-full w-full flex-row items-center ${selectedTeam === null ? 'justify-end' : 'justify-between'}`}
+                className={`flex h-full w-full flex-row items-center px-2 ${selectedTeam === null ? 'justify-end' : 'justify-between'}`}
             >
                 {selectedTeam !== null && (
-                    <Button variant="ghost" className="flex" onClick={() => setSelectedTeam(null)}>
+                    <Button variant="ghost" className="flex" onClick={() => setSelectedTeamIdx(-1)}>
                         <ArrowLeft />
                         View All Teams
                     </Button>
                 )}
                 <Select
                     value={selectedTeam?.name || ''}
-                    onValueChange={(value) => setSelectedTeam(teamList[+value])}
+                    onValueChange={(value) => setSelectedTeamIdx(+value)}
                 >
                     <SelectTrigger className="flex w-fit">
                         <SelectValue placeholder="Select A Team">
@@ -67,14 +68,14 @@ export default function TeamInspector() {
                 </Select>
             </div>
             <Separator className="my-2" />
-            <div>
+            <div className="p-2">
                 {selectedTeam === null ? (
                     <div className="flex w-full flex-col gap-1">
                         {teamList.map((team, index) => (
                             <Card
                                 key={index}
                                 className="cursor-pointer"
-                                onClick={() => setSelectedTeam(team)}
+                                onClick={() => setSelectedTeamIdx(index)}
                             >
                                 <CardHeader>
                                     <CardTitle className="flex items-center justify-between">

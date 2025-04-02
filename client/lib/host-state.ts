@@ -14,31 +14,25 @@ export const useTeams = () => {
     return { teamList, setTeamList };
 };
 
-const selectedTeamAtom = atom(
-    (get) => {
-        const teams = get(teamsAtom);
-        const selectedTeam = get(selectedTeamBaseAtom);
-        return teams.find((team) => team.name === selectedTeam?.name) || null;
-    },
-    (
-        _get,
-        set,
-        newTeam: { name: string; password: string; points: number; status: boolean } | null
-    ) => {
-        set(selectedTeamBaseAtom, newTeam);
+const selectedTeamIdxAtom = atom(-1);
+const selectedTeamAtom = atom((get) => {
+    const idx = get(selectedTeamIdxAtom);
+    const allTeams = get(teamsAtom);
+
+    if (idx === -1) {
+        return null;
+    } else {
+        return allTeams[idx];
     }
-);
-
-const selectedTeamBaseAtom = atom<null | {
-    name: string;
-    password: string;
-    points: number;
-    status: boolean;
-}>(null);
-
+});
 export const useSelectedTeam = () => {
-    const [selectedTeam, setSelectedTeam] = useAtom(selectedTeamAtom);
-    return { selectedTeam, setSelectedTeam };
+    const [selectedTeam] = useAtom(selectedTeamAtom);
+    return { selectedTeam };
+};
+
+export const useSelectedTeamIdx = () => {
+    const [selectedTeamIdx, setSelectedTeamIdx] = useAtom(selectedTeamIdxAtom);
+    return { selectedTeamIdx, setSelectedTeamIdx };
 };
 
 const currentHostTabAtom = atom<'questions' | 'teams'>('questions');

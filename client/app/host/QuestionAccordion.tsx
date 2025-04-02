@@ -69,7 +69,7 @@ export default function QuestionAccordion() {
                                                     {test.input && (
                                                         <div className="w-full">
                                                             <h2>Input</h2>
-                                                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-black text-white dark:bg-slate-800">
+                                                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-black dark:bg-slate-800 dark:text-white">
                                                                 {test.input}
                                                             </pre>
                                                         </div>
