@@ -66,7 +66,6 @@ export default function QuestionAccordion() {
                                             </AccordionTrigger>
                                             <AccordionContent>
                                                 <span className="flex w-full flex-row gap-2">
-
                                                     {test.input && (
                                                         <div className="w-full">
                                                             <h2>Input</h2>
