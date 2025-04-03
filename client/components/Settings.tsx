@@ -97,24 +97,31 @@ const FOLDS = [
     { id: 'markbeginend', label: 'Mark Begin and End' },
 ] as const;
 
+const TABS = [
+    { id: 'general', label: 'General', disabled: true },
+    { id: 'editor', label: 'Editor', disabled: false },
+] as const;
+
 export function Editor() {
-    const [selectedItem, setSelectedItem] = useState<string>('editor');
+    const [selectedItem, setSelectedItem] = useState<(typeof TABS)[number]['id']>('editor');
     const [editorSettings, setEditorSettings] = useAtom(editorSettingsAtom);
 
     return (
         <div className="flex h-full w-full flex-row justify-between">
             <div className="flex h-full w-1/3 flex-col space-y-2">
                 <h1 className="flex justify-center font-bold">Configuration Options</h1>
-                <Button variant="outline" onClick={() => setSelectedItem('general')} disabled>
-                    General Configurations
-                </Button>
-                <Button
-                    variant={selectedItem === 'editor' ? 'secondary' : 'ghost'}
-                    onClick={() => setSelectedItem('editor')}
-                >
-                    Editor Configurations
-                </Button>
+                {TABS.map((t, i) => (
+                    <Button
+                        key={i}
+                        variant={selectedItem === t.id ? 'secondary' : 'ghost'}
+                        onClick={() => setSelectedItem(t.id)}
+                        disabled={t.disabled}
+                    >
+                        {t.label}
+                    </Button>
+                ))}
             </div>
+
 
             <div className="h-full w-1/2">
                 {selectedItem === 'editor' && (
