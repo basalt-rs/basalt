@@ -1,5 +1,4 @@
 'use client';
-import React, { useState } from 'react';
 import QuestionAccordion from './QuestionAccordion';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
@@ -15,21 +14,17 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Ellipsis, Copy } from 'lucide-react';
+import { Ellipsis, Copy, Wifi, WifiOff } from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useSelectedTeamIdx, useCurrentHostTab, useTeams } from '@/lib/host-state';
+import TeamInspector from './TeamInspector';
 
 export default function Host() {
-    const [teamList, setTeamList] = useState([
-        { name: 'Team1', password: 'password1', points: 300, status: true },
-        { name: 'Team2', password: 'password2', points: 126, status: true },
-        { name: 'Team3', password: 'password3', points: 0, status: false },
-        { name: 'Team4', password: 'password4', points: 299, status: true },
-        { name: 'Team5', password: 'password5', points: 0, status: true },
-        { name: 'Team6', password: 'password6', points: 5, status: false },
-        { name: 'Team7', password: 'password7', points: 125, status: true },
-    ]);
+    const { teamList, setTeamList } = useTeams();
+    const { setSelectedTeamIdx } = useSelectedTeamIdx();
+    const { currentTab, setCurrentTab } = useCurrentHostTab();
 
     const disconnectAllTeams = () => {
         const updatedTeams = teamList.map((team) => ({
@@ -72,10 +67,19 @@ export default function Host() {
                         .sort((a, b) => b.points - a.points)
                         .map((team, index) => (
                             <span
-                                className={`flex w-full justify-between p-1.5 ${team.status ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-500'}`}
+                                className="flex w-full justify-between rounded border p-1.5"
                                 key={index}
                             >
-                                <p className="w-1/2 truncate">{team.name}</p>
+                                <p className="w-1/2 truncate">
+                                    <span className="flex gap-1">
+                                        {team.status ? (
+                                            <Wifi className="text-green-500" />
+                                        ) : (
+                                            <WifiOff className="text-gray-300 dark:text-gray-500" />
+                                        )}
+                                        {team.name}
+                                    </span>
+                                </p>
                                 <p>{team.points} pts</p>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger className="pr-0.5">
@@ -85,6 +89,14 @@ export default function Host() {
                                         {team.status ? (
                                             <div>
                                                 <DropdownMenuItem>Message</DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setSelectedTeamIdx(index);
+                                                        setCurrentTab('teams');
+                                                    }}
+                                                >
+                                                    View
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSub>
                                                     <DropdownMenuSubTrigger>
                                                         Info
@@ -162,9 +174,15 @@ export default function Host() {
 
                 <Separator />
 
-                <ScrollArea className="w-full flex-grow pt-2">
-                    <QuestionAccordion />
-                </ScrollArea>
+                {currentTab === 'questions' ? (
+                    <ScrollArea className="w-full flex-grow pt-2">
+                        <QuestionAccordion />
+                    </ScrollArea>
+                ) : (
+                    <ScrollArea className="w-full flex-grow pt-2">
+                        <TeamInspector />
+                    </ScrollArea>
+                )}
             </ResizablePanel>
         </ResizablePanelGroup>
     );
