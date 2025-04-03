@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 import { useState } from 'react';
 import { useAtom } from 'jotai';
-import { editorSettingsAtom } from '@/lib/competitor-state';
+import { EditorSettings, editorSettingsAtom } from '@/lib/competitor-state';
 import { Label } from './ui/label';
 
 const EDITOR_OPTIONS = [
@@ -196,7 +196,10 @@ export function Editor() {
                             <Select
                                 value={editorSettings.keybind}
                                 onValueChange={(keybind) =>
-                                    setEditorSettings({ ...editorSettings, keybind })
+                                    setEditorSettings({
+                                        ...editorSettings,
+                                        keybind: keybind as EditorSettings['keybind'],
+                                    })
                                 }
                             >
                                 <SelectTrigger className="w-1/2">
@@ -219,7 +222,10 @@ export function Editor() {
                             <Select
                                 value={editorSettings.cursorStyle}
                                 onValueChange={(cursorStyle) =>
-                                    setEditorSettings({ ...editorSettings, cursorStyle })
+                                    setEditorSettings({
+                                        ...editorSettings,
+                                        cursorStyle: cursorStyle as EditorSettings['cursorStyle'],
+                                    })
                                 }
                             >
                                 <SelectTrigger className="w-1/2">

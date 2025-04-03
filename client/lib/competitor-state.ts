@@ -11,8 +11,8 @@ export interface EditorSettings {
     showIndentGuides: boolean;
     fontSize: number;
     softTabs: number;
-    keybind: string;
-    cursorStyle: string;
+    keybind: 'ace' | 'vscode' | 'vim' | 'emacs' | 'sublime' | undefined;
+    cursorStyle: 'ace' | 'slim' | 'smooth' | 'smooth-slim' | 'wide' | undefined;
     foldStyle: 'manual' | 'markbegin' | 'markbeginend' | undefined;
 }
 
