@@ -227,11 +227,15 @@ export function Editor() {
                             <Label>Cursor Style:</Label>
                             <Select
                                 value={editorSettings.cursorStyle}
-                                onValueChange={(cursorStyle) =>
+                                onValueChange={(
+                                    cursorStyle: NonNullable<EditorSettings['cursorStyle']>
+                                ) =>
                                     setEditorSettings({
                                         ...editorSettings,
-                                        cursorStyle: cursorStyle as EditorSettings['cursorStyle'],
+                                        cursorStyle,
                                     })
+                                }
+
                                 }
                             >
                                 <SelectTrigger className="w-1/2">
