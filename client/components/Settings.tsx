@@ -122,7 +122,6 @@ export function Editor() {
                 ))}
             </div>
 
-
             <div className="h-full w-1/2">
                 {selectedItem === 'editor' && (
                     <div className="flex flex-col gap-3">

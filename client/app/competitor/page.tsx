@@ -93,7 +93,7 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
             return (
                 <div className="flex h-full flex-col">
                     <EditorButtons />
-                    <CodeEditor/>
+                    <CodeEditor />
                 </div>
             );
         case 'leaderboard':
