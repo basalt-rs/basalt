@@ -254,7 +254,7 @@ export function Editor() {
                             <Select
                                 value={editorSettings.foldStyle}
                                 onValueChange={(
-                                    foldStyle: 'manual' | 'markbegin' | 'markbeginend'
+                                    foldStyle: NonNullable<EditorSettings['foldStyle']>
                                 ) => setEditorSettings({ ...editorSettings, foldStyle })}
                             >
                                 <SelectTrigger className="w-1/2">
