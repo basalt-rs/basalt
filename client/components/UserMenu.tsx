@@ -2,7 +2,7 @@
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { User, Sun, Moon, SunMoon, LogOut } from 'lucide-react';
+import { User, Sun, Moon, SunMoon, LogOut, Settings } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -25,7 +25,7 @@ export default function UserMenu() {
     const { setTheme } = useTheme();
     const setToken = useSetAtom(tokenAtom);
     const router = useRouter();
-    const [open, setOpen] = useState(false);
+    const [settingsOpen, setOpen] = useState(false);
     const logout = () => {
         setToken(RESET);
         router.replace('/');
@@ -59,10 +59,9 @@ export default function UserMenu() {
                                 </DropdownMenuSubContent>
                             </DropdownMenuPortal>
                         </DropdownMenuSub>
-                        <DropdownMenuSeparator />
-
-                        <DropdownMenuItem onClick={() => setOpen(true)}>Settings</DropdownMenuItem>
-
+                        <DropdownMenuItem onClick={() => setOpen(true)}>
+                            <Settings /> Settings
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={logout}>
                             <LogOut />
@@ -72,8 +71,8 @@ export default function UserMenu() {
                 </DropdownMenuPortal>
             </DropdownMenu>
 
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="max-w-[40vw]">
+            <Dialog open={settingsOpen} onOpenChange={setOpen}>
+                <DialogContent className="min-w-[600px] max-w-[40vw]">
                     <DialogHeader>
                         <DialogTitle className="flex justify-center">Settings</DialogTitle>
                     </DialogHeader>

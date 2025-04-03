@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import {
     Select,
     SelectContent,
@@ -9,18 +9,19 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAtom } from 'jotai';
-import { editorSettingsAtom } from '@/Models/EditorModel';
+import { editorSettingsAtom } from '@/lib/competitor-state';
+import { Label } from './ui/label';
 
 const EDITOR_OPTIONS = [
-    { id: 'highlight-active-line', label: 'Highlight Active Line' },
-    { id: 'auto-indent', label: 'Enable Auto Indent' },
-    { id: 'relative-line', label: 'Relative Line Numbers' },
-    { id: 'show-line-numbers', label: 'Show Line Numbers' },
-    { id: 'show-indent-guides', label: 'Show Indent Guides' },
-    { id: 'enable-autocompletion', label: 'Enable Autocompletion' },
-    { id: 'enable-live-autocompletion', label: 'Enable Live Autocompletion' },
+    { id: 'highlightActiveLine', label: 'Highlight Active Line' },
+    { id: 'autoIndent', label: 'Enable Auto Indent' },
+    { id: 'relativeLine', label: 'Relative Line Numbers' },
+    { id: 'showLineNumbers', label: 'Show Line Numbers' },
+    { id: 'showIndentGuides', label: 'Show Indent Guides' },
+    { id: 'basicAutocompletion', label: 'Enable Autocompletion' },
+    { id: 'liveAutocompletion', label: 'Enable Live Autocompletion' },
 ] as const;
 
 const THEMES = [
@@ -59,37 +60,8 @@ const FOLDS = [
 ] as const;
 
 export function Editor() {
-    const [selectedItem, setSelectedItem] = useState<string>('general');
+    const [selectedItem, setSelectedItem] = useState<string>('editor');
     const [editorSettings, setEditorSettings] = useAtom(editorSettingsAtom);
-    const [selectedOptions, setSelectedOptions] = useState<string[]>(editorSettings.options || []);
-
-    useEffect(() => {
-        setSelectedOptions(editorSettings.options || []);
-    }, [editorSettings.options]);
-
-    const updateSettings = (newSettings: Partial<typeof editorSettings>) => {
-        setEditorSettings({ ...editorSettings, ...newSettings });
-        localStorage.setItem(
-            'editorSettings',
-            JSON.stringify({ ...editorSettings, ...newSettings })
-        );
-    };
-
-    const handleCheckboxChange = (optionId: string, checked: boolean) => {
-        let updatedOptions;
-
-        if (checked) {
-            updatedOptions = selectedOptions.includes(optionId)
-                ? selectedOptions
-                : [...selectedOptions, optionId];
-        } else {
-            updatedOptions = selectedOptions.filter((id) => id !== optionId);
-        }
-        console.log(updatedOptions);
-        console.log(updatedOptions.includes('enable-live-autocompletion'));
-        setSelectedOptions(updatedOptions);
-        updateSettings({ options: updatedOptions });
-    };
 
     return (
         <div className="flex h-full w-full flex-row justify-between">
@@ -110,10 +82,12 @@ export function Editor() {
                 {selectedItem === 'editor' && (
                     <div className="flex flex-col gap-3">
                         <div className="flex flex-col gap-1">
-                            <label>Theme:</label>
+                            <Label>Theme:</Label>
                             <Select
                                 value={editorSettings.theme}
-                                onValueChange={(theme) => updateSettings({ theme })}
+                                onValueChange={(theme) =>
+                                    setEditorSettings({ ...editorSettings, theme })
+                                }
                             >
                                 <SelectTrigger className="w-1/2">
                                     <SelectValue placeholder="Select a theme" />
@@ -131,54 +105,61 @@ export function Editor() {
                         </div>
 
                         <div className="flex flex-col gap-1">
-                            <label>Editor Configurations:</label>
-                            <ul>
-                                {EDITOR_OPTIONS.map((option) => (
-                                    <li
-                                        key={option.id}
-                                        className="flex items-center space-x-2 text-sm"
-                                    >
-                                        <Checkbox
-                                            checked={selectedOptions.includes(option.id)}
-                                            onCheckedChange={(checked) =>
-                                                handleCheckboxChange(option.id, checked as boolean)
-                                            }
-                                        />
-                                        <span>{option.label}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                            <Label>Editor Configurations:</Label>
+                            {EDITOR_OPTIONS.map((option) => (
+                                <div key={option.id} className="flex items-center space-x-2">
+                                    <Switch
+                                        className="gap-1"
+                                        checked={editorSettings[option.id]}
+                                        onCheckedChange={(checked) =>
+                                            setEditorSettings({
+                                                ...editorSettings,
+                                                [option.id]: checked,
+                                            })
+                                        }
+                                    />
+                                    <Label>{option.label}</Label>
+                                </div>
+                            ))}
                         </div>
 
                         <div className="flex flex-col gap-1">
-                            <label>Font Size:</label>
+                            <Label>Font Size:</Label>
                             <Input
-                                id="font-size"
+                                className="w-1/2"
                                 type="number"
                                 value={editorSettings.fontSize}
                                 onChange={(e) =>
-                                    updateSettings({ fontSize: parseInt(e.target.value, 10) || 12 })
+                                    setEditorSettings({
+                                        ...editorSettings,
+                                        fontSize: parseInt(e.target.value, 10) || 12,
+                                    })
                                 }
                             />
                         </div>
 
                         <div className="flex flex-col gap-1">
-                            <label>Soft Tabs:</label>
+                            <Label>Soft Tabs:</Label>
                             <Input
-                                id="soft-tabs"
+                                className="w-1/2"
                                 type="number"
                                 value={editorSettings.softTabs}
                                 onChange={(e) =>
-                                    updateSettings({ softTabs: parseInt(e.target.value, 10) || 4 })
+                                    setEditorSettings({
+                                        ...editorSettings,
+                                        softTabs: parseInt(e.target.value, 10) || 4,
+                                    })
                                 }
                             />
                         </div>
 
                         <div className="flex flex-col gap-1">
-                            <label>Keybindings:</label>
+                            <Label>Keybindings:</Label>
                             <Select
                                 value={editorSettings.keybind}
-                                onValueChange={(keybind) => updateSettings({ keybind })}
+                                onValueChange={(keybind) =>
+                                    setEditorSettings({ ...editorSettings, keybind })
+                                }
                             >
                                 <SelectTrigger className="w-1/2">
                                     <SelectValue placeholder="Select Keybind" />
@@ -196,10 +177,12 @@ export function Editor() {
                         </div>
 
                         <div className="flex flex-col gap-1">
-                            <label>Cursor Style:</label>
+                            <Label>Cursor Style:</Label>
                             <Select
                                 value={editorSettings.cursorStyle}
-                                onValueChange={(cursorStyle) => updateSettings({ cursorStyle })}
+                                onValueChange={(cursorStyle) =>
+                                    setEditorSettings({ ...editorSettings, cursorStyle })
+                                }
                             >
                                 <SelectTrigger className="w-1/2">
                                     <SelectValue placeholder="Select Cursor Style" />
@@ -217,12 +200,12 @@ export function Editor() {
                         </div>
 
                         <div className="flex flex-col gap-1">
-                            <label>Folding:</label>
+                            <Label>Folding:</Label>
                             <Select
                                 value={editorSettings.foldStyle}
                                 onValueChange={(
                                     foldStyle: 'manual' | 'markbegin' | 'markbeginend'
-                                ) => updateSettings({ foldStyle })}
+                                ) => setEditorSettings({ ...editorSettings, foldStyle })}
                             >
                                 <SelectTrigger className="w-1/2">
                                     <SelectValue placeholder="Select Folding Style" />

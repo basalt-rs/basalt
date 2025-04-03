@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
-import { editorSettingsAtom } from '@/Models/EditorModel';
+import { editorSettingsAtom } from '@/lib/competitor-state';
 import 'ace-builds/src-noconflict/theme-monokai';
 import('ace-builds/src-noconflict/mode-javascript');
 import 'ace-builds/src-noconflict/keybinding-vim';
@@ -82,15 +82,13 @@ export default function CodeEditor() {
             setOptions={{
                 fontSize: editorSettings.fontSize,
                 tabSize: editorSettings.softTabs,
-                useSoftTabs: editorSettings.options.includes('auto-indent'),
-                enableBasicAutocompletion: editorSettings.options.includes('enable-autocompletion'),
-                enableLiveAutocompletion: editorSettings.options.includes(
-                    'enable-live-autocompletion'
-                ),
-                highlightActiveLine: editorSettings.options.includes('highlight-active-line'),
-                showGutter: editorSettings.options.includes('show-line-numbers'),
-                displayIndentGuides: editorSettings.options.includes('show-indent-guides'),
-                relativeLineNumbers: editorSettings.options.includes('relative-line'),
+                useSoftTabs: editorSettings.autoIndent,
+                enableBasicAutocompletion: editorSettings.basicAutocompletion,
+                enableLiveAutocompletion: editorSettings.liveAutocompletion,
+                highlightActiveLine: editorSettings.highlightActiveLine,
+                showGutter: editorSettings.showLineNumbers,
+                displayIndentGuides: editorSettings.showIndentGuides,
+                relativeLineNumbers: editorSettings.relativeLine,
                 foldStyle: editorSettings.foldStyle,
             }}
             keyboardHandler={editorSettings.keybind}
