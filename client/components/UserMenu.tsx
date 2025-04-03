@@ -17,7 +17,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useRouter } from 'next/navigation';
 import { useSetAtom } from 'jotai';
-import { tokenAtom } from '@/lib/auth';
+import { tokenAtom } from '@/lib/services/auth';
 import { RESET } from 'jotai/utils';
 import { Editor } from './Settings';
 

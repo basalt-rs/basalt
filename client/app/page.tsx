@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { login, roleAtom } from '@/lib/auth';
+import { login, roleAtom } from '@/lib/services/auth';
 import { Provider, useAtom } from 'jotai';
 import { Loader2 } from 'lucide-react';
 

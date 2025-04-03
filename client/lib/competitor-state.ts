@@ -1,4 +1,5 @@
 import { atomWithStorage } from 'jotai/utils';
+import { atom } from 'jotai';
 
 export interface EditorSettings {
     theme: string;
@@ -32,3 +33,5 @@ export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settin
     cursorStyle: 'ace',
     foldStyle: 'manual',
 });
+
+export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');

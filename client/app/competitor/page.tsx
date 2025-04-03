@@ -1,82 +1,175 @@
 'use client';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
-import { Button } from '@/components/ui/button';
-import { PropsWithChildren, useEffect, useState } from 'react';
-import CompetitorNavbar, { tabChangeEmitter } from '@/components/CompetitorNavbar';
+import CompetitorNavbar from '@/components/CompetitorNavbar';
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '../leaderboard/page';
 import CodeEditor from '@/components/Editor';
+import { QuestionResponse, TestState } from '@/lib/types';
+import {
+    allQuestionsAtom,
+    allStatesAtom,
+    currQuestionAtom,
+    currQuestionIdxAtom,
+} from '@/lib/services/questions';
+import { ExtractAtomValue, useAtom } from 'jotai';
+import { Circle, FileDown, FlaskConical, SendHorizonal, Upload } from 'lucide-react';
+import { testColor } from '@/lib/utils';
+import { Markdown } from '@/components/Markdown';
+import { CodeBlock, Tooltip } from '@/components/util';
+import { Button } from '@/components/ui/button';
+import { currentTabAtom } from '@/lib/competitor-state';
+import { toast } from '@/hooks/use-toast';
 
-const TabContent = () => {
-    const [selectedTab, setSelectedTab] = useState<'text-editor' | 'leaderboard'>('text-editor');
+const EditorButtons = () => {
+    const [currQuestion] = useAtom(currQuestionAtom);
+    const notImplemented = () =>
+        toast({
+            title: 'Not Yet Implemented',
+            description: 'Check back later!',
+            variant: 'destructive',
+        });
+    return (
+        <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
+            <div className="flex flex-row">
+                <Tooltip tooltip="Load File">
+                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                        <Upload />
+                    </Button>
+                </Tooltip>
+                <Tooltip tooltip="Download Packet">
+                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                        <FileDown />
+                    </Button>
+                </Tooltip>
+            </div>
+            <div className="flex flex-row">
+                <Tooltip tooltip="Run Tests">
+                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                        <FlaskConical className="text-in-progress" />
+                    </Button>
+                </Tooltip>
+                <Tooltip tooltip="Submit Solution">
+                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                        <SendHorizonal className="text-pass" />
+                    </Button>
+                </Tooltip>
+                <span className="ml-auto">
+                    <Select>
+                        <SelectTrigger className="w-56" defaultValue={currQuestion?.languages?.[0]}>
+                            <SelectValue placeholder="Programming Language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {currQuestion?.languages?.map((l) => (
+                                <SelectItem key={l} value={l}>
+                                    {l}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </span>
+            </div>
+        </div>
+    );
+};
 
-    useEffect(() => {
-        tabChangeEmitter.on('tabChange', setSelectedTab);
-
-        return () => {
-            tabChangeEmitter.off('tabChange', setSelectedTab);
-        };
-    }, []);
-
-    if (selectedTab === 'leaderboard') {
-        return (
-            <ScrollArea className="h-full w-full border">
-                <Leaderboard showTimer={false} />
-            </ScrollArea>
-        );
-    } else {
-        return <CodeEditor />;
+const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
+    switch (tab) {
+        case 'text-editor':
+            return (
+                <div className="flex h-full flex-col">
+                    <EditorButtons />
+                    <CodeEditor/>
+                </div>
+            );
+        case 'leaderboard':
+            return (
+                <ScrollArea className="h-full w-full border">
+                    <Leaderboard showTimer={false} />
+                </ScrollArea>
+            );
+        default:
+            return 'unreachable';
     }
 };
 
-const Code = ({ children }: PropsWithChildren) => (
-    <p>
-        <code className="py-1/2 m-1 rounded-sm bg-slate-800 px-2 font-mono text-white">
-            {children}
-        </code>
-    </p>
-);
+const TestResults = () => {
+    const [currQuestion] = useAtom(currQuestionAtom);
+    return (
+        <div className="w-full">
+            <Accordion type="single" collapsible>
+                {currQuestion.tests
+                    .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
+                    .map((test, i) => (
+                        <AccordionItem key={i} value={`test-${i}`}>
+                            <AccordionTrigger className="items-center justify-between px-8">
+                                <h1>
+                                    <b>Test Case {i + 1}</b>
+                                </h1>
+                                <h1 className="flex items-center justify-center text-pass">
+                                    <b>PASS</b>
+                                </h1>
+                            </AccordionTrigger>
+                            <AccordionContent className="flex flex-row gap-4 px-8">
+                                {test.input && (
+                                    <div className="flex h-full flex-grow flex-col gap-2">
+                                        <b>Input</b>
+                                        <CodeBlock text={test.input} />
+                                    </div>
+                                )}
+                                <div className="flex h-full flex-grow flex-col gap-2">
+                                    <b>Expected Output</b>
+                                    <CodeBlock text={test.output} />
+                                </div>
+                                <div className="flex h-full flex-grow flex-col gap-2">
+                                    <b>Actual Output</b>
+                                    <CodeBlock text="Not yet implemented" />
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+            </Accordion>
+        </div>
+    );
+};
 
-// TODO: need to bring in Question Information from host component as am input for this func
-const GetCurrentQuestion = () => {
+const QuestionDetails = ({
+    question: { title, description, tests },
+}: {
+    question: QuestionResponse;
+    status: TestState;
+}) => {
     return (
         <div className="flex flex-col items-center justify-center gap-2">
-            <h1>
-                <b>Question Title</b>
-            </h1>
-            <h1>Sort</h1>
+            <h1 className="font-bold">{title}</h1>
             <div>
-                <p>Given an array of integers, sort the array and return it</p>
+                <Markdown markdown={description || ''} />
 
+                <h1 className="mt-2 w-full text-center font-bold">Example</h1>
                 <div className="flex flex-col gap-2">
-                    <div>
-                        <strong>Input</strong>
-                        <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                            2 11 15 0
-                        </pre>
-                    </div>
+                    {tests[0].input && (
+                        <div>
+                            <strong>Input</strong>
+                            <CodeBlock text={tests[0].input} />
+                        </div>
+                    )}
                     <div>
                         <strong>Output</strong>
-                        <pre className="rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                            0 2 11 15
-                        </pre>
-                    </div>
-                    <div>
-                        <strong>Explanation</strong>
-                        <div>
-                            The expected output is
-                            <Code>0 2 11 15</Code>
-                            because
-                            <Code>0 &lt; 2 &lt; 11 &lt; 15</Code>
-                        </div>
+                        <CodeBlock text={tests[0].output} />
                     </div>
                 </div>
             </div>
@@ -84,179 +177,13 @@ const GetCurrentQuestion = () => {
     );
 };
 
-// TODO: need to be able to grab info from the text editor and have this func take it as a param
-const RunTest = () => {
-    return (
-        <div className="mx-4 flex w-full flex-col items-center gap-2">
-            <Button variant="outline" className="h-12 w-full max-w-72">
-                <b>Test</b>
-            </Button>
-            <Button variant="outline" className="h-12 w-full max-w-72">
-                <b>Submit</b>
-            </Button>
-        </div>
-    );
-};
-
-const TestResults = () => {
-    return (
-        <div className="w-full">
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-1">
-                    <AccordionTrigger className="items-center justify-between px-8">
-                        <h1>
-                            <b>Test Case 1</b>
-                        </h1>
-                        <h1 className="flex items-center justify-center text-green-500">
-                            <b>PASS</b>
-                        </h1>
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-row gap-4 px-8">
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Input</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />2 11 15 0
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Expected Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />0 2 11 15
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Expected Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />0 2 11 15
-                            </pre>
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-2">
-                    <AccordionTrigger className="items-center justify-between px-8">
-                        <h1>
-                            <b>Test Case 2</b>
-                        </h1>
-                        <h1 className="flex items-center justify-center text-red-700">
-                            <b>FAIL</b>
-                        </h1>
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-row gap-[10vw] px-8">
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Input</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />2 11 15 0
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Your Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />2 11 15 0
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Expected Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />0 2 11 15
-                            </pre>
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-3">
-                    <AccordionTrigger className="items-center justify-between px-8">
-                        <h1>
-                            <b>Test Case 3</b>
-                        </h1>
-                        <h1 className="flex items-center justify-center text-red-700">
-                            <b>FAIL</b>
-                        </h1>
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-row gap-[10vw] px-8">
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Input</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />
-                                2 11 15 0<br />2 11 15 0
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Your Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                11 15 0 2<br />
-                                11 15 0 2<br />
-                                11 15 0 2<br />
-                                11 15 0 2<br />
-                                11 15 0 2<br />
-                                11 15 0 2
-                            </pre>
-                        </div>
-                        <div className="flex h-full flex-grow flex-col gap-2">
-                            <b>Expected Output</b>
-                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />
-                                0 2 11 15
-                                <br />0 2 11 15
-                            </pre>
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-        </div>
-    );
-};
-
 export default function Competitor() {
+    const [currentQuestion] = useAtom(currQuestionAtom);
+    const [allQuestions] = useAtom(allQuestionsAtom);
+    const [allStates] = useAtom(allStatesAtom);
+    const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
+    const [tab] = useAtom(currentTabAtom);
+
     return (
         <div className="h-screen">
             <div>
@@ -267,22 +194,41 @@ export default function Competitor() {
                 <div className="flex-grow">
                     <ResizablePanelGroup direction="horizontal">
                         <ResizablePanel
-                            defaultSize={20}
-                            maxSize={25}
+                            defaultSize={35}
+                            maxSize={55}
+                            collapsible={true}
+                            collapsedSize={0}
+                            minSize={10}
                             className="border-black-300 h-full border-t"
                         >
                             <ResizablePanelGroup direction="vertical" className="h-full">
-                                <div className="flex h-full flex-col pt-8">
-                                    <div className="box-border flex flex-col p-4">
-                                        <GetCurrentQuestion />
-                                    </div>
-                                    <div className="mt-auto flex w-full flex-row justify-center">
-                                        <RunTest />
-                                    </div>
-                                    <div className="py-2.5">
-                                        <Separator className="mb-2.5 mt-2.5" />
-                                        <Timer isHost={false} startingTime={4500} isActive={true} />
-                                    </div>
+                                <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
+                                    <Select
+                                        defaultValue={`${currQuestion}`}
+                                        onValueChange={(v) => setCurrQuestionIdx(+v)}
+                                    >
+                                        <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
+                                            <SelectValue placeholder="Select a Question..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {allQuestions.map((q, i) => (
+                                                <SelectItem key={i} value={`${i}`}>
+                                                    <div className="flex flex-row items-center">
+                                                        <Circle
+                                                            fill="currentColor"
+                                                            className={`${testColor(allStates[i])} h-6 w-6 pr-2`}
+                                                        />
+                                                        {q.title}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <QuestionDetails question={currentQuestion} status="pass" />
+                                </ScrollArea>
+                                <div className="py-2.5">
+                                    <Separator className="mb-2.5 mt-2.5" />
+                                    <Timer isHost={false} startingTime={4500} isActive={true} />
                                 </div>
                             </ResizablePanelGroup>
                         </ResizablePanel>
@@ -290,16 +236,12 @@ export default function Competitor() {
                         <ResizablePanel className="">
                             <ResizablePanelGroup direction="vertical" className="h-full">
                                 <ResizablePanel defaultSize={400} className="h-full">
-                                    <div className="flex h-full">
-                                        <TabContent />
-                                    </div>
+                                    <TabContent tab={tab} />
                                 </ResizablePanel>
                                 <ResizableHandle />
                                 <ResizablePanel defaultSize={100} className="h-full">
                                     <ScrollArea className="h-full w-full">
-                                        <div>
-                                            <TestResults />
-                                        </div>
+                                        <TestResults />
                                     </ScrollArea>
                                 </ResizablePanel>
                             </ResizablePanelGroup>
