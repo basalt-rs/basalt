@@ -21,7 +21,6 @@ const EDITOR_OPTIONS = [
     { id: 'show-indent-guides', label: 'Show Indent Guides' },
     { id: 'enable-autocompletion', label: 'Enable Autocompletion' },
     { id: 'enable-live-autocompletion', label: 'Enable Live Autocompletion' },
-    { id: 'read-only', label: 'Read-Only Mode' },
 ] as const;
 
 const THEMES = [

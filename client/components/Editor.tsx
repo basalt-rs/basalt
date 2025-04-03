@@ -83,7 +83,6 @@ export default function CodeEditor() {
                 fontSize: editorSettings.fontSize,
                 tabSize: editorSettings.softTabs,
                 useSoftTabs: editorSettings.options.includes('auto-indent'),
-                readOnly: editorSettings.options.includes('read-only'),
                 enableBasicAutocompletion: editorSettings.options.includes('enable-autocompletion'),
                 enableLiveAutocompletion: editorSettings.options.includes(
                     'enable-live-autocompletion'
