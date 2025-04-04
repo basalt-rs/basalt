@@ -83,14 +83,14 @@ export default function CodeEditor() {
             onChange={(newValue) => setEditorValue(newValue)}
             setOptions={{
                 fontSize: editorSettings.fontSize,
-                tabSize: editorSettings.softTabs,
-                useSoftTabs: editorSettings.autoIndent,
-                enableBasicAutocompletion: editorSettings.basicAutocompletion,
-                enableLiveAutocompletion: editorSettings.liveAutocompletion,
+                tabSize: editorSettings.tabSize,
+                useSoftTabs: editorSettings.useSoftTabs,
+                enableBasicAutocompletion: editorSettings.enableBasicAutocompletion,
+                enableLiveAutocompletion: editorSettings.enableLiveAutocompletion,
                 highlightActiveLine: editorSettings.highlightActiveLine,
-                showGutter: editorSettings.showLineNumbers,
-                displayIndentGuides: editorSettings.showIndentGuides,
-                relativeLineNumbers: editorSettings.relativeLine,
+                showGutter: editorSettings.showGutter,
+                displayIndentGuides: editorSettings.displayIndentGuides,
+                relativeLineNumbers: editorSettings.relativeLineNumbers,
                 foldStyle: editorSettings.foldStyle,
             }}
             keyboardHandler={editorSettings.keybind}

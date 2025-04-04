@@ -16,12 +16,12 @@ import { Label } from './ui/label';
 
 const EDITOR_OPTIONS = [
     { id: 'highlightActiveLine', label: 'Highlight Active Line' },
-    { id: 'autoIndent', label: 'Enable Auto Indent' },
-    { id: 'relativeLine', label: 'Relative Line Numbers' },
-    { id: 'showLineNumbers', label: 'Show Line Numbers' },
-    { id: 'showIndentGuides', label: 'Show Indent Guides' },
-    { id: 'basicAutocompletion', label: 'Enable Autocompletion' },
-    { id: 'liveAutocompletion', label: 'Enable Live Autocompletion' },
+    { id: 'useSoftTabs', label: 'Enable Auto Indent' },
+    { id: 'relativeLineNumbers                ', label: 'Relative Line Numbers' },
+    { id: 'showGutter', label: 'Show Line Numbers' },
+    { id: 'displayIndentGuides', label: 'Show Indent Guides' },
+    { id: 'enableBasicAutocompletion', label: 'Enable Autocompletion' },
+    { id: 'enableLiveAutocompletion', label: 'Enable Live Autocompletion' },
 ] as const;
 
 const THEMES = [
@@ -187,11 +187,11 @@ export function Editor() {
                             <Input
                                 className="w-1/2"
                                 type="number"
-                                value={editorSettings.softTabs}
+                                value={editorSettings.tabSize}
                                 onChange={(e) =>
                                     setEditorSettings({
                                         ...editorSettings,
-                                        softTabs: parseInt(e.target.value, 10) || 4,
+                                        tabSize: parseInt(e.target.value, 10) || 4,
                                     })
                                 }
                             />
@@ -234,8 +234,6 @@ export function Editor() {
                                         ...editorSettings,
                                         cursorStyle,
                                     })
-                                }
-
                                 }
                             >
                                 <SelectTrigger className="w-1/2">

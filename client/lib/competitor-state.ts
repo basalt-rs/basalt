@@ -3,15 +3,15 @@ import { atom } from 'jotai';
 
 export interface EditorSettings {
     theme: string;
-    autoIndent: boolean;
-    showLineNumbers: boolean;
-    basicAutocompletion: boolean;
-    liveAutocompletion: boolean;
+    useSoftTabs: boolean;
+    showGutter: boolean;
+    enableBasicAutocompletion: boolean;
+    enableLiveAutocompletion: boolean;
     highlightActiveLine: boolean;
-    relativeLine: boolean;
-    showIndentGuides: boolean;
+    relativeLineNumbers: boolean;
+    displayIndentGuides: boolean;
     fontSize: number;
-    softTabs: number;
+    tabSize: number;
     keybind: 'ace' | 'vscode' | 'vim' | 'emacs' | 'sublime' | undefined;
     cursorStyle: 'ace' | 'slim' | 'smooth' | 'smooth-slim' | 'wide' | undefined;
     foldStyle: 'manual' | 'markbegin' | 'markbeginend' | undefined;
@@ -20,15 +20,15 @@ export interface EditorSettings {
 // Default Editor Configurations
 export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settings', {
     theme: 'monokai',
-    autoIndent: true,
-    showLineNumbers: true,
-    basicAutocompletion: true,
-    liveAutocompletion: true,
+    useSoftTabs: true,
+    showGutter: true,
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: true,
     highlightActiveLine: false,
-    relativeLine: false,
-    showIndentGuides: false,
+    relativeLineNumbers: false,
+    displayIndentGuides: false,
     fontSize: 12,
-    softTabs: 4,
+    tabSize: 4,
     keybind: 'ace',
     cursorStyle: 'ace',
     foldStyle: 'manual',
