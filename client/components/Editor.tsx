@@ -55,10 +55,20 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 //     'zig',
 // ];
 
-export default function CodeEditor() {
+interface CodeEditorProps {
+    fileUpload?: string;
+}
+
+export default function CodeEditor({ fileUpload }: CodeEditorProps) {
     const [editorSettings] = useAtom(editorSettingsAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
     const [editorValue, setEditorValue] = useState('');
+
+    useEffect(() => {
+        if (fileUpload) {
+            setEditorValue(fileUpload);
+        }
+    }, [fileUpload]);
 
     useEffect(() => {
         (async () => {

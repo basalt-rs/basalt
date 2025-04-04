@@ -1,5 +1,5 @@
 import { atomWithStorage } from 'jotai/utils';
-import { atom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 
 export interface EditorSettings {
     theme: string;
@@ -35,3 +35,9 @@ export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settin
 });
 
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
+
+const fileDataAtom = atom<string>('');
+export const useFileData = () => {
+    const [fileData, setFileData] = useAtom(fileDataAtom);
+    return { fileData, setFileData };
+};

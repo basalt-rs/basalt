@@ -1,4 +1,5 @@
 'use client';
+import { useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
@@ -32,10 +33,12 @@ import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom } from '@/lib/competitor-state';
+import { currentTabAtom, useFileData } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 
 const EditorButtons = () => {
+    const { setFileData } = useFileData();
+    const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
     const notImplemented = () =>
         toast({
@@ -43,14 +46,33 @@ const EditorButtons = () => {
             description: 'Check back later!',
             variant: 'destructive',
         });
+
+    const handleUploadBtnClick = () => {
+        fileUploadRef.current?.click();
+    };
+    const handleFileUploadChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) {
+            return;
+        }
+        const content = await file.text();
+        setFileData(content);
+    };
     return (
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
                 <Tooltip tooltip="Load File">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                    <Button size="icon" variant="ghost" onClick={handleUploadBtnClick}>
                         <Upload />
                     </Button>
                 </Tooltip>
+                <input
+                    ref={fileUploadRef}
+                    type="file"
+                    accept=".txt"
+                    onChange={handleFileUploadChange}
+                    className="hidden"
+                />
                 <Tooltip tooltip="Download Packet">
                     <Button size="icon" variant="ghost" onClick={notImplemented}>
                         <FileDown />
@@ -88,12 +110,13 @@ const EditorButtons = () => {
 };
 
 const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
+    const { fileData } = useFileData();
     switch (tab) {
         case 'text-editor':
             return (
                 <div className="flex h-full flex-col">
                     <EditorButtons />
-                    <CodeEditor />
+                    <CodeEditor fileUpload={fileData} />
                 </div>
             );
         case 'leaderboard':
