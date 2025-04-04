@@ -2,7 +2,6 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
-import { Textarea } from '@/components/ui/textarea';
 import {
     Accordion,
     AccordionContent,
@@ -19,6 +18,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '../leaderboard/page';
+import CodeEditor from '@/components/Editor';
 import { QuestionResponse, TestState } from '@/lib/types';
 import {
     allQuestionsAtom,
@@ -93,7 +93,7 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
             return (
                 <div className="flex h-full flex-col">
                     <EditorButtons />
-                    <Textarea className="flex-grow" />
+                    <CodeEditor />
                 </div>
             );
         case 'leaderboard':
