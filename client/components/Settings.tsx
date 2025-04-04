@@ -17,7 +17,7 @@ import { Label } from './ui/label';
 const EDITOR_OPTIONS = [
     { id: 'highlightActiveLine', label: 'Highlight Active Line' },
     { id: 'useSoftTabs', label: 'Enable Auto Indent' },
-    { id: 'relativeLineNumbers                ', label: 'Relative Line Numbers' },
+    { id: 'relativeLineNumbers', label: 'Relative Line Numbers' },
     { id: 'showGutter', label: 'Show Line Numbers' },
     { id: 'displayIndentGuides', label: 'Show Indent Guides' },
     { id: 'enableBasicAutocompletion', label: 'Enable Autocompletion' },
