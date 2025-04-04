@@ -16,9 +16,9 @@ import { Label } from './ui/label';
 
 const EDITOR_OPTIONS = [
     { id: 'highlightActiveLine', label: 'Highlight Active Line' },
-    { id: 'useSoftTabs', label: 'Enable Auto Indent' },
+    { id: 'useSoftTabs', label: 'Enable Soft Tabs' },
     { id: 'relativeLineNumbers', label: 'Relative Line Numbers' },
-    { id: 'showGutter', label: 'Show Line Numbers' },
+    { id: 'showGutter', label: 'Show Gutter' },
     { id: 'displayIndentGuides', label: 'Show Indent Guides' },
     { id: 'enableBasicAutocompletion', label: 'Enable Autocompletion' },
     { id: 'enableLiveAutocompletion', label: 'Enable Live Autocompletion' },
