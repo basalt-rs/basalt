@@ -34,6 +34,7 @@ import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
 import { currentTabAtom } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
+import { WithPauseGuard } from '@/components/PauseGuard';
 
 const EditorButtons = () => {
     const [currQuestion] = useAtom(currQuestionAtom);
@@ -92,8 +93,10 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
         case 'text-editor':
             return (
                 <div className="flex h-full flex-col">
-                    <EditorButtons />
-                    <CodeEditor />
+                    <WithPauseGuard isPaused>
+                        <EditorButtons />
+                        <CodeEditor />
+                    </WithPauseGuard>
                 </div>
             );
         case 'leaderboard':
