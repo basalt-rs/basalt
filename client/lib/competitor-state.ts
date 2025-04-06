@@ -50,23 +50,6 @@ export interface EditorSettings {
     foldStyle: 'manual' | 'markbegin' | 'markbeginend' | undefined;
 }
 
-// Default Editor Configurations
-export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settings', {
-    theme: 'monokai',
-    useSoftTabs: true,
-    showGutter: true,
-    enableBasicAutocompletion: true,
-    enableLiveAutocompletion: true,
-    highlightActiveLine: false,
-    relativeLineNumbers: false,
-    displayIndentGuides: false,
-    fontSize: 12,
-    tabSize: 4,
-    keybind: 'ace',
-    cursorStyle: 'ace',
-    foldStyle: 'manual',
-});
-
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
 
 const fileDataAtom = atom<string>('');
