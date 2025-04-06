@@ -20,8 +20,14 @@ export const useClock = () => {
         });
     };
 
+    const playTicker = () => {
+        setTicker((prev) => {
+            if (prev) clearInterval(prev);
+            return setInterval(() => decrementTimer(), 1000);
+        });
+    };
+
     const decrementTimer = () => {
-        console.log('DECREMENTING');
         setClock((prev) =>
             prev === undefined
                 ? undefined
@@ -41,26 +47,21 @@ export const useClock = () => {
 
             setClock(res);
 
-            if (!ticker)
-                setTicker((prev) => {
-                    console.log('setting ticker');
-                    if (prev) clearInterval(prev);
-                    return setInterval(() => decrementTimer(), 1000);
-                });
+            if (!ticker) playTicker();
         },
         refetchInterval: 15 * 1000,
     });
 
     basaltWs.registerEvent('game-paused', () => {
-        console.log('game paused fr');
+        pauseTicker();
         setClock((prev) =>
             prev ? { ...prev, isPaused: true } : { timeLeftInSeconds: 0, isPaused: true }
         );
     });
 
     basaltWs.registerEvent('game-unpaused', (data) => {
-        console.log('game unpaused fr');
         setClock({ isPaused: false, ...data });
+        playTicker();
     });
 
     const pause = async () => {
