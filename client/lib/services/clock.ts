@@ -24,8 +24,9 @@ export const updateClock = async (
         method: 'PATCH',
         headers: {
             Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
         },
-        body: body as unknown as BodyInit,
+        body: JSON.stringify(body),
     });
     if (res.ok) {
         return (await res.json()) as CurrentTime;

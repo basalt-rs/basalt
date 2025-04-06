@@ -31,7 +31,9 @@ export const useClock = () => {
         setClock((prev) =>
             prev === undefined
                 ? undefined
-                : { ...prev, timeLeftInSeconds: prev?.timeLeftInSeconds - 1 }
+                : prev.isPaused
+                  ? prev
+                  : { ...prev, timeLeftInSeconds: prev?.timeLeftInSeconds - 1 }
         );
     };
 
@@ -53,6 +55,7 @@ export const useClock = () => {
     });
 
     basaltWs.registerEvent('game-paused', () => {
+        console.log('Pause event');
         pauseTicker();
         setClock((prev) =>
             prev ? { ...prev, isPaused: true } : { timeLeftInSeconds: 0, isPaused: true }
@@ -60,6 +63,7 @@ export const useClock = () => {
     });
 
     basaltWs.registerEvent('game-unpaused', (data) => {
+        console.log('unpause event');
         setClock({ isPaused: false, ...data });
         playTicker();
     });

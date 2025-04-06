@@ -204,7 +204,7 @@ export default function Competitor() {
     const [currentQuestion] = useAtom(currQuestionAtom);
     const [allQuestions] = useAtom(allQuestionsAtom);
     const [allStates] = useAtom(allStatesAtom);
-    const { clock, pause, unPause, isPaused } = useClock();
+    const { pause, unPause, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
 
@@ -255,7 +255,6 @@ export default function Competitor() {
                                         <Separator className="mb-2.5 mt-2.5" />
                                         <Timer
                                             isHost={false}
-                                            clock={clock}
                                             onPlay={unPause}
                                             onPause={pause}
                                             isPaused={isPaused}

@@ -60,6 +60,7 @@ class BasaltWSClient {
                         if (!(kind in this.broadcastHandlers)) return;
 
                         for (const handler of this.broadcastHandlers[kind]) {
+                            console.log('EXECUTING');
                             handler(data);
                         }
                     }
