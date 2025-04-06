@@ -1,13 +1,16 @@
 import { clockAtom } from '@/lib/host-state';
-import { useAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
 import { getClock, updateClock } from '@/lib/services/clock';
-import { useState } from 'react';
 import { tokenAtom } from '@/lib/services/auth';
+import { basaltWSClientAtom } from '@/lib/services/ws';
+
+const tickerAtom = atom<NodeJS.Timeout | null>(null);
 
 export const useClock = () => {
+    const [basaltWs] = useAtom(basaltWSClientAtom);
     const [clock, setClock] = useAtom(clockAtom);
-    const [ticker, setTicker] = useState<NodeJS.Timeout | null>(null);
+    const [ticker, setTicker] = useAtom(tickerAtom);
     const [authToken] = useAtom(tokenAtom);
 
     const pauseTicker = () => {
@@ -17,29 +20,47 @@ export const useClock = () => {
         });
     };
 
+    const decrementTimer = () => {
+        console.log('DECREMENTING');
+        setClock((prev) =>
+            prev === undefined
+                ? undefined
+                : { ...prev, timeLeftInSeconds: prev?.timeLeftInSeconds - 11 }
+        );
+    };
+
     useQuery({
-        queryKey: ['clock'],
+        queryKey: ['clock', clock?.isPaused ?? true],
         queryFn: async () => {
             const res = await getClock();
             if (res === null) {
-                setClock({ isPaused: true, timeLeftSeconds: 0 });
+                setClock({ isPaused: true, timeLeftInSeconds: 0 });
                 pauseTicker();
                 return;
             }
 
+            setClock(res);
+
             if (!ticker)
                 setTicker((prev) => {
+                    console.log('setting ticker');
                     if (prev) clearInterval(prev);
-                    return setInterval(() => {
-                        setClock((clockPrev) =>
-                            clockPrev === undefined
-                                ? res
-                                : { ...clockPrev, timeLeftSeconds: clockPrev.timeLeftSeconds - 1 }
-                        );
-                    }, 1000);
+                    return setInterval(() => decrementTimer(), 1000);
                 });
         },
-        refetchInterval: 15,
+        refetchInterval: 15 * 1000,
+    });
+
+    basaltWs.registerEvent('game-paused', () => {
+        console.log('game paused fr');
+        setClock((prev) =>
+            prev ? { ...prev, isPaused: true } : { timeLeftInSeconds: 0, isPaused: true }
+        );
+    });
+
+    basaltWs.registerEvent('game-unpaused', (data) => {
+        console.log('game unpaused fr');
+        setClock({ isPaused: false, ...data });
     });
 
     const pause = async () => {

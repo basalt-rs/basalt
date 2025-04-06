@@ -20,7 +20,11 @@ import { currentTabAtom } from '@/lib/competitor-state';
 import { ExtractAtomValue, useAtom } from 'jotai';
 import UserMenu from './UserMenu';
 
-export default function CompetitorNavbar() {
+export interface CompetitorNavbarProps {
+    isPaused: boolean;
+}
+
+export default function CompetitorNavbar({ isPaused: _ }: CompetitorNavbarProps) {
     const [tab, setTab] = useAtom(currentTabAtom);
 
     return (

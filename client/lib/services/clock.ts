@@ -2,7 +2,7 @@ import { API } from './auth';
 
 export interface CurrentTime {
     isPaused: boolean;
-    timeLeftSeconds: number;
+    timeLeftInSeconds: number;
 }
 
 export interface ClockUpdateBody {
