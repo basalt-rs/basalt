@@ -25,7 +25,7 @@ export const useClock = () => {
         setClock((prev) =>
             prev === undefined
                 ? undefined
-                : { ...prev, timeLeftInSeconds: prev?.timeLeftInSeconds - 11 }
+                : { ...prev, timeLeftInSeconds: prev?.timeLeftInSeconds - 1 }
         );
     };
 
