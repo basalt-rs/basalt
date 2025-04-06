@@ -50,6 +50,7 @@ class BasaltWSClient {
             );
         };
         this.ws.onmessage = (m) => {
+            console.log('RECEIVED MESSAGE: ', m);
             try {
                 const { kind: msgKind, ...rest } = JSON.parse(m.data) as BasaltEvent;
                 switch (msgKind) {

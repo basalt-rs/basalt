@@ -14,7 +14,6 @@ interface TimerProps {
 
 export default function Timer({ isHost = false, onPause, onPlay, isPaused }: TimerProps) {
     const [clock] = useAtom(clockAtom);
-    console.log(isPaused);
 
     const handlePause = async () => {
         if (onPause) await onPause();

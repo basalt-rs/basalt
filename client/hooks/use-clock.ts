@@ -44,12 +44,14 @@ export const useClock = () => {
             if (res === null) {
                 setClock({ isPaused: true, timeLeftInSeconds: 0 });
                 pauseTicker();
-                return;
+                return 1;
             }
 
             setClock(res);
 
             if (!ticker) playTicker();
+
+            return 0;
         },
         refetchInterval: 15 * 1000,
     });
@@ -76,6 +78,7 @@ export const useClock = () => {
             },
             authToken
         );
+        pauseTicker();
     };
 
     const unPause = async () => {
@@ -86,6 +89,7 @@ export const useClock = () => {
             },
             authToken
         );
+        playTicker();
     };
 
     return {
