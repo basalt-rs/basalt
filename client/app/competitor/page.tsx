@@ -33,11 +33,11 @@ import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom, useFileData } from '@/lib/competitor-state';
+import { currentTabAtom, useEditorContent } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 
 const EditorButtons = () => {
-    const { setFileData } = useFileData();
+    const { setEditorContent } = useEditorContent();
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
     const notImplemented = () =>
@@ -56,7 +56,7 @@ const EditorButtons = () => {
             return;
         }
         const content = await file.text();
-        setFileData(content);
+        setEditorContent(content);
     };
     return (
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
@@ -110,13 +110,12 @@ const EditorButtons = () => {
 };
 
 const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
-    const { fileData } = useFileData();
     switch (tab) {
         case 'text-editor':
             return (
                 <div className="flex h-full flex-col">
                     <EditorButtons />
-                    <CodeEditor fileUpload={fileData} />
+                    <CodeEditor />
                 </div>
             );
         case 'leaderboard':

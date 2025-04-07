@@ -52,8 +52,8 @@ export interface EditorSettings {
 
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
 
-const fileDataAtom = atom<string>('');
-export const useFileData = () => {
-    const [fileData, setFileData] = useAtom(fileDataAtom);
-    return { fileData, setFileData };
+const editorContentAtom = atom<string>('');
+export const useEditorContent = () => {
+    const [editorContent, setEditorContent] = useAtom(editorContentAtom);
+    return { editorContent, setEditorContent };
 };

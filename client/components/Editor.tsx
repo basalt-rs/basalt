@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
-import { editorSettingsAtom } from '@/lib/competitor-state';
+import { editorSettingsAtom, useEditorContent } from '@/lib/competitor-state';
 import 'ace-builds/src-noconflict/theme-monokai';
 import('ace-builds/src-noconflict/mode-javascript');
 import 'ace-builds/src-noconflict/keybinding-vim';
@@ -55,20 +55,17 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 //     'zig',
 // ];
 
-interface CodeEditorProps {
-    fileUpload?: string;
-}
-
-export default function CodeEditor({ fileUpload }: CodeEditorProps) {
+export default function CodeEditor() {
+    const { editorContent } = useEditorContent();
     const [editorSettings] = useAtom(editorSettingsAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
-    const [editorValue, setEditorValue] = useState('');
+    const [editorValue, setEditorValue] = useState(editorContent ? editorContent : '');
 
     useEffect(() => {
-        if (fileUpload) {
-            setEditorValue(fileUpload);
+        if (editorContent) {
+            setEditorValue(editorContent);
         }
-    }, [fileUpload]);
+    }, [editorContent]);
 
     useEffect(() => {
         (async () => {
