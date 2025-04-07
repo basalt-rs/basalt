@@ -56,16 +56,9 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 // ];
 
 export default function CodeEditor() {
-    const { editorContent } = useEditorContent();
+    const { editorContent, setEditorContent } = useEditorContent();
     const [editorSettings] = useAtom(editorSettingsAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
-    const [editorValue, setEditorValue] = useState(editorContent ? editorContent : '');
-
-    useEffect(() => {
-        if (editorContent) {
-            setEditorValue(editorContent);
-        }
-    }, [editorContent]);
 
     useEffect(() => {
         (async () => {
@@ -86,8 +79,8 @@ export default function CodeEditor() {
             editorProps={{ $blockScrolling: true }}
             width="100%"
             height="100%"
-            value={editorValue}
-            onChange={(newValue) => setEditorValue(newValue)}
+            value={editorContent}
+            onChange={(newValue) => setEditorContent(newValue)}
             setOptions={{
                 fontSize: editorSettings.fontSize,
                 tabSize: editorSettings.tabSize,

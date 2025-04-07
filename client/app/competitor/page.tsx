@@ -57,6 +57,8 @@ const EditorButtons = () => {
         }
         const content = await file.text();
         setEditorContent(content);
+
+        event.target.value = '';
     };
     return (
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
@@ -205,6 +207,7 @@ export default function Competitor() {
     const [allStates] = useAtom(allStatesAtom);
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
+    const { setEditorContent } = useEditorContent();
 
     return (
         <div className="h-screen">
@@ -227,7 +230,10 @@ export default function Competitor() {
                                 <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
                                     <Select
                                         defaultValue={`${currQuestion}`}
-                                        onValueChange={(v) => setCurrQuestionIdx(+v)}
+                                        onValueChange={(v) => {
+                                            setCurrQuestionIdx(+v);
+                                            setEditorContent('');
+                                        }}
                                     >
                                         <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
                                             <SelectValue placeholder="Select a Question..." />
