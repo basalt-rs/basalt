@@ -16,10 +16,9 @@ import {
 } from '@/components/ui/form';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { login, roleAtom } from '@/lib/auth';
+import { useLogin, roleAtom } from '@/lib/services/auth';
 import { atom, Provider, useAtom, useSetAtom } from 'jotai';
 import { ArrowRight, Loader2 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Card,
     CardContent,
@@ -29,8 +28,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import * as Breadcrumb from '@/components/ui/breadcrumb';
-import { ipAtom, setIp } from '@/lib/api';
-import { atomWithStorage } from 'jotai/utils';
+import { useIp } from '@/lib/services/api';
 
 const LoginFormSchema = z.object({
     username: z.string().min(4, { message: 'Username must be at least 4 characters.' }),
@@ -45,6 +43,7 @@ const Loading = () => {
 const Login = () => {
     const router = useRouter();
     const [message, setMessage] = useState<string>('');
+    const login = useLogin();
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(LoginFormSchema),
@@ -123,11 +122,10 @@ const Login = () => {
     );
 };
 
-const ipOrGameCodeAtom = atomWithStorage<string>('ip_or_game_code', '');
 const GameCode = () => {
-    const [tab, setTab] = useAtom(activeTabAtom);
+    const setTab = useSetAtom(activeTabAtom);
     const [ipOrGameCode, setIpOrGameCode] = useAtom(ipOrGameCodeAtom);
-    const [ip] = useAtom(ipAtom);
+    const { ip, setIp } = useIp();
     const GameCodeSchema = z.object({
         code: z
             .string()

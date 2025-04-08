@@ -1,5 +1,4 @@
 'use client';
-import React, { useState } from 'react';
 import QuestionAccordion from './QuestionAccordion';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
@@ -15,60 +14,17 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Ellipsis, Copy } from 'lucide-react';
+import { Ellipsis, Copy, Wifi, WifiOff } from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useSelectedTeamIdx, useCurrentHostTab, useTeams } from '@/lib/host-state';
+import TeamInspector from './TeamInspector';
 
 export default function Host() {
-    const [questions, setQuestions] = useState([
-        {
-            question: 'Sort an Array of Integers',
-            description: 'Sort an array of integers in ascending order and return it.',
-            languages: null,
-            points: '10',
-            tests: [
-                { input: '2 11 15 0', output: '0 2 11 15' },
-                { input: '0 11 2 15', output: '0 2 11 15' },
-                { input: '15 11 2 0', output: '0 2 11 15' },
-            ],
-            enabled: true,
-        },
-        {
-            question: 'Sort an Array of Characters Alphabetically',
-            description:
-                'Sort an array of characters alphabetically and return them as a single string.',
-            languages: ['rs'],
-            points: '15',
-            tests: [
-                { input: 'a e h f', output: 'aefh' },
-                { input: 'd a l b', output: 'abdl' },
-                { input: 'p y r g', output: 'gpry' },
-            ],
-            enabled: false,
-        },
-        {
-            question: 'Hexadecimal in Reverse Order',
-            description:
-                'Convert characters to hexadecimal values and return them in reverse order.',
-            languages: ['rs', 'java'],
-            points: '25',
-            tests: [
-                { input: 'A B C D', output: '13 12 11 10' },
-                { input: 'E D A C', output: '12 10 13 14' },
-                { input: 'F A B E', output: '14 11 10 15' },
-            ],
-            enabled: true,
-        },
-    ]);
-    const [teamList, setTeamList] = useState([
-        { name: 'Team1', password: 'password1', points: 300, status: true },
-        { name: 'Team2', password: 'password2', points: 126, status: true },
-        { name: 'Team3', password: 'password3', points: 0, status: false },
-        { name: 'Team4', password: 'password4', points: 299, status: true },
-        { name: 'Team5', password: 'password5', points: 0, status: true },
-        { name: 'Team6', password: 'password6', points: 5, status: false },
-        { name: 'Team7', password: 'password7', points: 125, status: true },
-    ]);
+    const { teamList, setTeamList } = useTeams();
+    const { setSelectedTeamIdx } = useSelectedTeamIdx();
+    const { currentTab, setCurrentTab } = useCurrentHostTab();
 
     const disconnectAllTeams = () => {
         const updatedTeams = teamList.map((team) => ({
@@ -88,14 +44,8 @@ export default function Host() {
         setTeamList((prev) => prev.filter((team) => team.name !== teamName));
     };
 
-    const handleQuestionSwitch = (question: string) => {
-        setQuestions((prev) =>
-            prev.map((q) => (q.question === question ? { ...q, enabled: !q.enabled } : q))
-        );
-    };
-
     return (
-        <ResizablePanelGroup direction="horizontal" className="flex max-h-screen flex-grow">
+        <ResizablePanelGroup direction="horizontal" className="flex h-screen flex-grow">
             <ResizablePanel className="flex flex-col justify-center" defaultSize={30} maxSize={50}>
                 <div className="flex h-fit items-center justify-between p-2">
                     <div />
@@ -117,10 +67,19 @@ export default function Host() {
                         .sort((a, b) => b.points - a.points)
                         .map((team, index) => (
                             <span
-                                className={`flex w-full justify-between p-1.5 ${team.status ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-500'}`}
+                                className="flex w-full justify-between rounded border p-1.5"
                                 key={index}
                             >
-                                <p className="w-1/2 truncate">{team.name}</p>
+                                <p className="w-1/2 truncate">
+                                    <span className="flex gap-1">
+                                        {team.status ? (
+                                            <Wifi className="text-green-500" />
+                                        ) : (
+                                            <WifiOff className="text-gray-300 dark:text-gray-500" />
+                                        )}
+                                        {team.name}
+                                    </span>
+                                </p>
                                 <p>{team.points} pts</p>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger className="pr-0.5">
@@ -130,6 +89,14 @@ export default function Host() {
                                         {team.status ? (
                                             <div>
                                                 <DropdownMenuItem>Message</DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setSelectedTeamIdx(index);
+                                                        setCurrentTab('teams');
+                                                    }}
+                                                >
+                                                    View
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSub>
                                                     <DropdownMenuSubTrigger>
                                                         Info
@@ -200,24 +167,22 @@ export default function Host() {
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel
-                className="flex h-full min-h-screen w-full flex-col items-center"
-                defaultSize={70}
-            >
+            <ResizablePanel defaultSize={70} className="flex h-screen flex-col">
                 <span className="flex w-full justify-start p-1.5">
                     <HostNavbar />
                 </span>
 
                 <Separator />
 
-                <div className="flex max-h-full w-full flex-grow flex-col justify-start overflow-y-auto">
-                    <ul className="mt-2.5 flex flex-col">
-                        <QuestionAccordion
-                            questions={questions}
-                            handleQuestionSwitch={handleQuestionSwitch}
-                        />
-                    </ul>
-                </div>
+                {currentTab === 'questions' ? (
+                    <ScrollArea className="w-full flex-grow pt-2">
+                        <QuestionAccordion />
+                    </ScrollArea>
+                ) : (
+                    <ScrollArea className="w-full flex-grow pt-2">
+                        <TeamInspector />
+                    </ScrollArea>
+                )}
             </ResizablePanel>
         </ResizablePanelGroup>
     );
