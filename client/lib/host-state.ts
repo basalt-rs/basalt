@@ -1,4 +1,5 @@
 import { atom, useAtom } from 'jotai';
+import { CurrentTime } from './services/clock';
 
 const teamsAtom = atom([
     { name: 'Team1', password: 'password1', points: 300, status: true },
@@ -40,3 +41,5 @@ export const useCurrentHostTab = () => {
     const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
     return { currentTab, setCurrentTab };
 };
+
+export const clockAtom = atom<CurrentTime | undefined>();

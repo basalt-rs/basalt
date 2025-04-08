@@ -20,11 +20,13 @@ import HostNavbar from '@/components/HostNavbar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSelectedTeamIdx, useCurrentHostTab, useTeams } from '@/lib/host-state';
 import TeamInspector from './TeamInspector';
+import { useClock } from '@/hooks/use-clock';
 
 export default function Host() {
     const { teamList, setTeamList } = useTeams();
     const { setSelectedTeamIdx } = useSelectedTeamIdx();
     const { currentTab, setCurrentTab } = useCurrentHostTab();
+    const { isPaused, pause, unPause } = useClock();
 
     const disconnectAllTeams = () => {
         const updatedTeams = teamList.map((team) => ({
@@ -161,7 +163,7 @@ export default function Host() {
 
                 <div className="mb-2.5 mt-auto flex flex-col items-center justify-center">
                     <Separator className="mb-2.5" />
-                    <Timer isHost={true} startingTime={4500} isActive={true} />
+                    <Timer isHost={true} isPaused={isPaused} onPlay={unPause} onPause={pause} />
                 </div>
             </ResizablePanel>
 
