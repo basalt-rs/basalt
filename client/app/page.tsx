@@ -28,7 +28,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import * as Breadcrumb from '@/components/ui/breadcrumb';
-import { useIp } from '@/lib/services/api';
+import { ipOrGameCodeAtom, useIp } from '@/lib/services/api';
 
 const LoginFormSchema = z.object({
     username: z.string().min(4, { message: 'Username must be at least 4 characters.' }),
@@ -58,11 +58,16 @@ const Login = () => {
 
         console.log(username, password);
 
-        const role = await login(username, password);
-        if (role) {
-            router.replace(`/${role}`);
-        } else {
-            setMessage('Invalid username or password.');
+        try {
+            const role = await login(username, password);
+            if (role) {
+                router.replace(`/${role}`);
+            } else {
+                setMessage('Invalid username or password');
+                form.reset();
+            }
+        } catch (_: unknown) {
+            setMessage('Invalid game code');
             form.reset();
         }
     };
@@ -102,15 +107,14 @@ const Login = () => {
                             )}
                         />
 
-                        <div className="flex w-full flex-row justify-end">
+                        <div className="flex w-full flex-row justify-between items-center">
+                            <span className="text-destructive items-center">{message}</span>
                             <Button>
                                 <ArrowRight />
                             </Button>
                         </div>
                     </form>
                 </Form>
-
-                {message && <p>{message}</p>}
             </CardContent>
 
             <CardFooter>
