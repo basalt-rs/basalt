@@ -32,17 +32,25 @@ import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom } from '@/lib/competitor-state';
+import { currentTabAtom, selectedLanguageAtom } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 
 const EditorButtons = () => {
     const [currQuestion] = useAtom(currQuestionAtom);
+    const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
+
     const notImplemented = () =>
         toast({
             title: 'Not Yet Implemented',
             description: 'Check back later!',
             variant: 'destructive',
         });
+
+    const handleLanguageSelection = (value: string) => {
+        setSelectedLanguage(value);
+        console.log(value);
+    };
+
     return (
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
@@ -69,14 +77,14 @@ const EditorButtons = () => {
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
-                    <Select>
-                        <SelectTrigger className="w-56" defaultValue={currQuestion?.languages?.[0]}>
+                    <Select value={selectedLanguage} onValueChange={handleLanguageSelection}>
+                        <SelectTrigger className="w-56">
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
                         <SelectContent>
                             {currQuestion?.languages?.map((l) => (
-                                <SelectItem key={l} value={l}>
-                                    {l}
+                                <SelectItem key={l.syntax} value={l.syntax}>
+                                    {l.syntax}
                                 </SelectItem>
                             ))}
                         </SelectContent>

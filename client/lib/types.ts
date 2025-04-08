@@ -7,9 +7,14 @@ export interface TestResponse {
 }
 
 export interface QuestionResponse {
-    languages?: string[];
+    languages?: Languages[];
     title: string;
     points: number;
     description?: string;
     tests: TestResponse[];
+}
+
+export interface Languages {
+    language: string;
+    syntax: string;
 }

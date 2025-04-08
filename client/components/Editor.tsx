@@ -1,62 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
-import { editorSettingsAtom } from '@/lib/competitor-state';
+import { editorSettingsAtom, selectedLanguageAtom } from '@/lib/competitor-state';
 import 'ace-builds/src-noconflict/theme-monokai';
-import('ace-builds/src-noconflict/mode-javascript');
 import 'ace-builds/src-noconflict/keybinding-vim';
 import 'ace-builds/src-noconflict/keybinding-emacs';
 import 'ace-builds/src-noconflict/keybinding-sublime';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
-// TODO: Need to have languages imported and hooked up in the Select to sync these items together
-// const languages = [
-//     'ada',
-//     'basic',
-//     'batchfile',
-//     'c_cpp',
-//     'clojure',
-//     'cobol',
-//     'csharp',
-//     'd',
-//     'dart',
-//     'ejs',
-//     'elixir',
-//     'elm',
-//     'erlang',
-//     'forth',
-//     'fortran',
-//     'fsharp',
-//     'golang',
-//     'java',
-//     'javascript',
-//     'julia',
-//     'kotlin',
-//     'lisp',
-//     'lua',
-//     'mips',
-//     'nim',
-//     'nix',
-//     'ocaml',
-//     'odin',
-//     'pascal',
-//     'perl',
-//     'php',
-//     'powershell',
-//     'prolog',
-//     'python',
-//     'r',
-//     'ruby',
-//     'rust',
-//     'scala',
-//     'scheme',
-//     'sh',
-//     'typescript',
-//     'zig',
-// ];
-
 export default function CodeEditor() {
     const [editorSettings] = useAtom(editorSettingsAtom);
+    const [languageValue] = useAtom(selectedLanguageAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
     const [editorValue, setEditorValue] = useState('');
 
@@ -68,12 +22,16 @@ export default function CodeEditor() {
             if (editorSettings.keybind !== 'ace') {
                 await import(`ace-builds/src-noconflict/keybinding-${editorSettings.keybind}`);
             }
+            if (languageValue) {
+                console.log('ace got this', languageValue);
+                await import(`ace-builds/src-noconflict/mode-${languageValue.toLowerCase()}`);
+            }
         })();
-    }, [editorSettings]);
+    }, [editorSettings, languageValue]);
 
     return (
         <AceEditor
-            mode="javascript"
+            mode={languageValue}
             theme={editorTheme}
             name="code-editor"
             editorProps={{ $blockScrolling: true }}

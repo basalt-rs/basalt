@@ -35,3 +35,5 @@ export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settin
 });
 
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
+
+export const selectedLanguageAtom = atom<string>();
