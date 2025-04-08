@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
-import { editorSettingsAtom } from '@/lib/competitor-state';
+import { editorSettingsAtom, useEditorContent } from '@/lib/competitor-state';
 import 'ace-builds/src-noconflict/theme-monokai';
 import('ace-builds/src-noconflict/mode-javascript');
 import 'ace-builds/src-noconflict/keybinding-vim';
@@ -56,9 +56,9 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 // ];
 
 export default function CodeEditor() {
+    const { editorContent, setEditorContent } = useEditorContent();
     const [editorSettings] = useAtom(editorSettingsAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
-    const [editorValue, setEditorValue] = useState('');
 
     useEffect(() => {
         (async () => {
@@ -79,8 +79,8 @@ export default function CodeEditor() {
             editorProps={{ $blockScrolling: true }}
             width="100%"
             height="100%"
-            value={editorValue}
-            onChange={(newValue) => setEditorValue(newValue)}
+            value={editorContent}
+            onChange={(newValue) => setEditorContent(newValue)}
             setOptions={{
                 fontSize: editorSettings.fontSize,
                 tabSize: editorSettings.tabSize,
