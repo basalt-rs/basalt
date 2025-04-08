@@ -13,17 +13,17 @@ export const useClock = () => {
     const [ticker, setTicker] = useAtom(tickerAtom);
     const [authToken] = useAtom(tokenAtom);
 
-    const pauseTicker = () => {
+    const startTicking = () => {
         setTicker((prev) => {
             if (prev) clearInterval(prev);
-            return null;
+            return setInterval(decrementTimer, 1000);
         });
     };
 
-    const playTicker = () => {
+    const stopTicking = () => {
         setTicker((prev) => {
             if (prev) clearInterval(prev);
-            return setInterval(() => decrementTimer(), 1000);
+            return null;
         });
     };
 
@@ -43,13 +43,11 @@ export const useClock = () => {
             const res = await getClock();
             if (res === null) {
                 setClock({ isPaused: true, timeLeftInSeconds: 0 });
-                pauseTicker();
                 return 1;
             }
 
             setClock(res);
-
-            if (!ticker) playTicker();
+            if (!ticker && !res.isPaused) startTicking();
 
             return 0;
         },
@@ -57,17 +55,15 @@ export const useClock = () => {
     });
 
     basaltWs.registerEvent('game-paused', () => {
-        console.log('Pause event');
-        pauseTicker();
+        stopTicking();
         setClock((prev) =>
             prev ? { ...prev, isPaused: true } : { timeLeftInSeconds: 0, isPaused: true }
         );
     });
 
     basaltWs.registerEvent('game-unpaused', (data) => {
-        console.log('unpause event');
         setClock({ isPaused: false, ...data });
-        playTicker();
+        startTicking();
     });
 
     const pause = async () => {
@@ -78,7 +74,6 @@ export const useClock = () => {
             },
             authToken
         );
-        pauseTicker();
     };
 
     const unPause = async () => {
@@ -89,7 +84,6 @@ export const useClock = () => {
             },
             authToken
         );
-        playTicker();
     };
 
     return {
