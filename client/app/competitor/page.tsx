@@ -256,8 +256,8 @@ export default function Competitor() {
                                         <Select
                                             defaultValue={`${currQuestion}`}
                                             onValueChange={(v) => {
-                                              setCurrQuestionIdx(+v);
-                                              setEditorContent('');
+                                                setCurrQuestionIdx(+v);
+                                                setEditorContent('');
                                             }}
                                         >
                                             <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
@@ -288,6 +288,7 @@ export default function Competitor() {
                                             isPaused={isPaused}
                                         />
                                     </div>
+                                </WithPauseGuard>
                             </ResizablePanelGroup>
                         </ResizablePanel>
                         <ResizableHandle withHandle />
