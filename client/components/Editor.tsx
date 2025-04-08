@@ -24,7 +24,7 @@ export default function CodeEditor() {
             }
             if (languageValue) {
                 console.log('ace got this', languageValue);
-                await import(`ace-builds/src-noconflict/mode-${languageValue.toLowerCase()}`);
+                await import(`ace-builds/src-noconflict/mode-${languageValue}`);
             }
         })();
     }, [editorSettings, languageValue]);
