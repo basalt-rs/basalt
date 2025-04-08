@@ -56,8 +56,6 @@ const Login = () => {
     const onSubmit = async () => {
         const { username, password } = form.getValues();
 
-        console.log(username, password);
-
         try {
             const role = await login(username, password);
             if (role) {
