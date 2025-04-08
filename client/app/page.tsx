@@ -107,8 +107,8 @@ const Login = () => {
                             )}
                         />
 
-                        <div className="flex w-full flex-row justify-between items-center">
-                            <span className="text-destructive items-center">{message}</span>
+                        <div className="flex w-full flex-row items-center justify-between">
+                            <span className="items-center text-destructive">{message}</span>
                             <Button>
                                 <ArrowRight />
                             </Button>
@@ -204,18 +204,24 @@ const LoginTabs = () => {
 
     return (
         <>
-            <Card className="w-[450px] flex flex-col justify-between">
+            <Card className="flex w-[450px] flex-col justify-between">
                 <CardHeader>
                     <Breadcrumb.Breadcrumb>
                         <Breadcrumb.BreadcrumbList>
-                            {tab === 'login' && (<>
-                                <Breadcrumb.BreadcrumbItem>
-                                    <Button variant="link" className="px-0" onClick={() => setTab('ip')}>
-                                        Game Code
-                                    </Button>
-                                </Breadcrumb.BreadcrumbItem>
-                                <Breadcrumb.BreadcrumbSeparator />
-                            </>)}
+                            {tab === 'login' && (
+                                <>
+                                    <Breadcrumb.BreadcrumbItem>
+                                        <Button
+                                            variant="link"
+                                            className="px-0"
+                                            onClick={() => setTab('ip')}
+                                        >
+                                            Game Code
+                                        </Button>
+                                    </Breadcrumb.BreadcrumbItem>
+                                    <Breadcrumb.BreadcrumbSeparator />
+                                </>
+                            )}
                             <Breadcrumb.BreadcrumbPage>
                                 {tab === 'login' ? 'Log In' : 'Game Code'}
                             </Breadcrumb.BreadcrumbPage>

@@ -147,13 +147,12 @@ const TestResults = () => {
     );
 };
 
-const QuestionDetails = (data: {
+const QuestionDetails = ({
+    question: { title, description, tests },
+}: {
     question: QuestionResponse;
     status: TestState;
 }) => {
-    const {
-        question: { title, description, tests },
-    } = data;
     return (
         <div className="flex flex-col items-center justify-center gap-2">
             <h1 className="font-bold">{title}</h1>
@@ -225,7 +224,9 @@ export default function Competitor() {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {currentQuestion && <QuestionDetails question={currentQuestion} status="pass" />}
+                                    {currentQuestion && (
+                                        <QuestionDetails question={currentQuestion} status="pass" />
+                                    )}
                                 </ScrollArea>
                                 <div className="py-2.5">
                                     <Separator className="mb-2.5 mt-2.5" />

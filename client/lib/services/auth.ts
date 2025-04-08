@@ -10,7 +10,7 @@ export interface User {
 
 export const tokenAtom = atomWithStorage<string | null>('auth_token', null);
 export const currentUserAtom = atom(async (get) => {
-    const token = get(tokenAtom)
+    const token = get(tokenAtom);
     const ip = get(ipAtom);
     if (token === null) return null;
 

@@ -24,9 +24,9 @@ export const useIp = () => {
             }
 
             return false;
-        }
+        },
     };
-}
+};
 
 const rleDecode = (encoded: string): string => {
     let out = '';
@@ -48,7 +48,6 @@ const parseGameCode = (gameCode: string): string | null => {
         return null;
     }
 
-
     const idx = (α: string) => α.charCodeAt(0) - 'a'.charCodeAt(0);
     const parseByte = (s: string, index: number): number =>
         (idx(s[index]) << 4) + idx(s[index + 1]);
@@ -59,9 +58,8 @@ const parseGameCode = (gameCode: string): string | null => {
     return `${ip}:${port}`;
 };
 
-
 export const resetIp = () => {
     const store = getDefaultStore();
     store.set(ipAtom, RESET);
     store.set(ipOrGameCodeAtom, '');
-}:
+};
