@@ -1,4 +1,5 @@
 'use client';
+import { useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
@@ -32,7 +33,7 @@ import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom } from '@/lib/competitor-state';
+import { currentTabAtom, useEditorContent } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
@@ -41,6 +42,8 @@ interface EditorButtons {
     isPaused: boolean;
 }
 const EditorButtons = ({ isPaused }: EditorButtons) => {
+    const { setEditorContent } = useEditorContent();
+    const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
     const notImplemented = () =>
         toast({
@@ -48,6 +51,20 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
             description: 'Check back later!',
             variant: 'destructive',
         });
+
+    const handleUploadBtnClick = () => {
+        fileUploadRef.current?.click();
+    };
+    const handleFileUploadChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) {
+            return;
+        }
+        const content = await file.text();
+        setEditorContent(content);
+
+        event.target.value = '';
+    };
     return (
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
@@ -56,11 +73,18 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
                         disabled={isPaused}
                         size="icon"
                         variant="ghost"
-                        onClick={notImplemented}
+                        onClick={handleUploadBtnClick}
                     >
                         <Upload />
                     </Button>
                 </Tooltip>
+                <input
+                    ref={fileUploadRef}
+                    type="file"
+                    accept=".txt"
+                    onChange={handleFileUploadChange}
+                    className="hidden"
+                />
                 <Tooltip tooltip="Download Packet">
                     <Button size="icon" variant="ghost" onClick={notImplemented}>
                         <FileDown />
@@ -207,6 +231,7 @@ export default function Competitor() {
     const { pause, unPause, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
+    const { setEditorContent } = useEditorContent();
 
     return (
         <div className="h-screen">
@@ -230,7 +255,10 @@ export default function Competitor() {
                                     <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
                                         <Select
                                             defaultValue={`${currQuestion}`}
-                                            onValueChange={(v) => setCurrQuestionIdx(+v)}
+                                            onValueChange={(v) => {
+                                              setCurrQuestionIdx(+v);
+                                              setEditorContent('');
+                                            }}
                                         >
                                             <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
                                                 <SelectValue placeholder="Select a Question..." />
@@ -260,7 +288,6 @@ export default function Competitor() {
                                             isPaused={isPaused}
                                         />
                                     </div>
-                                </WithPauseGuard>
                             </ResizablePanelGroup>
                         </ResizablePanel>
                         <ResizableHandle withHandle />
