@@ -28,12 +28,26 @@ export const useIp = () => {
     };
 }
 
+const rleDecode = (encoded: string): string => {
+    let out = '';
+    for (let i = 0; i < encoded.length; ++i) {
+        const c = encoded[i];
+        if (!isNaN(+c)) {
+            out += encoded[++i].repeat(+c);
+        } else {
+            out += c;
+        }
+    }
+    return out;
+};
+
 const parseGameCode = (gameCode: string): string | null => {
+    gameCode = rleDecode(gameCode.toLowerCase());
+
     if (!/[a-z]{12}/i.test(gameCode)) {
         return null;
     }
 
-    gameCode = gameCode.toLowerCase();
 
     const idx = (α: string) => α.charCodeAt(0) - 'a'.charCodeAt(0);
     const parseByte = (s: string, index: number): number =>

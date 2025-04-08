@@ -134,7 +134,7 @@ const GameCode = () => {
         code: z
             .string()
             .regex(
-                /^([a-z]{12}|(https?:\/\/)?(\d{1,3}\.){3}\d{1,3}:\d{1,4})$/i,
+                /^([a-z0-9]{0,12}|(https?:\/\/)?(\d{1,3}\.){3}\d{1,3}:\d{1,4})$/i,
                 'Must be a game code or IPv4 address'
             ),
     });
@@ -155,6 +155,8 @@ const GameCode = () => {
         if (setIp(code)) {
             setIpOrGameCode(code);
             setTab('login');
+        } else {
+            form.setError('code', { message: 'Must be a game code or IPv4 address' });
         }
     };
 
