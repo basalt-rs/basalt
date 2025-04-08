@@ -33,14 +33,14 @@ import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom, useEditorContent } from '@/lib/competitor-state';
+import { currentTabAtom, useEditorContent, useTesting } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 
 const EditorButtons = () => {
     const { setEditorContent } = useEditorContent();
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
-    const [loading, setLoading] = useState<'test' | 'submit' | undefined>(undefined);
+    const { loading, runTests, submit } = useTesting();
 
     const notImplemented = () =>
         toast({
@@ -49,17 +49,6 @@ const EditorButtons = () => {
             variant: 'destructive',
         });
 
-    const runTests = async () => {
-        setLoading('test');
-        await new Promise((res) => setTimeout(res, 5000));
-        setLoading(undefined);
-    };
-
-    const submit = async () => {
-        setLoading('submit');
-        await new Promise((res) => setTimeout(res, 5000));
-        setLoading(undefined);
-    };
 
     const handleUploadBtnClick = () => {
         fileUploadRef.current?.click();
@@ -100,7 +89,7 @@ const EditorButtons = () => {
             <div className="flex flex-row">
                 <Tooltip tooltip="Run Tests">
                     <Button size="icon" variant="ghost" onClick={runTests} disabled={!!loading}>
-                        
+
                         {loading === 'test'
                             ? <Loader2 className="text-in-progress animate-spin" />
                             : <FlaskConical className="text-in-progress" />
@@ -155,43 +144,43 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
 };
 
 const TestResults = () => {
-    const [currQuestion] = useAtom(currQuestionAtom);
-    return (
-        <div className="w-full">
-            <Accordion type="single" collapsible>
-                {currQuestion.tests
-                    .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
-                    .map((test, i) => (
-                        <AccordionItem key={i} value={`test-${i}`}>
-                            <AccordionTrigger className="items-center justify-between px-8">
-                                <h1>
-                                    <b>Test Case {i + 1}</b>
-                                </h1>
-                                <h1 className="flex items-center justify-center text-pass">
-                                    <b>PASS</b>
-                                </h1>
-                            </AccordionTrigger>
-                            <AccordionContent className="flex flex-row gap-4 px-8">
-                                {test.input && (
-                                    <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Input</b>
-                                        <CodeBlock text={test.input} />
-                                    </div>
-                                )}
+    const { loading, testResults } = useTesting();
+    if (!testResults) return null;
+    return (<div className="w-full">
+        {loading
+            ? <Loader2 size={64} className="animate-spin text-in-progress mx-auto my-4" />
+            : <Accordion type="single" collapsible>
+                {testResults.map((test, i) => (
+                    <AccordionItem key={i} value={`test-${i}`}>
+                        <AccordionTrigger className="items-center justify-between px-8">
+                            <h1>
+                                <b>Test Case {i + 1}</b>
+                            </h1>
+                            <h1 className="flex items-center justify-center text-pass">
+                                <b>{test.state.toUpperCase()}</b>
+                            </h1>
+                        </AccordionTrigger>
+                        <AccordionContent className="flex flex-row gap-4 px-8">
+                            {test.input && (
                                 <div className="flex h-full flex-grow flex-col gap-2">
-                                    <b>Expected Output</b>
-                                    <CodeBlock text={test.output} />
+                                    <b>Input</b>
+                                    <CodeBlock text={test.input} />
                                 </div>
-                                <div className="flex h-full flex-grow flex-col gap-2">
-                                    <b>Actual Output</b>
-                                    <CodeBlock text="Not yet implemented" />
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
+                            )}
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Expected Output</b>
+                                <CodeBlock text={test.expectedOutput} />
+                            </div>
+                            <div className="flex h-full flex-grow flex-col gap-2">
+                                <b>Actual Output</b>
+                                <CodeBlock text={test.actualOutput} />
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
             </Accordion>
-        </div>
-    );
+        }
+    </div>);
 };
 
 const QuestionDetails = ({
@@ -230,6 +219,7 @@ export default function Competitor() {
     const [allStates] = useAtom(allStatesAtom);
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
+    const { loading, testResults } = useTesting();
 
     return (
         <div className="h-screen">
@@ -286,11 +276,13 @@ export default function Competitor() {
                                     <TabContent tab={tab} />
                                 </ResizablePanel>
                                 <ResizableHandle />
-                                <ResizablePanel defaultSize={100} className="h-full">
-                                    <ScrollArea className="h-full w-full">
-                                        <TestResults />
-                                    </ScrollArea>
-                                </ResizablePanel>
+                                {(loading || testResults) &&
+                                    <ResizablePanel defaultSize={100} className="h-full">
+                                        <ScrollArea className="h-full w-full">
+                                            <TestResults />
+                                        </ScrollArea>
+                                    </ResizablePanel>
+                                }
                             </ResizablePanelGroup>
                         </ResizablePanel>
                     </ResizablePanelGroup>

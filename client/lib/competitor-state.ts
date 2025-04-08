@@ -1,6 +1,7 @@
 import { atomWithStorage } from 'jotai/utils';
 import { atom, useAtom } from 'jotai';
 import { allQuestionsAtom, currQuestionIdxAtom } from './services/questions';
+import { TestState } from './types';
 
 export interface EditorSettings {
     theme: string;
@@ -42,7 +43,8 @@ const editorContentAtom = atom(
     async (get) => {
         const editors = get(editorsAtom);
         const questionIdx = get(currQuestionIdxAtom);
-        return editors[questionIdx] ?? '';
+        console.log(editors, questionIdx);
+        return editors[questionIdx] ?? 'foo';
     },
     async (get, set, newContent: string) => {
         const questionIdx = get(currQuestionIdxAtom);
@@ -61,4 +63,48 @@ export const useEditorContent = () => {
         editorContent,
         setEditorContent,
     };
+};
+
+interface TestResult {
+    state: 'pass' | 'fail';
+    input: string;
+    expectedOutput: string;
+    actualOutput: string;
+}
+
+const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
+const testResultsAtom = atom<TestResult[] | null>(null);
+export const useTesting = () => {
+    const [loading, setLoading] = useAtom(testsLoadingAtom); 
+    const [testResults, setTestResults] = useAtom(testResultsAtom); 
+
+    const runTests = async () => {
+        setLoading('test');
+        await new Promise((res) => setTimeout(res, 5000));
+        setTestResults([
+            {
+                state: 'pass',
+                input: 'hello',
+                expectedOutput: 'olleh',
+                actualOutput: 'hello',
+            }
+        ]);
+        setLoading(null);
+    };
+
+    const submit = async () => {
+        setLoading('submit');
+        await new Promise((res) => setTimeout(res, 5000));
+        setTestResults([
+            {
+                state: 'pass',
+                input: 'world',
+                expectedOutput: 'dlrow',
+                actualOutput: 'world',
+            }
+        ]);
+        setLoading(null);
+    };
+
+    return { loading, runTests, submit, testResults };
 };
