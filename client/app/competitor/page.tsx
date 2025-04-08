@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import Leaderboard from '../leaderboard/page';
+import Leaderboard from '@/components/Leaderboard';
 import CodeEditor from '@/components/Editor';
 import { QuestionResponse, TestState } from '@/lib/types';
 import {
