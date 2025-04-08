@@ -28,6 +28,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import * as Breadcrumb from '@/components/ui/breadcrumb';
 import { ipAtom, setIp } from '@/lib/api';
 import { atomWithStorage } from 'jotai/utils';
 
@@ -67,14 +68,12 @@ const Login = () => {
         }
     };
     return (
-        <Card>
-            <CardHeader>
+        <>
+            <CardContent className="flex flex-col gap-1">
                 <CardTitle>Log In</CardTitle>
                 <CardDescription>
                     Login using your username and password to join the competition
                 </CardDescription>
-            </CardHeader>
-            <CardContent>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
@@ -120,13 +119,13 @@ const Login = () => {
                     <Link href="/leaderboard">Show Leaderboard</Link>
                 </Button>
             </CardFooter>
-        </Card>
+        </>
     );
 };
 
 const ipOrGameCodeAtom = atomWithStorage<string>('ip_or_game_code', '');
 const GameCode = () => {
-    const setTab = useSetAtom(activeTabAtom);
+    const [tab, setTab] = useAtom(activeTabAtom);
     const [ipOrGameCode, setIpOrGameCode] = useAtom(ipOrGameCodeAtom);
     const [ip] = useAtom(ipAtom);
     const GameCodeSchema = z.object({
@@ -158,12 +157,10 @@ const GameCode = () => {
     };
 
     return (
-        <Card>
-            <CardHeader>
+        <>
+            <CardContent className="flex flex-col gap-1">
                 <CardTitle>Game Code</CardTitle>
                 <CardDescription>Enter the competition game code to connect</CardDescription>
-            </CardHeader>
-            <CardContent>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
@@ -192,30 +189,39 @@ const GameCode = () => {
                     </form>
                 </Form>
             </CardContent>
-        </Card>
+            <CardFooter />
+        </>
     );
 };
 
 const activeTabAtom = atom<'ip' | 'login'>('ip');
 const LoginTabs = () => {
     const [tab, setTab] = useAtom(activeTabAtom);
-    const [ip] = useAtom(ipAtom);
 
     return (
-        <Tabs value={tab} onValueChange={(t) => setTab(t as typeof tab)} className="w-[400px]">
-            <TabsList>
-                <TabsTrigger value="ip">Game Code</TabsTrigger>
-                <TabsTrigger value="login" disabled={!ip}>
-                    Log In
-                </TabsTrigger>
-            </TabsList>
-            <TabsContent value="ip">
-                <GameCode />
-            </TabsContent>
-            <TabsContent value="login">
-                <Login />
-            </TabsContent>
-        </Tabs>
+        <>
+            <Card className="w-[450px] flex flex-col justify-between">
+                <CardHeader>
+                    <Breadcrumb.Breadcrumb>
+                        <Breadcrumb.BreadcrumbList>
+                            {tab === 'login' && (<>
+                                <Breadcrumb.BreadcrumbItem>
+                                    <Button variant="link" className="px-0" onClick={() => setTab('ip')}>
+                                        Game Code
+                                    </Button>
+                                </Breadcrumb.BreadcrumbItem>
+                                <Breadcrumb.BreadcrumbSeparator />
+                            </>)}
+                            <Breadcrumb.BreadcrumbPage>
+                                {tab === 'login' ? 'Log In' : 'Game Code'}
+                            </Breadcrumb.BreadcrumbPage>
+                        </Breadcrumb.BreadcrumbList>
+                    </Breadcrumb.Breadcrumb>
+                </CardHeader>
+                {tab === 'ip' && <GameCode />}
+                {tab === 'login' && <Login />}
+            </Card>
+        </>
     );
 };
 
