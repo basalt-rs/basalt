@@ -1,5 +1,5 @@
 'use client';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
@@ -28,7 +28,7 @@ import {
     currQuestionIdxAtom,
 } from '@/lib/services/questions';
 import { ExtractAtomValue, useAtom } from 'jotai';
-import { Circle, FileDown, FlaskConical, SendHorizonal, Upload } from 'lucide-react';
+import { Circle, FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
 import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
@@ -40,6 +40,8 @@ const EditorButtons = () => {
     const { setEditorContent } = useEditorContent();
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
+    const [loading, setLoading] = useState<'test' | 'submit' | undefined>(undefined);
+
     const notImplemented = () =>
         toast({
             title: 'Not Yet Implemented',
@@ -47,9 +49,22 @@ const EditorButtons = () => {
             variant: 'destructive',
         });
 
+    const runTests = async () => {
+        setLoading('test');
+        await new Promise((res) => setTimeout(res, 5000));
+        setLoading(undefined);
+    };
+
+    const submit = async () => {
+        setLoading('submit');
+        await new Promise((res) => setTimeout(res, 5000));
+        setLoading(undefined);
+    };
+
     const handleUploadBtnClick = () => {
         fileUploadRef.current?.click();
     };
+
     const handleFileUploadChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) {
@@ -60,6 +75,7 @@ const EditorButtons = () => {
 
         event.target.value = '';
     };
+
     return (
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
@@ -83,13 +99,20 @@ const EditorButtons = () => {
             </div>
             <div className="flex flex-row">
                 <Tooltip tooltip="Run Tests">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
-                        <FlaskConical className="text-in-progress" />
+                    <Button size="icon" variant="ghost" onClick={runTests} disabled={!!loading}>
+                        
+                        {loading === 'test'
+                            ? <Loader2 className="text-in-progress animate-spin" />
+                            : <FlaskConical className="text-in-progress" />
+                        }
                     </Button>
                 </Tooltip>
                 <Tooltip tooltip="Submit Solution">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
-                        <SendHorizonal className="text-pass" />
+                    <Button size="icon" variant="ghost" onClick={submit} disabled={!!loading}>
+                        {loading === 'submit'
+                            ? <Loader2 className="text-pass animate-spin" />
+                            : <SendHorizonal className="text-pass" />
+                        }
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
@@ -207,7 +230,6 @@ export default function Competitor() {
     const [allStates] = useAtom(allStatesAtom);
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
-    const { setEditorContent } = useEditorContent();
 
     return (
         <div className="h-screen">
@@ -230,10 +252,7 @@ export default function Competitor() {
                                 <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
                                     <Select
                                         defaultValue={`${currQuestion}`}
-                                        onValueChange={(v) => {
-                                            setCurrQuestionIdx(+v);
-                                            setEditorContent('');
-                                        }}
+                                        onValueChange={(v) => setCurrQuestionIdx(+v)}
                                     >
                                         <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
                                             <SelectValue placeholder="Select a Question..." />
