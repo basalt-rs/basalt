@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom, getDefaultStore } from 'jotai';
 import { tokenAtom } from './auth';
 import { TestResults } from '../types';
 import { ipAtom } from './api';
@@ -62,7 +62,8 @@ class BasaltWSClient {
 
     public establish(ip: string, token: string | null, retries: number = 0) {
         this.enabled = true;
-        this.ws = new WebSocket(this.endpoint, token ? [token] : undefined);
+        console.log('establishing ws connection', { ip, token });
+        this.ws = new WebSocket(ip + this.endpoint, token ? [token] : undefined);
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
             this.retries = retries - 1;
@@ -73,7 +74,11 @@ class BasaltWSClient {
                 // retry connection with exponential backoff
                 setTimeout(
                     () => {
-                        this.establish(this.retries + 1);
+                        const store = getDefaultStore();
+                        const ip = store.get(ipAtom)!;
+                        if (ip) {
+                            this.establish(ip, store.get(tokenAtom), this.retries + 1);
+                        }
                     },
                     2 ** retries * 1000
                 );

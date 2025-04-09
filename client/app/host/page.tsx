@@ -21,12 +21,24 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSelectedTeamIdx, useCurrentHostTab, useTeams } from '@/lib/host-state';
 import TeamInspector from './TeamInspector';
 import { useClock } from '@/hooks/use-clock';
+import { useEffect } from 'react';
+import { basaltWSClientAtom } from '@/lib/services/ws';
+import { useAtom } from 'jotai';
+import { ipAtom } from '@/lib/services/api';
+import { tokenAtom } from '@/lib/services/auth';
 
 export default function Host() {
     const { teamList, setTeamList } = useTeams();
     const { setSelectedTeamIdx } = useSelectedTeamIdx();
     const { currentTab, setCurrentTab } = useCurrentHostTab();
     const { isPaused, pause, unPause } = useClock();
+    const [ip] = useAtom(ipAtom);
+    const [token] = useAtom(tokenAtom);
+    const [ws] = useAtom(basaltWSClientAtom);
+
+    useEffect(() => {
+        if (ip) ws.establish(ip, token);
+    }, [ws, ip, token]);
 
     const disconnectAllTeams = () => {
         const updatedTeams = teamList.map((team) => ({

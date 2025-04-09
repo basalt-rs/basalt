@@ -1,5 +1,5 @@
 'use client';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
@@ -39,6 +39,9 @@ import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
 import { Progress } from '@/components/ui/progress';
+import { ipAtom } from '@/lib/services/api';
+import { basaltWSClientAtom } from '@/lib/services/ws';
+import { tokenAtom } from '@/lib/services/auth';
 
 interface EditorButtons {
     isPaused: boolean;
@@ -118,14 +121,14 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
-                    <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                    <Select value={selectedLanguage?.language} onValueChange={x => setSelectedLanguage(currQuestion.languages.find(l => l.language === x))}>
                         <SelectTrigger className="w-56">
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
                         <SelectContent>
                             {currQuestion?.languages?.map((l) => (
                                 <SelectItem key={l.syntax} value={l.syntax}>
-                                    {l.syntax}
+                                    {l.language}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -337,8 +340,17 @@ export default function Competitor() {
     const [allStates] = useAtom(allStatesAtom);
     const { pause, unPause, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
-    const [tab] = useAtom(currentTabAtom);
+    const [tab, setCurrentTab] = useAtom(currentTabAtom);
     const { loading, testResults } = useTesting();
+    const [ip] = useAtom(ipAtom);
+    const [token] = useAtom(tokenAtom);
+    const [ws] = useAtom(basaltWSClientAtom);
+
+    useEffect(() => {
+        if (ip) ws.establish(ip, token);
+        setCurrentTab('leaderboard');
+        setTimeout(() => setCurrentTab('text-editor'));
+    }, [ws, ip, token, setCurrentTab]);
 
     return (
         <div className="h-screen">

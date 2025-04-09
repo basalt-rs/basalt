@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
 import { editorSettingsAtom, useEditorContent, selectedLanguageAtom } from '@/lib/competitor-state';
+import 'ace-builds/esm-resolver';
 import 'ace-builds/src-noconflict/theme-monokai';
 import 'ace-builds/src-noconflict/keybinding-vim';
 import 'ace-builds/src-noconflict/keybinding-emacs';
@@ -24,14 +25,14 @@ export default function CodeEditor() {
             }
             if (languageValue) {
                 console.log('ace got this', languageValue);
-                await import(`ace-builds/src-noconflict/mode-${languageValue}`);
+                await import(`ace-builds/src-noconflict/mode-${languageValue.syntax}`);
             }
         })();
     }, [editorSettings, languageValue]);
 
     return (
         <AceEditor
-            mode={languageValue}
+            mode={languageValue?.syntax || 'java'}
             theme={editorTheme}
             name="code-editor"
             editorProps={{ $blockScrolling: true }}
