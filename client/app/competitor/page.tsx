@@ -47,6 +47,10 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
     const [currQuestion] = useAtom(currQuestionAtom);
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
 
+    if (!selectedLanguage && currQuestion?.languages?.[0]?.syntax) {
+        setSelectedLanguage(currQuestion.languages[0].syntax);
+    }
+
     const notImplemented = () =>
         toast({
             title: 'Not Yet Implemented',
@@ -57,6 +61,7 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
     const handleUploadBtnClick = () => {
         fileUploadRef.current?.click();
     };
+
     const handleFileUploadChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) {
@@ -67,6 +72,7 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
 
         event.target.value = '';
     };
+
     return (
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
@@ -105,14 +111,14 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
-                    <Select value={selectedLanguage} onValueChange={handleLanguageSelection}>
+                    <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
                         <SelectTrigger className="w-56">
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
                         <SelectContent>
                             {currQuestion?.languages?.map((l) => (
-                                <SelectItem key={l.syntax} value={l.syntax}>
-                                    {l.syntax}
+                                <SelectItem key={l.language} value={l.syntax}>
+                                    {l.language}
                                 </SelectItem>
                             ))}
                         </SelectContent>

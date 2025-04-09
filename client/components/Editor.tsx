@@ -21,7 +21,6 @@ export default function CodeEditor() {
                 await import(`ace-builds/src-noconflict/keybinding-${editorSettings.keybind}`);
             }
             if (languageValue) {
-                console.log('ace got this', languageValue);
                 await import(`ace-builds/src-noconflict/mode-${languageValue}`);
             }
         })();
