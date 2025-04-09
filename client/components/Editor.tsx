@@ -80,7 +80,7 @@ export default function CodeEditor() {
             width="100%"
             height="100%"
             value={editorContent}
-            onChange={(newValue) => setEditorContent(newValue)}
+            onChange={setEditorContent}
             setOptions={{
                 fontSize: editorSettings.fontSize,
                 tabSize: editorSettings.tabSize,
