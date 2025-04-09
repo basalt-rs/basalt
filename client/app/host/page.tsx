@@ -36,10 +36,6 @@ export default function Host() {
     const [token] = useAtom(tokenAtom);
     const [ws] = useAtom(basaltWSClientAtom);
 
-    useEffect(() => {
-        if (ip) ws.establish(ip, token);
-    }, [ws, ip, token]);
-
     const disconnectAllTeams = () => {
         const updatedTeams = teamList.map((team) => ({
             ...team,

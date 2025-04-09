@@ -4,6 +4,8 @@ import { currQuestionIdxAtom } from './services/questions';
 import { TestResults } from './types';
 import { basaltWSClientAtom } from './services/ws';
 import { toast } from '@/hooks';
+import { tokenAtom } from './services/auth';
+import { ipAtom } from './services/api';
 
 export interface EditorSettings {
     theme: string;
@@ -82,9 +84,15 @@ export const useTesting = () => {
     const { editorContent } = useEditorContent();
     const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [selectedLanguage] = useAtom(selectedLanguageAtom);
+    const [ip] = useAtom(ipAtom);
+    const [token] = useAtom(tokenAtom);
 
     const runTests = async () => {
         setLoading('test');
+        if (!ws.isEstablished()) {
+            ws.establish(ip!, token);
+            await ws.waitForOpen();
+        }
         const { results, percent } = await ws.sendAndWait({
             kind: 'run-test',
             language: selectedLanguage.toLowerCase(),

@@ -346,12 +346,6 @@ export default function Competitor() {
     const [token] = useAtom(tokenAtom);
     const [ws] = useAtom(basaltWSClientAtom);
 
-    useEffect(() => {
-        if (ip) ws.establish(ip, token);
-        setCurrentTab('leaderboard');
-        setTimeout(() => setCurrentTab('text-editor'));
-    }, [ws, ip, token, setCurrentTab]);
-
     return (
         <div className="h-screen">
             <div>

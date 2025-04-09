@@ -49,6 +49,8 @@ class BasaltWSClient {
     private nextId = 0;
 
     private ws!: WebSocket;
+    private open: boolean;
+    private openWaiting: (() => void)[] = []
 
     private retries: number = 0;
 
@@ -60,6 +62,18 @@ class BasaltWSClient {
         // this.establish(0);
     }
 
+    public isEstablished() {
+        return !!this.ws;
+    }
+
+    public waitForOpen(): Promise<void> {
+        if (this.open) return new Promise(res => res());
+        let done: (() => void) | undefined;
+        const x =  new Promise<void>((res) => done = res);
+        this.openWaiting.push(done!);
+        return x;
+    }
+
     public establish(ip: string, token: string | null, retries: number = 0) {
         this.enabled = true;
         console.log('establishing ws connection', { ip, token });
@@ -67,8 +81,12 @@ class BasaltWSClient {
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
             this.retries = retries - 1;
+            this.open = true;
+            this.openWaiting.forEach(x => x());
+            this.openWaiting = [];
         };
         this.ws.onclose = () => {
+            this.open = false;
             if (this.enabled) {
                 console.debug('disconnected to websocket backend');
                 // retry connection with exponential backoff
