@@ -25,14 +25,14 @@ export default function CodeEditor() {
             }
             if (languageValue) {
                 console.log('ace got this', languageValue);
-                await import(`ace-builds/src-noconflict/mode-${languageValue.syntax}`);
+                await import(`ace-builds/src-noconflict/mode-${languageValue}`);
             }
         })();
     }, [editorSettings, languageValue]);
 
     return (
         <AceEditor
-            mode={languageValue?.syntax || 'java'}
+            mode={languageValue}
             theme={editorTheme}
             name="code-editor"
             editorProps={{ $blockScrolling: true }}

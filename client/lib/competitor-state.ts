@@ -1,7 +1,7 @@
 import { atomWithStorage } from 'jotai/utils';
 import { atom, useAtom } from 'jotai';
 import { currQuestionIdxAtom } from './services/questions';
-import { Language, TestResults } from './types';
+import { TestResults } from './types';
 import { basaltWSClientAtom } from './services/ws';
 import { toast } from '@/hooks';
 
@@ -87,7 +87,7 @@ export const useTesting = () => {
         setLoading('test');
         const { results, percent } = await ws.sendAndWait({
             kind: 'run-test',
-            language: selectedLanguage?.language?.toLowerCase() || 'java',
+            language: selectedLanguage.toLowerCase(),
             problem: currentQuestionIdx,
             solution: editorContent,
         });
@@ -119,4 +119,4 @@ export const useTesting = () => {
 
     return { loading, runTests, submit, testResults };
 };
-export const selectedLanguageAtom = atom<Language>();
+export const selectedLanguageAtom = atom<string>('java');

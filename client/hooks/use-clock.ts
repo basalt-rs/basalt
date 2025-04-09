@@ -53,7 +53,7 @@ export const useClock = () => {
 
             return 0;
         },
-        refetchInterval: 15 * 1000,
+        refetchInterval: 1 * 1000,
     });
 
     basaltWs.registerEvent('game-paused', () => {
