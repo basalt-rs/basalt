@@ -1,7 +1,9 @@
 import { atomWithStorage } from 'jotai/utils';
 import { atom, useAtom } from 'jotai';
 import { allQuestionsAtom, currQuestionIdxAtom } from './services/questions';
-import { TestState } from './types';
+import { TestResults, TestState } from './types';
+import { basaltWSClientAtom } from './services/ws';
+import { toast } from '@/hooks';
 
 export interface EditorSettings {
     theme: string;
@@ -38,19 +40,17 @@ export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settin
 
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
 
-const editorsAtom = atom<string[]>([]);
+const editorsAtom = atomWithStorage<string[]>('editors', []);
 const editorContentAtom = atom(
     async (get) => {
         const editors = get(editorsAtom);
         const questionIdx = get(currQuestionIdxAtom);
         console.log(editors, questionIdx);
-        return editors[questionIdx] ?? 'foo';
+        return editors[questionIdx] ?? '';
     },
     async (get, set, newContent: string) => {
         const questionIdx = get(currQuestionIdxAtom);
-        console.log('set content 1', { newContent });
-        set(editorsAtom, (editors: string[]) => {
-            console.log('set content', { editors, newContent });
+        set(editorsAtom, ([...editors]: string[]) => {
             editors[questionIdx] = newContent;
             return editors;
         });
@@ -65,44 +65,56 @@ export const useEditorContent = () => {
     };
 };
 
-interface TestResult {
+export interface TestResult {
     state: 'pass' | 'fail';
     input: string;
     expectedOutput: string;
     actualOutput: string;
+    stderr: string;
 }
 
+const selectedLanguageAtom = atom<string>('java');
 const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
-const testResultsAtom = atom<TestResult[] | null>(null);
+const testResultsAtom = atom<(TestResults & { percent: number }) | null>(null);
 export const useTesting = () => {
     const [loading, setLoading] = useAtom(testsLoadingAtom);
     const [testResults, setTestResults] = useAtom(testResultsAtom);
+    const [ws] = useAtom(basaltWSClientAtom);
+    const { editorContent } = useEditorContent();
+    const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
+    const [selectedLanguage] = useAtom(selectedLanguageAtom);
 
     const runTests = async () => {
         setLoading('test');
-        await new Promise((res) => setTimeout(res, 5000));
-        setTestResults([
-            {
-                state: 'pass',
-                input: 'hello',
-                expectedOutput: 'olleh',
-                actualOutput: 'hello',
-            },
-        ]);
+        const { results, percent } = await ws.sendAndWait({
+            kind: 'run-test',
+            language: selectedLanguage,
+            problem: currentQuestionIdx,
+            solution: editorContent,
+        });
+
+
+        setTestResults({ ...results, percent });
+        if (results.kind === 'compile-fail') {
+            toast({
+                title: 'Test code failed to comile',
+                variant: 'destructive',
+            });
+        } else if (results.kind === 'internal-error') {
+            toast({
+                title: 'There was an error while running your test.',
+                description: 'Please contact a competition host',
+                variant: 'destructive',
+            });
+        }
+
         setLoading(null);
     };
 
     const submit = async () => {
         setLoading('submit');
         await new Promise((res) => setTimeout(res, 5000));
-        setTestResults([
-            {
-                state: 'pass',
-                input: 'world',
-                expectedOutput: 'dlrow',
-                actualOutput: 'world',
-            },
-        ]);
+        setTestResults({ kind: 'internal-error' });
         setLoading(null);
     };
 

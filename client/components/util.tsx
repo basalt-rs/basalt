@@ -16,6 +16,8 @@ export const Tooltip = ({
     </CnTooltip.TooltipProvider>
 );
 
-export const CodeBlock = ({ text }: { text: string }) => (
-    <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">{text}</pre>
+export const CodeBlock = ({ text, rawHtml = false }: { text: string; rawHtml?: boolean }) => (
+    rawHtml
+        ? <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white" dangerouslySetInnerHTML={{ __html: text }} />
+        : <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">{text}</pre>
 );

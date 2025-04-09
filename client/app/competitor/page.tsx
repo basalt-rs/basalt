@@ -1,8 +1,9 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
+import AnsiConvert from 'ansi-to-html';
 import {
     Accordion,
     AccordionContent,
@@ -20,7 +21,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '@/components/Leaderboard';
 import CodeEditor from '@/components/Editor';
-import { QuestionResponse, TestState } from '@/lib/types';
+import { QuestionResponse, SimpleOutput, Test, TestOutput, TestState } from '@/lib/types';
 import {
     allQuestionsAtom,
     allStatesAtom,
@@ -37,6 +38,7 @@ import { currentTabAtom, useEditorContent, useTesting } from '@/lib/competitor-s
 import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
+import { Progress } from '@/components/ui/progress';
 
 interface EditorButtons {
     isPaused: boolean;
@@ -161,49 +163,138 @@ const TabContent = ({
     }
 };
 
-interface TestResultsProps {
-    isPaused: boolean;
+const c = new AnsiConvert();
+const convertAnsi = (x: string): string => {
+    return c.toHtml(x);
+};
+
+const IncorrectOutput = ({ input, expected, actual }: { input: string; expected: string; actual: string; }) => {
+    return (
+        <>
+            <div>
+                <p className="text-xl pb-2">Incorrect output:</p>
+            </div>
+            <div className="flex flex-row gap-4">
+                {input && (
+                    <div className="flex h-full flex-grow flex-col gap-2">
+                        <b>Input</b>
+                        <CodeBlock text={input} />
+                    </div>
+                )}
+                <div className="flex h-full flex-grow flex-col gap-2">
+                    <b>Expected Output</b>
+                    <CodeBlock text={expected} />
+                </div>
+                <div className="flex h-full flex-grow flex-col gap-2">
+                    <b>Actual Output</b>
+                    <CodeBlock text={actual} />
+                </div>
+            </div>
+        </>
+    );
+};
+
+const GeneralError = ({ error, output }: { error?: string; output: SimpleOutput }) => {
+    return (
+        <>
+            {error &&
+                <div>
+                    <p className="text-xl pb-2">{error}</p>
+                </div>}
+            <div className="flex flex-row gap-4">
+                <div className="flex h-full flex-grow flex-col gap-2">
+                    <b>Standard Output</b>
+                    <CodeBlock text={convertAnsi(output.stdout)} rawHtml={true} />
+                </div>
+                <div className="flex h-full flex-grow flex-col gap-2">
+                    <b>Standard Error</b>
+                    <CodeBlock text={convertAnsi(output.stderr)} rawHtml={true} />
+                </div>
+            </div>
+        </>
+    );
+};
+
+const TestDetails = ({ output, test }: { output: TestOutput; test: Test; }) => {
+    if (output === 'Pass') {
+        return <p>Pass</p>; // TODO
+    }
+
+    if (output.Fail === 'Timeout') {
+        return <p>Solution timed out</p>; // TODO
+    }
+
+    if ('IncorrectOutput' in output.Fail) {
+        return <IncorrectOutput input={test.input} expected={test.output} actual={output.Fail.IncorrectOutput.stdout} />
+    }
+
+    return <GeneralError error="Solution crashed" output={output.Fail.Crash} />
+};
+
+const SingleResult = ({ output, test, index }: { output: TestOutput; test: Test; index: number; }) => {
+    const state = output === 'Pass' ? 'pass' : 'fail';
+    if (output !== 'Pass') {
+    }
+    return (
+        <>
+            <AccordionTrigger className="items-center justify-between px-8">
+                <h1>
+                    <b>Test Case {index + 1}</b>
+                </h1>
+                <h1 className={`flex items-center justify-center text-${state}`}>
+                    <b>{state.toUpperCase()}</b>
+                </h1>
+            </AccordionTrigger>
+            <AccordionContent className="px-8">
+                <TestDetails output={output} test={test} />
+            </AccordionContent>
+        </>
+    );
+};
+
+const TestResults = () => {
+    const { testResults } = useTesting();
+    if (testResults === null) return null;
+    switch (testResults.kind) {
+        case 'individual': {
+            return (
+                <>
+                    <Progress value={testResults.percent} />
+                    <Accordion type="single" collapsible>
+                        {testResults.kind === 'individual' ?
+                            testResults.tests?.map(([output, test], i) => (
+                                <AccordionItem key={i} value={`test-${i}`}>
+                                    <SingleResult output={output} test={test} index={i} />
+                                </AccordionItem>
+                            )) : []}
+                    </Accordion>
+                </>
+            );
+        }
+        case 'internal-error': {
+            return <p className="text-fail text-xl">There was an error running tests, please contact a competition host.</p>
+        }
+        case 'compile-fail': {
+            return (
+                <div className="p-8">
+                    <p className="text-fail text-xl pb-2">Solution failed to compile</p>
+                    <CodeBlock text={convertAnsi(testResults.stderr)} rawHtml={true} />
+                </div>
+            )
+        }
+        // unreachable
+        default: return null;
+    }
 }
-const TestResults = ({ isPaused }: TestResultsProps) => {
-    const { loading, testResults } = useTesting();
-    if (!testResults) return null;
+
+const TestResultsPanel = ({ isPaused }: { isPaused: boolean; }) => {
+    const { loading } = useTesting();
     return (
         <WithPauseGuard isPaused={isPaused}>
             <div className="w-full">
-                {loading ? (
-                    <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
-                ) : (
-                    <Accordion type="single" collapsible>
-                        {testResults.map((test, i) => (
-                            <AccordionItem key={i} value={`test-${i}`}>
-                                <AccordionTrigger className="items-center justify-between px-8">
-                                    <h1>
-                                        <b>Test Case {i + 1}</b>
-                                    </h1>
-                                    <h1 className="flex items-center justify-center text-pass">
-                                        <b>{test.state.toUpperCase()}</b>
-                                    </h1>
-                                </AccordionTrigger>
-                                <AccordionContent className="flex flex-row gap-4 px-8">
-                                    {test.input && (
-                                        <div className="flex h-full flex-grow flex-col gap-2">
-                                            <b>Input</b>
-                                            <CodeBlock text={test.input} />
-                                        </div>
-                                    )}
-                                    <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Expected Output</b>
-                                        <CodeBlock text={test.expectedOutput} />
-                                    </div>
-                                    <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Actual Output</b>
-                                        <CodeBlock text={test.actualOutput} />
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                )}
+                {loading
+                    ? <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
+                    : <TestResults />}
             </div>
         </WithPauseGuard>
     );
@@ -313,7 +404,7 @@ export default function Competitor() {
                                 {(loading || testResults) && (
                                     <ResizablePanel defaultSize={100} className="h-full">
                                         <ScrollArea className="h-full w-full">
-                                            <TestResults isPaused={isPaused} />
+                                            <TestResultsPanel isPaused={isPaused} />
                                         </ScrollArea>
                                     </ResizablePanel>
                                 )}
