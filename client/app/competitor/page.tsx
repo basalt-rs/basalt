@@ -33,7 +33,7 @@ import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom, useEditorContent } from '@/lib/competitor-state';
+import { currentTabAtom, useEditorContent, selectedLanguageAtom } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
@@ -45,6 +45,8 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
     const { setEditorContent } = useEditorContent();
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
+    const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
+
     const notImplemented = () =>
         toast({
             title: 'Not Yet Implemented',
@@ -65,6 +67,7 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
 
         event.target.value = '';
     };
+
     return (
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
@@ -103,14 +106,14 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
-                    <Select>
-                        <SelectTrigger className="w-56" defaultValue={currQuestion?.languages?.[0]}>
+                    <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                        <SelectTrigger className="w-56">
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
                         <SelectContent>
                             {currQuestion?.languages?.map((l) => (
-                                <SelectItem key={l} value={l}>
-                                    {l}
+                                <SelectItem key={l.syntax} value={l.syntax}>
+                                    {l.syntax}
                                 </SelectItem>
                             ))}
                         </SelectContent>

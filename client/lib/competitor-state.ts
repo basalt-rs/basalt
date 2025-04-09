@@ -57,3 +57,4 @@ export const useEditorContent = () => {
     const [editorContent, setEditorContent] = useAtom(editorContentAtom);
     return { editorContent, setEditorContent };
 };
+export const selectedLanguageAtom = atom<string>();
