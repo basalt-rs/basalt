@@ -44,8 +44,6 @@ const Login = () => {
     const onSubmit = async () => {
         const { username, password } = form.getValues();
 
-        console.log(username, password);
-
         const role = await login(username, password);
         if (role) {
             router.replace(`/${role}`);

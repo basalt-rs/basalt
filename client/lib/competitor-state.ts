@@ -1,5 +1,5 @@
 import { atomWithStorage } from 'jotai/utils';
-import { atom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 
 export interface EditorSettings {
     theme: string;
@@ -34,6 +34,28 @@ export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settin
     foldStyle: 'manual',
 });
 
+export interface EditorSettings {
+    theme: string;
+    useSoftTabs: boolean;
+    showGutter: boolean;
+    enableBasicAutocompletion: boolean;
+    enableLiveAutocompletion: boolean;
+    highlightActiveLine: boolean;
+    relativeLineNumbers: boolean;
+    displayIndentGuides: boolean;
+    fontSize: number;
+    tabSize: number;
+    keybind: 'ace' | 'vscode' | 'vim' | 'emacs' | 'sublime' | undefined;
+    cursorStyle: 'ace' | 'slim' | 'smooth' | 'smooth-slim' | 'wide' | undefined;
+    foldStyle: 'manual' | 'markbegin' | 'markbeginend' | undefined;
+}
+
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
 
 export const selectedLanguageAtom = atom<string>();
+
+const editorContentAtom = atom<string>('');
+export const useEditorContent = () => {
+    const [editorContent, setEditorContent] = useAtom(editorContentAtom);
+    return { editorContent, setEditorContent };
+};

@@ -1,4 +1,5 @@
 'use client';
+import { useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
@@ -17,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import Leaderboard from '../leaderboard/page';
+import Leaderboard from '@/components/Leaderboard';
 import CodeEditor from '@/components/Editor';
 import { QuestionResponse, TestState } from '@/lib/types';
 import {
@@ -32,10 +33,17 @@ import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom, selectedLanguageAtom } from '@/lib/competitor-state';
+import { currentTabAtom, selectedLanguageAtom, useEditorContent } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
+import { WithPauseGuard } from '@/components/PauseGuard';
+import { useClock } from '@/hooks/use-clock';
 
-const EditorButtons = () => {
+interface EditorButtons {
+    isPaused: boolean;
+}
+const EditorButtons = ({ isPaused }: EditorButtons) => {
+    const { setEditorContent } = useEditorContent();
+    const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
 
@@ -46,19 +54,39 @@ const EditorButtons = () => {
             variant: 'destructive',
         });
 
-    const handleLanguageSelection = (value: string) => {
-        setSelectedLanguage(value);
-        console.log(value);
+    const handleUploadBtnClick = () => {
+        fileUploadRef.current?.click();
     };
+    const handleFileUploadChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) {
+            return;
+        }
+        const content = await file.text();
+        setEditorContent(content);
 
+        event.target.value = '';
+    };
     return (
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
                 <Tooltip tooltip="Load File">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
+                    <Button
+                        disabled={isPaused}
+                        size="icon"
+                        variant="ghost"
+                        onClick={handleUploadBtnClick}
+                    >
                         <Upload />
                     </Button>
                 </Tooltip>
+                <input
+                    ref={fileUploadRef}
+                    type="file"
+                    accept=".txt"
+                    onChange={handleFileUploadChange}
+                    className="hidden"
+                />
                 <Tooltip tooltip="Download Packet">
                     <Button size="icon" variant="ghost" onClick={notImplemented}>
                         <FileDown />
@@ -95,13 +123,21 @@ const EditorButtons = () => {
     );
 };
 
-const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
+const TabContent = ({
+    tab,
+    isPaused,
+}: {
+    tab: ExtractAtomValue<typeof currentTabAtom>;
+    isPaused: boolean;
+}) => {
     switch (tab) {
         case 'text-editor':
             return (
                 <div className="flex h-full flex-col">
-                    <EditorButtons />
-                    <CodeEditor />
+                    <WithPauseGuard isPaused={isPaused}>
+                        <EditorButtons isPaused={isPaused} />
+                        <CodeEditor />
+                    </WithPauseGuard>
                 </div>
             );
         case 'leaderboard':
@@ -115,42 +151,47 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
     }
 };
 
-const TestResults = () => {
+interface TestResultsProps {
+    isPaused: boolean;
+}
+const TestResults = ({ isPaused }: TestResultsProps) => {
     const [currQuestion] = useAtom(currQuestionAtom);
     return (
         <div className="w-full">
-            <Accordion type="single" collapsible>
-                {currQuestion.tests
-                    .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
-                    .map((test, i) => (
-                        <AccordionItem key={i} value={`test-${i}`}>
-                            <AccordionTrigger className="items-center justify-between px-8">
-                                <h1>
-                                    <b>Test Case {i + 1}</b>
-                                </h1>
-                                <h1 className="flex items-center justify-center text-pass">
-                                    <b>PASS</b>
-                                </h1>
-                            </AccordionTrigger>
-                            <AccordionContent className="flex flex-row gap-4 px-8">
-                                {test.input && (
+            <WithPauseGuard isPaused={isPaused}>
+                <Accordion type="single" collapsible>
+                    {currQuestion.tests
+                        .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
+                        .map((test, i) => (
+                            <AccordionItem key={i} value={`test-${i}`}>
+                                <AccordionTrigger className="items-center justify-between px-8">
+                                    <h1>
+                                        <b>Test Case {i + 1}</b>
+                                    </h1>
+                                    <h1 className="flex items-center justify-center text-pass">
+                                        <b>PASS</b>
+                                    </h1>
+                                </AccordionTrigger>
+                                <AccordionContent className="flex flex-row gap-4 px-8">
+                                    {test.input && (
+                                        <div className="flex h-full flex-grow flex-col gap-2">
+                                            <b>Input</b>
+                                            <CodeBlock text={test.input} />
+                                        </div>
+                                    )}
                                     <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Input</b>
-                                        <CodeBlock text={test.input} />
+                                        <b>Expected Output</b>
+                                        <CodeBlock text={test.output} />
                                     </div>
-                                )}
-                                <div className="flex h-full flex-grow flex-col gap-2">
-                                    <b>Expected Output</b>
-                                    <CodeBlock text={test.output} />
-                                </div>
-                                <div className="flex h-full flex-grow flex-col gap-2">
-                                    <b>Actual Output</b>
-                                    <CodeBlock text="Not yet implemented" />
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-            </Accordion>
+                                    <div className="flex h-full flex-grow flex-col gap-2">
+                                        <b>Actual Output</b>
+                                        <CodeBlock text="Not yet implemented" />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                </Accordion>
+            </WithPauseGuard>
         </div>
     );
 };
@@ -189,13 +230,15 @@ export default function Competitor() {
     const [currentQuestion] = useAtom(currQuestionAtom);
     const [allQuestions] = useAtom(allQuestionsAtom);
     const [allStates] = useAtom(allStatesAtom);
+    const { pause, unPause, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
+    const { setEditorContent } = useEditorContent();
 
     return (
         <div className="h-screen">
             <div>
-                <CompetitorNavbar />
+                <CompetitorNavbar isPaused={isPaused} />
             </div>
 
             <div className="flex h-[95vh]">
@@ -210,46 +253,56 @@ export default function Competitor() {
                             className="border-black-300 h-full border-t"
                         >
                             <ResizablePanelGroup direction="vertical" className="h-full">
-                                <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
-                                    <Select
-                                        defaultValue={`${currQuestion}`}
-                                        onValueChange={(v) => setCurrQuestionIdx(+v)}
-                                    >
-                                        <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
-                                            <SelectValue placeholder="Select a Question..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {allQuestions.map((q, i) => (
-                                                <SelectItem key={i} value={`${i}`}>
-                                                    <div className="flex flex-row items-center">
-                                                        <Circle
-                                                            fill="currentColor"
-                                                            className={`${testColor(allStates[i])} h-6 w-6 pr-2`}
-                                                        />
-                                                        {q.title}
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <QuestionDetails question={currentQuestion} status="pass" />
-                                </ScrollArea>
-                                <div className="py-2.5">
-                                    <Separator className="mb-2.5 mt-2.5" />
-                                    <Timer isHost={false} startingTime={4500} isActive={true} />
-                                </div>
+                                <WithPauseGuard isPaused={isPaused}>
+                                    <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
+                                        <Select
+                                            defaultValue={`${currQuestion}`}
+                                            onValueChange={(v) => {
+                                                setCurrQuestionIdx(+v);
+                                                setEditorContent('');
+                                            }}
+                                        >
+                                            <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
+                                                <SelectValue placeholder="Select a Question..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {allQuestions.map((q, i) => (
+                                                    <SelectItem key={i} value={`${i}`}>
+                                                        <div className="flex flex-row items-center">
+                                                            <Circle
+                                                                fill="currentColor"
+                                                                className={`${testColor(allStates[i])} h-6 w-6 pr-2`}
+                                                            />
+                                                            {q.title}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <QuestionDetails question={currentQuestion} status="pass" />
+                                    </ScrollArea>
+                                    <div className="py-2.5">
+                                        <Separator className="mb-2.5 mt-2.5" />
+                                        <Timer
+                                            isHost={false}
+                                            onPlay={unPause}
+                                            onPause={pause}
+                                            isPaused={isPaused}
+                                        />
+                                    </div>
+                                </WithPauseGuard>
                             </ResizablePanelGroup>
                         </ResizablePanel>
                         <ResizableHandle withHandle />
                         <ResizablePanel className="">
                             <ResizablePanelGroup direction="vertical" className="h-full">
                                 <ResizablePanel defaultSize={400} className="h-full">
-                                    <TabContent tab={tab} />
+                                    <TabContent isPaused={isPaused} tab={tab} />
                                 </ResizablePanel>
                                 <ResizableHandle />
                                 <ResizablePanel defaultSize={100} className="h-full">
                                     <ScrollArea className="h-full w-full">
-                                        <TestResults />
+                                        <TestResults isPaused={isPaused} />
                                     </ScrollArea>
                                 </ResizablePanel>
                             </ResizablePanelGroup>
