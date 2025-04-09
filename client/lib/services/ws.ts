@@ -1,6 +1,7 @@
 import { atom } from 'jotai';
-import { API, tokenAtom } from './auth';
+import { tokenAtom } from './auth';
 import { TestResults } from '../types';
+import { ipAtom } from './api';
 
 type EVENT_MAPPING = {
     'game-paused': object;
@@ -53,16 +54,15 @@ class BasaltWSClient {
 
     constructor(
         private endpoint: string,
-        private token: string | null,
         private enabled: boolean = true
     ) {
         console.debug('constructing WS');
-        this.establish(0);
+        // this.establish(0);
     }
 
-    public establish(retries: number = 0) {
+    public establish(ip: string, token: string | null, retries: number = 0) {
         this.enabled = true;
-        this.ws = new WebSocket(this.endpoint, this.token ? [this.token] : undefined);
+        this.ws = new WebSocket(this.endpoint, token ? [token] : undefined);
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
             this.retries = retries - 1;
@@ -156,4 +156,4 @@ class BasaltWSClient {
 
 // TODO: Make this get the token once, perhaps move the token to "establish" and call that on login
 //       Or, add an auth method within the ws?  Seems kind of weird, though
-export const basaltWSClientAtom = atom((get) => new BasaltWSClient(`${API}/ws`, get(tokenAtom)));
+export const basaltWSClientAtom = atom(new BasaltWSClient(`/ws`));

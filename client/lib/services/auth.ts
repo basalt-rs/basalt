@@ -1,6 +1,7 @@
 import { atom, useAtom, useSetAtom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { ipAtom, resetIp } from './api';
+import { basaltWSClientAtom } from './ws';
 
 export type Role = 'competitor' | 'admin';
 export interface User {
@@ -24,6 +25,9 @@ export const currentUserAtom = atom(async (get) => {
         if (!res.ok) {
             return null;
         }
+
+        get(basaltWSClientAtom).establish(ip!, token);
+
         return (await res.json()) as User;
     } catch (e: unknown) {
         if (`${e}`.includes('Load failed')) {

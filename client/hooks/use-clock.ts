@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getClock, updateClock } from '@/lib/services/clock';
 import { tokenAtom } from '@/lib/services/auth';
 import { basaltWSClientAtom } from '@/lib/services/ws';
+import { ipAtom } from '@/lib/services/api';
 
 const tickerAtom = atom<NodeJS.Timeout | null>(null);
 
@@ -12,6 +13,7 @@ export const useClock = () => {
     const [clock, setClock] = useAtom(clockAtom);
     const [ticker, setTicker] = useAtom(tickerAtom);
     const [authToken] = useAtom(tokenAtom);
+    const [ip] = useAtom(ipAtom);
 
     const startTicking = () => {
         setTicker((prev) => {
@@ -40,7 +42,7 @@ export const useClock = () => {
     useQuery({
         queryKey: ['clock', clock?.isPaused ?? true],
         queryFn: async () => {
-            const res = await getClock();
+            const res = await getClock(ip!);
             if (res === null) {
                 setClock({ isPaused: true, timeLeftInSeconds: 0 });
                 return 1;
@@ -72,7 +74,8 @@ export const useClock = () => {
             {
                 isPaused: true,
             },
-            authToken
+            authToken,
+            ip!,
         );
     };
 
@@ -82,7 +85,8 @@ export const useClock = () => {
             {
                 isPaused: false,
             },
-            authToken
+            authToken,
+            ip!,
         );
     };
 
