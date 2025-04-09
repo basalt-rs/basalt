@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
+import AnsiConvert from 'ansi-to-html';
 import {
     Accordion,
     AccordionContent,
@@ -20,7 +21,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '@/components/Leaderboard';
 import CodeEditor from '@/components/Editor';
-import { QuestionResponse, TestState } from '@/lib/types';
+import { QuestionResponse, SimpleOutput, Test, TestOutput, TestState } from '@/lib/types';
 import {
     allQuestionsAtom,
     allStatesAtom,
@@ -28,15 +29,16 @@ import {
     currQuestionIdxAtom,
 } from '@/lib/services/questions';
 import { ExtractAtomValue, useAtom } from 'jotai';
-import { Circle, FileDown, FlaskConical, SendHorizonal, Upload } from 'lucide-react';
+import { Circle, FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
 import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom, useEditorContent, selectedLanguageAtom } from '@/lib/competitor-state';
+import { currentTabAtom, useEditorContent, selectedLanguageAtom, useTesting } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
+import { Progress } from '@/components/ui/progress';
 
 interface EditorButtons {
     isPaused: boolean;
@@ -46,6 +48,7 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
+    const { loading, runTests, submit } = useTesting();
 
     const notImplemented = () =>
         toast({
@@ -57,6 +60,7 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
     const handleUploadBtnClick = () => {
         fileUploadRef.current?.click();
     };
+
     const handleFileUploadChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) {
@@ -96,13 +100,21 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
             </div>
             <div className="flex flex-row">
                 <Tooltip tooltip="Run Tests">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
-                        <FlaskConical className="text-in-progress" />
+                    <Button size="icon" variant="ghost" onClick={runTests} disabled={!!loading}>
+                        {loading === 'test' ? (
+                            <Loader2 className="animate-spin text-in-progress" />
+                        ) : (
+                            <FlaskConical className="text-in-progress" />
+                        )}
                     </Button>
                 </Tooltip>
                 <Tooltip tooltip="Submit Solution">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
-                        <SendHorizonal className="text-pass" />
+                    <Button size="icon" variant="ghost" onClick={submit} disabled={!!loading}>
+                        {loading === 'submit' ? (
+                            <Loader2 className="animate-spin text-pass" />
+                        ) : (
+                            <SendHorizonal className="text-pass" />
+                        )}
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
@@ -152,48 +164,140 @@ const TabContent = ({
     }
 };
 
-interface TestResultsProps {
-    isPaused: boolean;
-}
-const TestResults = ({ isPaused }: TestResultsProps) => {
-    const [currQuestion] = useAtom(currQuestionAtom);
+const c = new AnsiConvert();
+const convertAnsi = (x: string): string => {
+    return c.toHtml(x);
+};
+
+const IncorrectOutput = ({ input, expected, actual }: { input: string; expected: string; actual: string; }) => {
     return (
-        <div className="w-full">
-            <WithPauseGuard isPaused={isPaused}>
-                <Accordion type="single" collapsible>
-                    {currQuestion?.tests
-                        .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
-                        .map((test, i) => (
-                            <AccordionItem key={i} value={`test-${i}`}>
-                                <AccordionTrigger className="items-center justify-between px-8">
-                                    <h1>
-                                        <b>Test Case {i + 1}</b>
-                                    </h1>
-                                    <h1 className="flex items-center justify-center text-pass">
-                                        <b>PASS</b>
-                                    </h1>
-                                </AccordionTrigger>
-                                <AccordionContent className="flex flex-row gap-4 px-8">
-                                    {test.input && (
-                                        <div className="flex h-full flex-grow flex-col gap-2">
-                                            <b>Input</b>
-                                            <CodeBlock text={test.input} />
-                                        </div>
-                                    )}
-                                    <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Expected Output</b>
-                                        <CodeBlock text={test.output} />
-                                    </div>
-                                    <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Actual Output</b>
-                                        <CodeBlock text="Not yet implemented" />
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                </Accordion>
-            </WithPauseGuard>
-        </div>
+        <>
+            <div>
+                <p className="text-xl pb-2">Incorrect output:</p>
+            </div>
+            <div className="flex flex-row gap-4">
+                {input && (
+                    <div className="flex h-full flex-grow flex-col gap-2">
+                        <b>Input</b>
+                        <CodeBlock text={input} />
+                    </div>
+                )}
+                <div className="flex h-full flex-grow flex-col gap-2">
+                    <b>Expected Output</b>
+                    <CodeBlock text={expected} />
+                </div>
+                <div className="flex h-full flex-grow flex-col gap-2">
+                    <b>Actual Output</b>
+                    <CodeBlock text={actual} />
+                </div>
+            </div>
+        </>
+    );
+};
+
+const GeneralError = ({ error, output }: { error?: string; output: SimpleOutput }) => {
+    return (
+        <>
+            {error &&
+                <div>
+                    <p className="text-xl pb-2">{error}</p>
+                </div>}
+            <div className="flex flex-row gap-4">
+                <div className="flex h-full flex-grow flex-col gap-2">
+                    <b>Standard Output</b>
+                    <CodeBlock text={convertAnsi(output.stdout)} rawHtml={true} />
+                </div>
+                <div className="flex h-full flex-grow flex-col gap-2">
+                    <b>Standard Error</b>
+                    <CodeBlock text={convertAnsi(output.stderr)} rawHtml={true} />
+                </div>
+            </div>
+        </>
+    );
+};
+
+const TestDetails = ({ output, test }: { output: TestOutput; test: Test; }) => {
+    if (output === 'Pass') {
+        return <p>Pass</p>; // TODO
+    }
+
+    if (output.Fail === 'Timeout') {
+        return <p>Solution timed out</p>; // TODO
+    }
+
+    if ('IncorrectOutput' in output.Fail) {
+        return <IncorrectOutput input={test.input} expected={test.output} actual={output.Fail.IncorrectOutput.stdout} />
+    }
+
+    return <GeneralError error="Solution crashed" output={output.Fail.Crash} />
+};
+
+const SingleResult = ({ output, test, index }: { output: TestOutput; test: Test; index: number; }) => {
+    const state = output === 'Pass' ? 'pass' : 'fail';
+    if (output !== 'Pass') {
+    }
+    return (
+        <>
+            <AccordionTrigger className="items-center justify-between px-8">
+                <h1>
+                    <b>Test Case {index + 1}</b>
+                </h1>
+                <h1 className={`flex items-center justify-center text-${state}`}>
+                    <b>{state.toUpperCase()}</b>
+                </h1>
+            </AccordionTrigger>
+            <AccordionContent className="px-8">
+                <TestDetails output={output} test={test} />
+            </AccordionContent>
+        </>
+    );
+};
+
+const TestResults = () => {
+    const { testResults } = useTesting();
+    if (testResults === null) return null;
+    switch (testResults.kind) {
+        case 'individual': {
+            return (
+                <>
+                    <Progress value={testResults.percent} />
+                    <Accordion type="single" collapsible>
+                        {testResults.kind === 'individual' ?
+                            testResults.tests?.map(([output, test], i) => (
+                                <AccordionItem key={i} value={`test-${i}`}>
+                                    <SingleResult output={output} test={test} index={i} />
+                                </AccordionItem>
+                            )) : []}
+                    </Accordion>
+                </>
+            );
+        }
+        case 'internal-error': {
+            return <p className="text-fail text-xl">There was an error running tests, please contact a competition host.</p>
+        }
+        case 'compile-fail': {
+            return (
+                <div className="p-8">
+                    <p className="text-fail text-xl pb-2">Solution failed to compile</p>
+                    <CodeBlock text={convertAnsi(testResults.stderr)} rawHtml={true} />
+                </div>
+            )
+        }
+        // unreachable
+        default: return null;
+    }
+}
+
+const TestResultsPanel = ({ isPaused }: { isPaused: boolean; }) => {
+    const { loading } = useTesting();
+    return (
+        <WithPauseGuard isPaused={isPaused}>
+            <div className="w-full">
+                {loading
+                    ? <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
+                    : <TestResults />}
+            </div>
+        </WithPauseGuard>
     );
 };
 
@@ -234,7 +338,7 @@ export default function Competitor() {
     const { pause, unPause, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
-    const { setEditorContent } = useEditorContent();
+    const { loading, testResults } = useTesting();
 
     return (
         <div className="h-screen">
@@ -258,10 +362,7 @@ export default function Competitor() {
                                     <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
                                         <Select
                                             defaultValue={`${currQuestion}`}
-                                            onValueChange={(v) => {
-                                                setCurrQuestionIdx(+v);
-                                                setEditorContent('');
-                                            }}
+                                            onValueChange={(v) => setCurrQuestionIdx(+v)}
                                         >
                                             <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
                                                 <SelectValue placeholder="Select a Question..." />
@@ -306,11 +407,13 @@ export default function Competitor() {
                                     <TabContent isPaused={isPaused} tab={tab} />
                                 </ResizablePanel>
                                 <ResizableHandle />
-                                <ResizablePanel defaultSize={100} className="h-full">
-                                    <ScrollArea className="h-full w-full">
-                                        <TestResults isPaused={isPaused} />
-                                    </ScrollArea>
-                                </ResizablePanel>
+                                {(loading || testResults) && (
+                                    <ResizablePanel defaultSize={100} className="h-full">
+                                        <ScrollArea className="h-full w-full">
+                                            <TestResultsPanel isPaused={isPaused} />
+                                        </ScrollArea>
+                                    </ResizablePanel>
+                                )}
                             </ResizablePanelGroup>
                         </ResizablePanel>
                     </ResizablePanelGroup>
