@@ -278,7 +278,10 @@ export default function Competitor() {
                                             </SelectContent>
                                         </Select>
                                         {currentQuestion && (
-                                            <QuestionDetails question={currentQuestion} status="pass" />
+                                            <QuestionDetails
+                                                question={currentQuestion}
+                                                status="pass"
+                                            />
                                         )}
                                     </ScrollArea>
                                     <div className="py-2.5">
