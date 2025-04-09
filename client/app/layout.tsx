@@ -1,19 +1,20 @@
-import type { Metadata } from 'next';
+'use client';
+
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-export const metadata: Metadata = {
-    title: 'Basalt',
-    description: 'Competitive programming application',
-};
+const queryClient = new QueryClient();
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <>
-            <html lang="en" suppressHydrationWarning>
-                <head />
-                <body>
+        <html lang="en" suppressHydrationWarning>
+            <head />
+            <title>Basalt</title>
+            <meta content="Competitive programming application" name="description" />
+            <body>
+                <QueryClientProvider client={queryClient}>
                     <ThemeProvider
                         attribute="class"
                         defaultTheme="system"
@@ -23,8 +24,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                         {children}
                         <Toaster />
                     </ThemeProvider>
-                </body>
-            </html>
-        </>
+                </QueryClientProvider>
+            </body>
+        </html>
     );
 }
