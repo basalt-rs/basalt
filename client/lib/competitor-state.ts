@@ -53,7 +53,7 @@ const editorContentAtom = atom(
             console.log('set content', { editors, newContent });
             editors[questionIdx] = newContent;
             return editors;
-        })
+        });
     }
 );
 
@@ -75,8 +75,8 @@ interface TestResult {
 const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
 const testResultsAtom = atom<TestResult[] | null>(null);
 export const useTesting = () => {
-    const [loading, setLoading] = useAtom(testsLoadingAtom); 
-    const [testResults, setTestResults] = useAtom(testResultsAtom); 
+    const [loading, setLoading] = useAtom(testsLoadingAtom);
+    const [testResults, setTestResults] = useAtom(testResultsAtom);
 
     const runTests = async () => {
         setLoading('test');
@@ -87,7 +87,7 @@ export const useTesting = () => {
                 input: 'hello',
                 expectedOutput: 'olleh',
                 actualOutput: 'hello',
-            }
+            },
         ]);
         setLoading(null);
     };
@@ -101,7 +101,7 @@ export const useTesting = () => {
                 input: 'world',
                 expectedOutput: 'dlrow',
                 actualOutput: 'world',
-            }
+            },
         ]);
         setLoading(null);
     };

@@ -54,7 +54,6 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
             variant: 'destructive',
         });
 
-
     const handleUploadBtnClick = () => {
         fileUploadRef.current?.click();
     };
@@ -99,19 +98,20 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
             <div className="flex flex-row">
                 <Tooltip tooltip="Run Tests">
                     <Button size="icon" variant="ghost" onClick={runTests} disabled={!!loading}>
-
-                        {loading === 'test'
-                            ? <Loader2 className="text-in-progress animate-spin" />
-                            : <FlaskConical className="text-in-progress" />
-                        }
+                        {loading === 'test' ? (
+                            <Loader2 className="animate-spin text-in-progress" />
+                        ) : (
+                            <FlaskConical className="text-in-progress" />
+                        )}
                     </Button>
                 </Tooltip>
                 <Tooltip tooltip="Submit Solution">
                     <Button size="icon" variant="ghost" onClick={submit} disabled={!!loading}>
-                        {loading === 'submit'
-                            ? <Loader2 className="text-pass animate-spin" />
-                            : <SendHorizonal className="text-pass" />
-                        }
+                        {loading === 'submit' ? (
+                            <Loader2 className="animate-spin text-pass" />
+                        ) : (
+                            <SendHorizonal className="text-pass" />
+                        )}
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
@@ -170,9 +170,10 @@ const TestResults = ({ isPaused }: TestResultsProps) => {
     return (
         <WithPauseGuard isPaused={isPaused}>
             <div className="w-full">
-                {loading
-                    ? <Loader2 size={64} className="animate-spin text-in-progress mx-auto my-4" />
-                    : <Accordion type="single" collapsible>
+                {loading ? (
+                    <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
+                ) : (
+                    <Accordion type="single" collapsible>
                         {testResults.map((test, i) => (
                             <AccordionItem key={i} value={`test-${i}`}>
                                 <AccordionTrigger className="items-center justify-between px-8">
@@ -202,7 +203,7 @@ const TestResults = ({ isPaused }: TestResultsProps) => {
                             </AccordionItem>
                         ))}
                     </Accordion>
-                }
+                )}
             </div>
         </WithPauseGuard>
     );
@@ -300,8 +301,8 @@ export default function Competitor() {
                                         />
                                     </div>
                                 </WithPauseGuard>
-                            </ResizablePanelGroup >
-                        </ResizablePanel >
+                            </ResizablePanelGroup>
+                        </ResizablePanel>
                         <ResizableHandle withHandle />
                         <ResizablePanel className="">
                             <ResizablePanelGroup direction="vertical" className="h-full">
@@ -309,19 +310,18 @@ export default function Competitor() {
                                     <TabContent isPaused={isPaused} tab={tab} />
                                 </ResizablePanel>
                                 <ResizableHandle />
-                                {
-                                    (loading || testResults) &&
+                                {(loading || testResults) && (
                                     <ResizablePanel defaultSize={100} className="h-full">
                                         <ScrollArea className="h-full w-full">
                                             <TestResults isPaused={isPaused} />
                                         </ScrollArea>
                                     </ResizablePanel>
-                                }
-                            </ResizablePanelGroup >
-                        </ResizablePanel >
-                    </ResizablePanelGroup >
-                </div >
-            </div >
-        </div >
+                                )}
+                            </ResizablePanelGroup>
+                        </ResizablePanel>
+                    </ResizablePanelGroup>
+                </div>
+            </div>
+        </div>
     );
 }
