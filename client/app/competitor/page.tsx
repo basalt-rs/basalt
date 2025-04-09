@@ -158,7 +158,7 @@ const TestResults = ({ isPaused }: TestResultsProps) => {
         <div className="w-full">
             <WithPauseGuard isPaused={isPaused}>
                 <Accordion type="single" collapsible>
-                    {currQuestion.tests
+                    {currQuestion?.tests
                         .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
                         .map((test, i) => (
                             <AccordionItem key={i} value={`test-${i}`}>
@@ -277,7 +277,12 @@ export default function Competitor() {
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        <QuestionDetails question={currentQuestion} status="pass" />
+                                        {currentQuestion && (
+                                            <QuestionDetails
+                                                question={currentQuestion}
+                                                status="pass"
+                                            />
+                                        )}
                                     </ScrollArea>
                                     <div className="py-2.5">
                                         <Separator className="mb-2.5 mt-2.5" />
