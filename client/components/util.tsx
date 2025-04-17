@@ -1,6 +1,9 @@
 import * as CnTooltip from '@/components/ui/tooltip';
 import { PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 import { diffLines, Change } from 'diff';
+import { ToastAction } from './ui/toast';
+import { allQuestionsAtom, currQuestionIdxAtom } from '@/lib/services/questions';
+import { useAtom } from 'jotai';
 
 export const Tooltip = ({
     tooltip,

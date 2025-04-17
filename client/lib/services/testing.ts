@@ -4,6 +4,7 @@ import { currQuestionIdxAtom, useSubmissionStates } from './questions';
 import { useEditorContent } from '../competitor-state';
 import { useWebSocket } from './ws';
 import { TestResults } from '../types';
+import { NextQuestionAction } from '@/components/util';
 
 const selectedLanguageAtom = atom<string>('java');
 const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
@@ -45,10 +46,16 @@ export const useTesting = () => {
             setTestResults({ ...res.results, percent: res.percent, submitKind: 'submit' });
             const isPass =
                 res.results.kind === 'individual' &&
-                res.results.tests.every((t) => t[0] === 'Pass');
-            if (!isPass) {
+                res.results.tests.every(([output]) => output.kind === 'pass');
+            if (isPass) {
                 toast({
-                    title: `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                    title: 'Submission Passed',
+                    variant: 'success',
+                });
+            } else {
+                toast({
+                    title: 'Submission Failed',
+                    description: `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
                 });
             }
             setCurrentState((s) => ({

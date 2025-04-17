@@ -20,8 +20,15 @@ export interface SimpleOutput {
     status: number;
 }
 export type TestOutput =
-    | 'Pass'
-    | { Fail: 'Timeout' | { IncorrectOutput: SimpleOutput } | { Crash: SimpleOutput } };
+    | { kind: 'pass'; }
+    | (
+        { kind: 'fail'; } & (
+            | { reason: 'timeout' }
+            | ({ reason: 'incorrect-output'; } & SimpleOutput)
+            | ({ reason: 'crash'; } & SimpleOutput)
+        )
+      );
+    
 export type TestResults =
     | { kind: 'other-error'; message: string }
     | { kind: 'internal-error' }

@@ -78,7 +78,7 @@ const GeneralError = ({ error, output }: { error?: string; output: SimpleOutput 
 };
 
 const TestDetails = ({ output, test }: { output: TestOutput; test: Test }) => {
-    if (output === 'Pass') {
+    if (output.kind === 'pass') {
         return (
             <h1 className="flex items-center gap-2 text-2xl">
                 <Check className="text-pass" />
@@ -87,7 +87,7 @@ const TestDetails = ({ output, test }: { output: TestOutput; test: Test }) => {
         );
     }
 
-    if (output.Fail === 'Timeout') {
+    if (output.reason === 'timeout') {
         return (
             <h1 className="flex items-center gap-2 text-2xl">
                 <Clock className="text-red" />
@@ -96,17 +96,17 @@ const TestDetails = ({ output, test }: { output: TestOutput; test: Test }) => {
         );
     }
 
-    if ('IncorrectOutput' in output.Fail) {
+    if (output.reason === 'incorrect-output') {
         return (
             <IncorrectOutput
                 input={test.input}
                 expected={test.output}
-                actual={output.Fail.IncorrectOutput.stdout}
+                actual={output.stdout}
             />
         );
     }
 
-    return <GeneralError error="Solution crashed" output={output.Fail.Crash} />;
+    return <GeneralError error="Solution crashed" output={output} />;
 };
 
 const SingleResult = ({
@@ -118,15 +118,14 @@ const SingleResult = ({
     test: Test;
     index: number;
 }) => {
-    const state = output === 'Pass' ? 'pass' : 'fail';
     return (
         <>
             <AccordionTrigger className="items-center justify-between px-8">
                 <h1>
                     <b>Test Case {index + 1}</b>
                 </h1>
-                <h1 className={`flex items-center justify-center text-${state}`}>
-                    <b>{state.toUpperCase()}</b>
+                <h1 className={`flex items-center justify-center text-${output.kind}`}>
+                    <b>{output.kind.toUpperCase()}</b>
                 </h1>
             </AccordionTrigger>
             <AccordionContent className="px-8">
