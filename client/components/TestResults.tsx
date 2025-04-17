@@ -15,12 +15,20 @@ const convertAnsi = (x: string): string => {
     return c.toHtml(x);
 };
 
-const IncorrectOutput = ({ input, expected, actual }: { input: string; expected: string; actual: string; }) => {
+const IncorrectOutput = ({
+    input,
+    expected,
+    actual,
+}: {
+    input: string;
+    expected: string;
+    actual: string;
+}) => {
     const [inline, setInline] = useAtom(inlineDiffAtom);
     return (
         <>
-            <div className="flex flex-row justify-between w-full">
-                <h1 className="text-2xl flex items-center gap-2 py-2">
+            <div className="flex w-full flex-row justify-between">
+                <h1 className="flex items-center gap-2 py-2 text-2xl">
                     <CircleX className="text-fail" />
                     Incorrect Output
                 </h1>
@@ -45,33 +53,34 @@ const IncorrectOutput = ({ input, expected, actual }: { input: string; expected:
 const GeneralError = ({ error, output }: { error?: string; output: SimpleOutput }) => {
     return (
         <>
-            {error &&
+            {error && (
                 <div>
-                    <p className="text-xl pb-2">{error}</p>
-                </div>}
+                    <p className="pb-2 text-xl">{error}</p>
+                </div>
+            )}
             <div className="flex flex-row gap-4">
-                {output.stdout &&
+                {output.stdout && (
                     <div className="flex h-full flex-grow flex-col gap-2">
                         <b>Standard Output</b>
                         <CodeBlock text={convertAnsi(output.stdout)} rawHtml />
                     </div>
-                }
-                {output.stderr &&
+                )}
+                {output.stderr && (
                     <div className="flex h-full flex-grow flex-col gap-2">
                         <b>Standard Error</b>
                         <CodeBlock text={convertAnsi(output.stderr)} rawHtml />
                     </div>
-                }
-                {(!output.stdout && !output.stderr) && <p>No output</p>}
+                )}
+                {!output.stdout && !output.stderr && <p>No output</p>}
             </div>
         </>
     );
 };
 
-const TestDetails = ({ output, test }: { output: TestOutput; test: Test; }) => {
+const TestDetails = ({ output, test }: { output: TestOutput; test: Test }) => {
     if (output === 'Pass') {
         return (
-            <h1 className="text-2xl flex items-center gap-2">
+            <h1 className="flex items-center gap-2 text-2xl">
                 <Check className="text-pass" />
                 Test Passed!
             </h1>
@@ -80,7 +89,7 @@ const TestDetails = ({ output, test }: { output: TestOutput; test: Test; }) => {
 
     if (output.Fail === 'Timeout') {
         return (
-            <h1 className="text-2xl flex gap-2 items-center">
+            <h1 className="flex items-center gap-2 text-2xl">
                 <Clock className="text-red" />
                 Solution timed out
             </h1>
@@ -88,13 +97,27 @@ const TestDetails = ({ output, test }: { output: TestOutput; test: Test; }) => {
     }
 
     if ('IncorrectOutput' in output.Fail) {
-        return <IncorrectOutput input={test.input} expected={test.output} actual={output.Fail.IncorrectOutput.stdout} />
+        return (
+            <IncorrectOutput
+                input={test.input}
+                expected={test.output}
+                actual={output.Fail.IncorrectOutput.stdout}
+            />
+        );
     }
 
-    return <GeneralError error="Solution crashed" output={output.Fail.Crash} />
+    return <GeneralError error="Solution crashed" output={output.Fail.Crash} />;
 };
 
-const SingleResult = ({ output, test, index }: { output: TestOutput; test: Test; index: number; }) => {
+const SingleResult = ({
+    output,
+    test,
+    index,
+}: {
+    output: TestOutput;
+    test: Test;
+    index: number;
+}) => {
     const state = output === 'Pass' ? 'pass' : 'fail';
     return (
         <>
@@ -122,39 +145,44 @@ export const TestResults = () => {
                 <>
                     <Progress value={testResults.percent} />
                     <Accordion type="single" collapsible>
-                        {testResults.kind === 'individual' ?
-                            testResults.tests?.map(([output, test], i) => (
-                                <AccordionItem key={i} value={`test-${i}`}>
-                                    <SingleResult output={output} test={test} index={i} />
-                                </AccordionItem>
-                            )) : []}
+                        {testResults.kind === 'individual'
+                            ? testResults.tests?.map(([output, test], i) => (
+                                  <AccordionItem key={i} value={`test-${i}`}>
+                                      <SingleResult output={output} test={test} index={i} />
+                                  </AccordionItem>
+                              ))
+                            : []}
                     </Accordion>
                 </>
             );
         }
         case 'internal-error': {
             return (
-                <h1 className="w-full h-full justify-center text-2xl flex flex-col items-center">
-                    <TriangleAlert className="text-fail my-4" size={72} />
-                    There was an error running your {testResults.submitKind === 'test' ? 'test' : 'submission'}, please contact a competition host.
+                <h1 className="flex h-full w-full flex-col items-center justify-center text-2xl">
+                    <TriangleAlert className="my-4 text-fail" size={72} />
+                    There was an error running your{' '}
+                    {testResults.submitKind === 'test' ? 'test' : 'submission'}, please contact a
+                    competition host.
                 </h1>
             );
         }
         case 'compile-fail': {
             return (
                 <div className="p-8">
-                    <p className="text-fail text-xl pb-2">Solution failed to compile</p>
+                    <p className="pb-2 text-xl text-fail">Solution failed to compile</p>
                     <CodeBlock text={convertAnsi(testResults.stderr)} rawHtml />
                 </div>
-            )
+            );
         }
         case 'other-error': {
             return (
-                <h1 className="text-2xl p-4">
-                    <span className="text-fail">Submission Attempt Failed:</span> { testResults.message }
+                <h1 className="p-4 text-2xl">
+                    <span className="text-fail">Submission Attempt Failed:</span>{' '}
+                    {testResults.message}
                 </h1>
             );
         }
-        default: throw 'unreachable';
+        default:
+            throw 'unreachable';
     }
-}
+};

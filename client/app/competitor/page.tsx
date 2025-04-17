@@ -102,17 +102,30 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
                         )}
                     </Button>
                 </Tooltip>
-                <Tooltip tooltip={
-                    <div className="text-center">
-                        <p>Submit Solution</p>
-                        {currentState && (
-                            <p className={currentState.remainingAttempts === 0 ? 'text-fail' : ''}>
-                                {currentState.remainingAttempts} {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining
-                            </p>
-                        )}
-                    </div>
-                }>
-                    <Button size="icon" variant="ghost" onClick={submit} disabled={!!loading || currentState?.remainingAttempts === 0}>
+                <Tooltip
+                    tooltip={
+                        <div className="text-center">
+                            <p>Submit Solution</p>
+                            {currentState && (
+                                <p
+                                    className={
+                                        currentState.remainingAttempts === 0 ? 'text-fail' : ''
+                                    }
+                                >
+                                    {currentState.remainingAttempts}{' '}
+                                    {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'}{' '}
+                                    remaining
+                                </p>
+                            )}
+                        </div>
+                    }
+                >
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={submit}
+                        disabled={!!loading || currentState?.remainingAttempts === 0}
+                    >
                         {loading === 'submit' ? (
                             <Loader2 className="animate-spin text-pass" />
                         ) : (
@@ -167,14 +180,16 @@ const TabContent = ({
     }
 };
 
-const TestResultsPanel = ({ isPaused }: { isPaused: boolean; }) => {
+const TestResultsPanel = ({ isPaused }: { isPaused: boolean }) => {
     const { loading } = useTesting();
     return (
         <WithPauseGuard isPaused={isPaused}>
             <div className="w-full">
-                {loading
-                    ? <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
-                    : <TestResults />}
+                {loading ? (
+                    <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
+                ) : (
+                    <TestResults />
+                )}
             </div>
         </WithPauseGuard>
     );

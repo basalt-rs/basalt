@@ -25,21 +25,31 @@ export const currQuestionAtom = atom(async (get) => {
 });
 
 const statesAtom = atom<QuestionSubmissionState[] | null>(null);
-const currentStateAtom = atom((get) => {
-    const states = get(statesAtom);
-    const idx = get(currQuestionIdxAtom);
-    return states && states[idx];
-}, (get, set, newState: QuestionSubmissionState | ((state: QuestionSubmissionState) => QuestionSubmissionState)) => {
-    const idx = get(currQuestionIdxAtom);
-    set(statesAtom, (states) => {
-        if (!states) return states;
-        return states && states.map((s, i) => i === idx
-            ? typeof newState === 'function'
-                ? newState(s)
-                : newState
-            : s)
-    });
-});
+const currentStateAtom = atom(
+    (get) => {
+        const states = get(statesAtom);
+        const idx = get(currQuestionIdxAtom);
+        return states && states[idx];
+    },
+    (
+        get,
+        set,
+        newState:
+            | QuestionSubmissionState
+            | ((state: QuestionSubmissionState) => QuestionSubmissionState)
+    ) => {
+        const idx = get(currQuestionIdxAtom);
+        set(statesAtom, (states) => {
+            if (!states) return states;
+            return (
+                states &&
+                states.map((s, i) =>
+                    i === idx ? (typeof newState === 'function' ? newState(s) : newState) : s
+                )
+            );
+        });
+    }
+);
 export const useSubmissionStates = () => {
     const [states, setStates] = useAtom(statesAtom);
     const [token] = useAtom(tokenAtom);
@@ -60,7 +70,6 @@ export const useSubmissionStates = () => {
             });
             setStates(await res.json());
         })();
-
     }, [ip, token, setStates]);
 
     ws.registerEvent('team-update', (x) => {

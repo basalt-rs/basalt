@@ -10,46 +10,58 @@ export const Tooltip = ({
     <CnTooltip.TooltipProvider>
         <CnTooltip.Tooltip>
             <CnTooltip.TooltipTrigger asChild>{children}</CnTooltip.TooltipTrigger>
-            <CnTooltip.TooltipContent side={side}>
-                {tooltip}
-            </CnTooltip.TooltipContent>
+            <CnTooltip.TooltipContent side={side}>{tooltip}</CnTooltip.TooltipContent>
         </CnTooltip.Tooltip>
     </CnTooltip.TooltipProvider>
 );
 
-export const CodeBlock = ({ text, rawHtml = false }: { text: string; rawHtml?: boolean; }) => (
-    rawHtml
-        ? <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white" dangerouslySetInnerHTML={{ __html: text }} />
-        : <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">{text}</pre>
-);
+export const CodeBlock = ({ text, rawHtml = false }: { text: string; rawHtml?: boolean }) =>
+    rawHtml ? (
+        <pre
+            className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white"
+            dangerouslySetInnerHTML={{ __html: text }}
+        />
+    ) : (
+        <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">{text}</pre>
+    );
 
 // added/removed can never be true/true, but there is no useful way to represent that here because of diff's types.
-const DiffLine = ({ children, added = false, removed = false }: PropsWithChildren<{ added?: boolean; removed?: boolean }>) => (
-    <span className={`before:inline-block before:w-2 before:mx-1 ${added ? `before:content-['+'] before:text-green-400 bg-green-700/30` : removed ? `before:content-['-'] before:text-red-400 bg-red-700/30` : ''}`}>
+const DiffLine = ({
+    children,
+    added = false,
+    removed = false,
+}: PropsWithChildren<{ added?: boolean; removed?: boolean }>) => (
+    <span
+        className={`before:mx-1 before:inline-block before:w-2 ${added ? `bg-green-700/30 before:text-green-400 before:content-['+']` : removed ? `bg-red-700/30 before:text-red-400 before:content-['-']` : ''}`}
+    >
         {children}
     </span>
 );
 
-export const Diff = ({ left, right, inline }: { left: string; right: string; inline: boolean; }) => {
+export const Diff = ({ left, right, inline }: { left: string; right: string; inline: boolean }) => {
     const [diff, setDiff] = useState<Change[]>([]);
     useEffect(() => {
         const diff = diffLines(left, right);
-        const diff2 = diff.flatMap(d => d.count === 1
-            ? { ...d, value: d.value.replace(/\n$/, '') }
-            : d.value.replace(/\n$/, '').split('\n')
-                .map(value => ({ ...d, value: value || ' ' })));
+        const diff2 = diff.flatMap((d) =>
+            d.count === 1
+                ? { ...d, value: d.value.replace(/\n$/, '') }
+                : d.value
+                      .replace(/\n$/, '')
+                      .split('\n')
+                      .map((value) => ({ ...d, value: value || ' ' }))
+        );
         setDiff(diff2);
     }, [left, right, inline, setDiff]);
 
     if (inline) {
         return (
             <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                {diff.map((d, i) =>
+                {diff.map((d, i) => (
                     <DiffLine key={i} added={d.added} removed={d.removed}>
                         {d.value + '\n'}
                     </DiffLine>
-                )}
-            </pre >
+                ))}
+            </pre>
         );
     }
 
@@ -58,21 +70,25 @@ export const Diff = ({ left, right, inline }: { left: string; right: string; inl
             <div className="flex h-full flex-grow flex-col gap-2">
                 <b>Expected Output</b>
                 <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                    {diff.filter(x => !x.added).map((d, index) =>
-                        <DiffLine key={index} removed={d.removed}>
-                            {d.value + '\n'}
-                        </DiffLine>
-                    )}
+                    {diff
+                        .filter((x) => !x.added)
+                        .map((d, index) => (
+                            <DiffLine key={index} removed={d.removed}>
+                                {d.value + '\n'}
+                            </DiffLine>
+                        ))}
                 </pre>
             </div>
             <div className="flex h-full flex-grow flex-col gap-2">
                 <b>Actual Output</b>
                 <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">
-                    {diff.filter(x => !x.removed).map((d, index) =>
-                        <DiffLine key={index} added={d.added}>
-                            {d.value + '\n'}
-                        </DiffLine>
-                    )}
+                    {diff
+                        .filter((x) => !x.removed)
+                        .map((d, index) => (
+                            <DiffLine key={index} added={d.added}>
+                                {d.value + '\n'}
+                            </DiffLine>
+                        ))}
                 </pre>
             </div>
         </>
