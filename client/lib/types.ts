@@ -28,5 +28,5 @@ export type TestResults =
 
 export interface QuestionSubmissionState {
     state: TestState;
-    remaining_attempts: number;
+    remainingAttempts: number;
 }

@@ -1,17 +1,17 @@
 import * as CnTooltip from '@/components/ui/tooltip';
-import { PropsWithChildren, useEffect, useState } from 'react';
+import { PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 import { diffLines, Change } from 'diff';
 
 export const Tooltip = ({
     tooltip,
     children,
     side = 'bottom',
-}: PropsWithChildren<{ tooltip: string; side?: 'top' | 'right' | 'bottom' | 'left' }>) => (
+}: PropsWithChildren<{ tooltip: ReactNode; side?: 'top' | 'right' | 'bottom' | 'left' }>) => (
     <CnTooltip.TooltipProvider>
         <CnTooltip.Tooltip>
             <CnTooltip.TooltipTrigger asChild>{children}</CnTooltip.TooltipTrigger>
             <CnTooltip.TooltipContent side={side}>
-                <p>{tooltip}</p>
+                {tooltip}
             </CnTooltip.TooltipContent>
         </CnTooltip.Tooltip>
     </CnTooltip.TooltipProvider>

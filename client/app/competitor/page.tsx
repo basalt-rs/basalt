@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
@@ -17,7 +17,6 @@ import CodeEditor from '@/components/Editor';
 import { QuestionResponse, TestState } from '@/lib/types';
 import {
     allQuestionsAtom,
-    allStatesAtom,
     currQuestionAtom,
     currQuestionIdxAtom,
     useSubmissionStates,
@@ -43,6 +42,7 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
     const { loading, runTests, submit } = useTesting();
+    const { currentState } = useSubmissionStates();
 
     const notImplemented = () =>
         toast({
@@ -102,8 +102,17 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
                         )}
                     </Button>
                 </Tooltip>
-                <Tooltip tooltip="Submit Solution">
-                    <Button size="icon" variant="ghost" onClick={submit} disabled={!!loading}>
+                <Tooltip tooltip={
+                    <div className="text-center">
+                        <p>Submit Solution</p>
+                        {currentState && (
+                            <p className={currentState.remainingAttempts === 0 ? 'text-fail' : ''}>
+                                {currentState.remainingAttempts} {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining
+                            </p>
+                        )}
+                    </div>
+                }>
+                    <Button size="icon" variant="ghost" onClick={submit} disabled={!!loading || currentState?.remainingAttempts === 0}>
                         {loading === 'submit' ? (
                             <Loader2 className="animate-spin text-pass" />
                         ) : (
@@ -204,7 +213,7 @@ const QuestionDetails = ({
 export default function Competitor() {
     const [currentQuestion] = useAtom(currQuestionAtom);
     const [allQuestions] = useAtom(allQuestionsAtom);
-    const [allStates, setStates] = useSubmissionStates();
+    const { allStates } = useSubmissionStates();
     const { pause, unPause, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);

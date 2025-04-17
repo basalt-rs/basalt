@@ -37,7 +37,7 @@ export interface WebsocketRes {
         id: number;
         results: TestResults;
         percent: number;
-        remaining_attempts: number;
+        remainingAttempts: number;
     } | WebsocketError;
 }
 

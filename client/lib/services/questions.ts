@@ -24,27 +24,29 @@ export const currQuestionAtom = atom(async (get) => {
     return allQuestions[idx];
 });
 
-// export const allStatesAtom = atom<>(async (get) => {
-//     const token = get(tokenAtom);
-//     const ip = API;
-// 
-//     if (!ip || !token) return null;
-// 
-//     const res = await fetch(`${ip}/testing/state`, {
-//         method: 'GET',
-//         headers: {
-//             Authorization: `Bearer ${token}`,
-//         },
-//     });
-//     return res.json();
-// });
 const statesAtom = atom<QuestionSubmissionState[] | null>(null);
+const currentStateAtom = atom((get) => {
+    const states = get(statesAtom);
+    const idx = get(currQuestionIdxAtom);
+    return states && states[idx];
+}, (get, set, newState: QuestionSubmissionState | ((state: QuestionSubmissionState) => QuestionSubmissionState)) => {
+    const idx = get(currQuestionIdxAtom);
+    set(statesAtom, (states) => {
+        if (!states) return states;
+        return states && states.map((s, i) => i === idx
+            ? typeof newState === 'function'
+                ? newState(s)
+                : newState
+            : s)
+    });
+});
 export const useSubmissionStates = () => {
     const [states, setStates] = useAtom(statesAtom);
     const [token] = useAtom(tokenAtom);
     const ws = useWebSocket();
     const [currentUser] = useAtom(currentUserAtom);
     const ip = API;
+    const [currentState, setCurrentState] = useAtom(currentStateAtom);
 
     useEffect(() => {
         (async () => {
@@ -59,7 +61,7 @@ export const useSubmissionStates = () => {
             setStates(await res.json());
         })();
 
-    }, [ip, token, currentUser, ws, setStates]);
+    }, [ip, token, setStates]);
 
     ws.registerEvent('team-update', (x) => {
         if (currentUser?.username === x.team) {
@@ -75,6 +77,5 @@ export const useSubmissionStates = () => {
         }
     });
 
-
-    return [states, setStates] as const;
+    return { allStates: states, setCurrentState, currentState };
 };

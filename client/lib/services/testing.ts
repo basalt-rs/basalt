@@ -1,6 +1,6 @@
 import { toast } from "@/hooks";
 import { atom, useAtom } from "jotai";
-import { currQuestionIdxAtom } from "./questions";
+import { currQuestionIdxAtom, useSubmissionStates } from "./questions";
 import { useEditorContent } from "../competitor-state";
 import { useWebSocket } from "./ws";
 import { TestResults } from "../types";
@@ -15,6 +15,7 @@ export const useTesting = () => {
     const { editorContent } = useEditorContent();
     const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [selectedLanguage] = useAtom(selectedLanguageAtom);
+    const { setCurrentState } = useSubmissionStates();
 
     const runTests = async () => {
         setLoading('test');
@@ -55,8 +56,12 @@ export const useTesting = () => {
         if (res.kind === 'submit') {
             setTestResults({ ...res.results, percent: res.percent, submitKind: 'submit' });
             toast({
-                title: `You have ${res.remaining_attempts} ${res.remaining_attempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                title: `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
             });
+            setCurrentState(s => ({
+                ...s,
+                remainingAttempts: res.remainingAttempts
+            }));
         } else {
             setTestResults({ kind: 'other-error', message: res.message, percent: 0, submitKind: 'submit' });
         }
