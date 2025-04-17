@@ -1,5 +1,6 @@
-import { atom } from 'jotai';
-import { API } from './auth';
+import { atom, useAtom } from 'jotai';
+import { useEffect } from 'react';
+import { ipAtom } from './api';
 
 type EVENT_MAPPING = {
     'game-paused': object;
@@ -26,31 +27,38 @@ class BasaltWSClient {
     private onCloseTasks: (() => void)[] = [];
 
     private ws!: WebSocket;
+    public ip: string | null = null;
+    public isOpen: boolean = false;
 
     private retries: number = 0;
 
     constructor(
         private endpoint: string,
-        private enabled: boolean = true
+        private enabled: boolean = true,
     ) {
         console.debug('constructing WS');
-        this.establish(0);
     }
 
-    public establish(retries: number = 0) {
+    public establish(ip: string, retries: number = 0): Promise<void> {
         this.enabled = true;
-        this.ws = new WebSocket(this.endpoint);
+        this.ip = ip;
+        this.ws = new WebSocket(`${this.ip}/${this.endpoint}`);
+        let done: (() => void) | undefined = undefined;
+        const ret = new Promise<void>((res) => done = res);
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
+            this.isOpen = true;
             this.retries = retries - 1;
+            done?.();
         };
         this.ws.onclose = () => {
+            this.isOpen = false;
             if (this.enabled) {
                 console.debug('disconnected to websocket backend');
                 // retry connection with exponential backoff
                 setTimeout(
                     () => {
-                        this.establish(this.retries + 1);
+                        this.establish(ip, this.retries + 1);
                     },
                     2 ** retries * 1000
                 );
@@ -75,6 +83,8 @@ class BasaltWSClient {
                 console.error('Error processing message:', e);
             }
         };
+
+        return ret;
     }
 
     public registerEvent<K extends keyof EVENT_MAPPING>(
@@ -91,12 +101,18 @@ class BasaltWSClient {
     }
 
     public closeConnection() {
+        console.debug('websocket closed');
+        if (this.ws) {
+            this.ws.close();
+        }
         this.enabled = false;
         this.cleanup();
     }
 
     private cleanup() {
-        this.onCloseTasks.forEach((t) => t());
+        if (this.isOpen) {
+            this.onCloseTasks.forEach((t) => t());
+        }
     }
 
     public registerCleanup(task: () => void) {
@@ -104,4 +120,20 @@ class BasaltWSClient {
     }
 }
 
-export const basaltWSClientAtom = atom(new BasaltWSClient(`${API}/ws`));
+const basaltWSClientAtom = atom(new BasaltWSClient('ws'));
+
+export const useWebSocket = () => {
+    const [ws, setWs] = useAtom(basaltWSClientAtom);
+    const [ip] = useAtom(ipAtom);
+
+    useEffect(() => {
+        if (ip !== ws.ip) {
+            ws.closeConnection();
+            if (ip) {
+                ws.establish(ip);
+            }
+        }
+    }, [ip, ws, setWs]);
+
+    return ws;
+};
