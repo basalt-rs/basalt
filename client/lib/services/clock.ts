@@ -17,7 +17,7 @@ export const getClock = async (ip: string): Promise<CurrentTime | null> => {
 export const updateClock = async (
     body: ClockUpdateBody,
     authToken: string,
-    ip: string,
+    ip: string
 ): Promise<CurrentTime | null> => {
     const res = await fetch(`${ip}/clock`, {
         method: 'PATCH',

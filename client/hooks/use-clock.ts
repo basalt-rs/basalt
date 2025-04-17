@@ -81,7 +81,7 @@ export const useClock = () => {
                 isPaused: true,
             },
             authToken,
-            ip,
+            ip
         );
     };
 
@@ -92,7 +92,7 @@ export const useClock = () => {
                 isPaused: false,
             },
             authToken,
-            ip,
+            ip
         );
     };
 

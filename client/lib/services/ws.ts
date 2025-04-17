@@ -34,7 +34,7 @@ class BasaltWSClient {
 
     constructor(
         private endpoint: string,
-        private enabled: boolean = true,
+        private enabled: boolean = true
     ) {
         console.debug('constructing WS');
     }
@@ -44,7 +44,7 @@ class BasaltWSClient {
         this.ip = ip;
         this.ws = new WebSocket(`${this.ip}/${this.endpoint}`);
         let done: (() => void) | undefined = undefined;
-        const ret = new Promise<void>((res) => done = res);
+        const ret = new Promise<void>((res) => (done = res));
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
             this.isOpen = true;
