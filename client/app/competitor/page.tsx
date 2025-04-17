@@ -38,10 +38,7 @@ import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
 
-interface EditorButtons {
-    isPaused: boolean;
-}
-const EditorButtons = ({ isPaused }: EditorButtons) => {
+const EditorButtons = () => {
     const { setEditorContent } = useEditorContent();
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
@@ -69,12 +66,7 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
                 <Tooltip tooltip="Load File">
-                    <Button
-                        disabled={isPaused}
-                        size="icon"
-                        variant="ghost"
-                        onClick={handleUploadBtnClick}
-                    >
+                    <Button size="icon" variant="ghost" onClick={handleUploadBtnClick}>
                         <Upload />
                     </Button>
                 </Tooltip>
@@ -121,21 +113,13 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
     );
 };
 
-const TabContent = ({
-    tab,
-    isPaused,
-}: {
-    tab: ExtractAtomValue<typeof currentTabAtom>;
-    isPaused: boolean;
-}) => {
+const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
     switch (tab) {
         case 'text-editor':
             return (
                 <div className="flex h-full flex-col">
-                    <WithPauseGuard isPaused={isPaused}>
-                        <EditorButtons isPaused={isPaused} />
-                        <CodeEditor />
-                    </WithPauseGuard>
+                    <EditorButtons />
+                    <CodeEditor />
                 </div>
             );
         case 'leaderboard':
@@ -149,47 +133,42 @@ const TabContent = ({
     }
 };
 
-interface TestResultsProps {
-    isPaused: boolean;
-}
-const TestResults = ({ isPaused }: TestResultsProps) => {
+const TestResults = () => {
     const [currQuestion] = useAtom(currQuestionAtom);
     return (
         <div className="w-full">
-            <WithPauseGuard isPaused={isPaused}>
-                <Accordion type="single" collapsible>
-                    {currQuestion.tests
-                        .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
-                        .map((test, i) => (
-                            <AccordionItem key={i} value={`test-${i}`}>
-                                <AccordionTrigger className="items-center justify-between px-8">
-                                    <h1>
-                                        <b>Test Case {i + 1}</b>
-                                    </h1>
-                                    <h1 className="flex items-center justify-center text-pass">
-                                        <b>PASS</b>
-                                    </h1>
-                                </AccordionTrigger>
-                                <AccordionContent className="flex flex-row gap-4 px-8">
-                                    {test.input && (
-                                        <div className="flex h-full flex-grow flex-col gap-2">
-                                            <b>Input</b>
-                                            <CodeBlock text={test.input} />
-                                        </div>
-                                    )}
+            <Accordion type="single" collapsible>
+                {currQuestion.tests
+                    .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
+                    .map((test, i) => (
+                        <AccordionItem key={i} value={`test-${i}`}>
+                            <AccordionTrigger className="items-center justify-between px-8">
+                                <h1>
+                                    <b>Test Case {i + 1}</b>
+                                </h1>
+                                <h1 className="flex items-center justify-center text-pass">
+                                    <b>PASS</b>
+                                </h1>
+                            </AccordionTrigger>
+                            <AccordionContent className="flex flex-row gap-4 px-8">
+                                {test.input && (
                                     <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Expected Output</b>
-                                        <CodeBlock text={test.output} />
+                                        <b>Input</b>
+                                        <CodeBlock text={test.input} />
                                     </div>
-                                    <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Actual Output</b>
-                                        <CodeBlock text="Not yet implemented" />
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                </Accordion>
-            </WithPauseGuard>
+                                )}
+                                <div className="flex h-full flex-grow flex-col gap-2">
+                                    <b>Expected Output</b>
+                                    <CodeBlock text={test.output} />
+                                </div>
+                                <div className="flex h-full flex-grow flex-col gap-2">
+                                    <b>Actual Output</b>
+                                    <CodeBlock text="Not yet implemented" />
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+            </Accordion>
         </div>
     );
 };
@@ -233,25 +212,40 @@ export default function Competitor() {
     const [tab] = useAtom(currentTabAtom);
     const { setEditorContent } = useEditorContent();
 
-    return (
-        <div className="h-screen">
-            <div>
-                <CompetitorNavbar isPaused={isPaused} />
+    if (isPaused) {
+        return (
+            <div className="h-[90vh]">
+                <div>
+                    <CompetitorNavbar />
+                </div>
+                <Separator />
+                <div className="flex h-full flex-col items-center justify-center">
+                    <WithPauseGuard>
+                        <p className="text-5xl font-bold opacity-65">Competition Paused</p>
+                    </WithPauseGuard>
+                    <Timer isHost={false} onPlay={unPause} onPause={pause} isPaused={isPaused} />
+                </div>
             </div>
+        );
+    } else {
+        return (
+            <div className="h-screen">
+                <div>
+                    <CompetitorNavbar />
+                </div>
 
-            <div className="flex h-[95vh]">
-                <div className="flex-grow">
-                    <ResizablePanelGroup direction="horizontal">
-                        <ResizablePanel
-                            defaultSize={35}
-                            maxSize={55}
-                            collapsible={true}
-                            collapsedSize={0}
-                            minSize={10}
-                            className="border-black-300 h-full border-t"
-                        >
-                            <ResizablePanelGroup direction="vertical" className="h-full">
-                                <WithPauseGuard isPaused={isPaused}>
+                <div className="flex h-[95vh]">
+                    <div className="flex-grow">
+                        <ResizablePanelGroup direction="horizontal">
+                            <ResizablePanel
+                                defaultSize={35}
+                                maxSize={55}
+                                collapsible={true}
+                                collapsedSize={0}
+                                minSize={10}
+                                className="border-black-300 h-full border-t"
+                            >
+                                <ResizablePanelGroup direction="vertical" className="h-full">
                                     <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
                                         <Select
                                             defaultValue={`${currQuestion}`}
@@ -288,26 +282,26 @@ export default function Competitor() {
                                             isPaused={isPaused}
                                         />
                                     </div>
-                                </WithPauseGuard>
-                            </ResizablePanelGroup>
-                        </ResizablePanel>
-                        <ResizableHandle withHandle />
-                        <ResizablePanel className="">
-                            <ResizablePanelGroup direction="vertical" className="h-full">
-                                <ResizablePanel defaultSize={400} className="h-full">
-                                    <TabContent isPaused={isPaused} tab={tab} />
-                                </ResizablePanel>
-                                <ResizableHandle />
-                                <ResizablePanel defaultSize={100} className="h-full">
-                                    <ScrollArea className="h-full w-full">
-                                        <TestResults isPaused={isPaused} />
-                                    </ScrollArea>
-                                </ResizablePanel>
-                            </ResizablePanelGroup>
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
+                                </ResizablePanelGroup>
+                            </ResizablePanel>
+                            <ResizableHandle withHandle />
+                            <ResizablePanel className="">
+                                <ResizablePanelGroup direction="vertical" className="h-full">
+                                    <ResizablePanel defaultSize={400} className="h-full">
+                                        <TabContent tab={tab} />
+                                    </ResizablePanel>
+                                    <ResizableHandle />
+                                    <ResizablePanel defaultSize={100} className="h-full">
+                                        <ScrollArea className="h-full w-full">
+                                            <TestResults />
+                                        </ScrollArea>
+                                    </ResizablePanel>
+                                </ResizablePanelGroup>
+                            </ResizablePanel>
+                        </ResizablePanelGroup>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
 }
