@@ -39,17 +39,14 @@ class BasaltWSClient {
         console.debug('constructing WS');
     }
 
-    public establish(ip: string, retries: number = 0): Promise<void> {
+    public establish(ip: string, retries: number = 0) {
         this.enabled = true;
         this.ip = ip;
         this.ws = new WebSocket(`${this.ip}/${this.endpoint}`);
-        let done: (() => void) | undefined = undefined;
-        const ret = new Promise<void>((res) => (done = res));
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
             this.isOpen = true;
             this.retries = retries - 1;
-            done?.();
         };
         this.ws.onclose = () => {
             this.isOpen = false;
@@ -83,8 +80,6 @@ class BasaltWSClient {
                 console.error('Error processing message:', e);
             }
         };
-
-        return ret;
     }
 
     public registerEvent<K extends keyof EVENT_MAPPING>(
