@@ -1,5 +1,5 @@
 'use client';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
@@ -32,13 +32,15 @@ import { ExtractAtomValue, useAtom } from 'jotai';
 import { Circle, FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
 import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
-import { CodeBlock, Tooltip } from '@/components/util';
+import { CodeBlock, Diff, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom, useEditorContent, useTesting } from '@/lib/competitor-state';
+import { currentTabAtom, inlineDiffAtom, useEditorContent, useTesting } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface EditorButtons {
     isPaused: boolean;
@@ -169,10 +171,15 @@ const convertAnsi = (x: string): string => {
 };
 
 const IncorrectOutput = ({ input, expected, actual }: { input: string; expected: string; actual: string; }) => {
+    const [inline, setInline] = useAtom(inlineDiffAtom);
     return (
         <>
-            <div>
+            <div className="flex flex-row justify-between w-full">
                 <p className="text-xl pb-2">Incorrect output:</p>
+                <span className="flex flex-row items-center gap-2">
+                    <Switch checked={inline} onCheckedChange={setInline} />
+                    <Label>Inline diff</Label>
+                </span>
             </div>
             <div className="flex flex-row gap-4">
                 {input && (
@@ -181,14 +188,7 @@ const IncorrectOutput = ({ input, expected, actual }: { input: string; expected:
                         <CodeBlock text={input} />
                     </div>
                 )}
-                <div className="flex h-full flex-grow flex-col gap-2">
-                    <b>Expected Output</b>
-                    <CodeBlock text={expected} />
-                </div>
-                <div className="flex h-full flex-grow flex-col gap-2">
-                    <b>Actual Output</b>
-                    <CodeBlock text={actual} />
-                </div>
+                <Diff left={expected} right={actual} inline={inline} />
             </div>
         </>
     );
@@ -233,8 +233,6 @@ const TestDetails = ({ output, test }: { output: TestOutput; test: Test; }) => {
 
 const SingleResult = ({ output, test, index }: { output: TestOutput; test: Test; index: number; }) => {
     const state = output === 'Pass' ? 'pass' : 'fail';
-    if (output !== 'Pass') {
-    }
     return (
         <>
             <AccordionTrigger className="items-center justify-between px-8">

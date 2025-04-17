@@ -73,6 +73,8 @@ export interface TestResult {
     stderr: string;
 }
 
+export const inlineDiffAtom = atomWithStorage('inline-diff', false);
+
 const selectedLanguageAtom = atom<string>('java');
 const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
 const testResultsAtom = atom<(TestResults & { percent: number }) | null>(null);
