@@ -25,7 +25,7 @@ export const CodeBlock = ({ text, rawHtml = false }: { text: string; rawHtml?: b
 
 // added/removed can never be true/true, but there is no useful way to represent that here because of diff's types.
 const DiffLine = ({ children, added = false, removed = false }: PropsWithChildren<{ added?: boolean; removed?: boolean }>) => (
-    <span className={`before:inline-block before:w-2 ${added ? `before:content-['+'] before:text-green-400` : removed ? `before:content-['-'] before:text-red-500` : ''} ${added ? 'bg-green-400/50' : removed ? 'bg-red-400/50' : ''}`}>
+    <span className={`before:inline-block before:w-2 before:mx-1 ${added ? `before:content-['+'] before:text-green-400 bg-green-700/30` : removed ? `before:content-['-'] before:text-red-400 bg-red-700/30` : ''}`}>
         {children}
     </span>
 );

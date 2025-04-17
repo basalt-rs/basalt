@@ -1,15 +1,8 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
-import AnsiConvert from 'ansi-to-html';
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion';
 import {
     Select,
     SelectTrigger,
@@ -21,26 +14,26 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '@/components/Leaderboard';
 import CodeEditor from '@/components/Editor';
-import { QuestionResponse, SimpleOutput, Test, TestOutput, TestState } from '@/lib/types';
+import { QuestionResponse, TestState } from '@/lib/types';
 import {
     allQuestionsAtom,
     allStatesAtom,
     currQuestionAtom,
     currQuestionIdxAtom,
+    useSubmissionStates,
 } from '@/lib/services/questions';
 import { ExtractAtomValue, useAtom } from 'jotai';
 import { Circle, FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
 import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
-import { CodeBlock, Diff, Tooltip } from '@/components/util';
+import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom, inlineDiffAtom, useEditorContent, useTesting } from '@/lib/competitor-state';
+import { currentTabAtom, useEditorContent } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
-import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { TestResults } from '@/components/TestResults';
+import { useTesting } from '@/lib/services/testing';
 
 interface EditorButtons {
     isPaused: boolean;
@@ -165,126 +158,6 @@ const TabContent = ({
     }
 };
 
-const c = new AnsiConvert();
-const convertAnsi = (x: string): string => {
-    return c.toHtml(x);
-};
-
-const IncorrectOutput = ({ input, expected, actual }: { input: string; expected: string; actual: string; }) => {
-    const [inline, setInline] = useAtom(inlineDiffAtom);
-    return (
-        <>
-            <div className="flex flex-row justify-between w-full">
-                <p className="text-xl pb-2">Incorrect output:</p>
-                <span className="flex flex-row items-center gap-2">
-                    <Switch checked={inline} onCheckedChange={setInline} />
-                    <Label>Inline diff</Label>
-                </span>
-            </div>
-            <div className="flex flex-row gap-4">
-                {input && (
-                    <div className="flex h-full flex-grow flex-col gap-2">
-                        <b>Input</b>
-                        <CodeBlock text={input} />
-                    </div>
-                )}
-                <Diff left={expected} right={actual} inline={inline} />
-            </div>
-        </>
-    );
-};
-
-const GeneralError = ({ error, output }: { error?: string; output: SimpleOutput }) => {
-    return (
-        <>
-            {error &&
-                <div>
-                    <p className="text-xl pb-2">{error}</p>
-                </div>}
-            <div className="flex flex-row gap-4">
-                <div className="flex h-full flex-grow flex-col gap-2">
-                    <b>Standard Output</b>
-                    <CodeBlock text={convertAnsi(output.stdout)} rawHtml={true} />
-                </div>
-                <div className="flex h-full flex-grow flex-col gap-2">
-                    <b>Standard Error</b>
-                    <CodeBlock text={convertAnsi(output.stderr)} rawHtml={true} />
-                </div>
-            </div>
-        </>
-    );
-};
-
-const TestDetails = ({ output, test }: { output: TestOutput; test: Test; }) => {
-    if (output === 'Pass') {
-        return <p>Pass</p>; // TODO
-    }
-
-    if (output.Fail === 'Timeout') {
-        return <p>Solution timed out</p>; // TODO
-    }
-
-    if ('IncorrectOutput' in output.Fail) {
-        return <IncorrectOutput input={test.input} expected={test.output} actual={output.Fail.IncorrectOutput.stdout} />
-    }
-
-    return <GeneralError error="Solution crashed" output={output.Fail.Crash} />
-};
-
-const SingleResult = ({ output, test, index }: { output: TestOutput; test: Test; index: number; }) => {
-    const state = output === 'Pass' ? 'pass' : 'fail';
-    return (
-        <>
-            <AccordionTrigger className="items-center justify-between px-8">
-                <h1>
-                    <b>Test Case {index + 1}</b>
-                </h1>
-                <h1 className={`flex items-center justify-center text-${state}`}>
-                    <b>{state.toUpperCase()}</b>
-                </h1>
-            </AccordionTrigger>
-            <AccordionContent className="px-8">
-                <TestDetails output={output} test={test} />
-            </AccordionContent>
-        </>
-    );
-};
-
-const TestResults = () => {
-    const { testResults } = useTesting();
-    if (testResults === null) return null;
-    switch (testResults.kind) {
-        case 'individual': {
-            return (
-                <>
-                    <Progress value={testResults.percent} />
-                    <Accordion type="single" collapsible>
-                        {testResults.kind === 'individual' ?
-                            testResults.tests?.map(([output, test], i) => (
-                                <AccordionItem key={i} value={`test-${i}`}>
-                                    <SingleResult output={output} test={test} index={i} />
-                                </AccordionItem>
-                            )) : []}
-                    </Accordion>
-                </>
-            );
-        }
-        case 'internal-error': {
-            return <p className="text-fail text-xl">There was an error running tests, please contact a competition host.</p>
-        }
-        case 'compile-fail': {
-            return (
-                <div className="p-8">
-                    <p className="text-fail text-xl pb-2">Solution failed to compile</p>
-                    <CodeBlock text={convertAnsi(testResults.stderr)} rawHtml={true} />
-                </div>
-            )
-        }
-        // unreachable
-        default: return null;
-    }
-}
-
 const TestResultsPanel = ({ isPaused }: { isPaused: boolean; }) => {
     const { loading } = useTesting();
     return (
@@ -331,7 +204,7 @@ const QuestionDetails = ({
 export default function Competitor() {
     const [currentQuestion] = useAtom(currQuestionAtom);
     const [allQuestions] = useAtom(allQuestionsAtom);
-    const [allStates] = useAtom(allStatesAtom);
+    const [allStates, setStates] = useSubmissionStates();
     const { pause, unPause, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
@@ -370,7 +243,7 @@ export default function Competitor() {
                                                         <div className="flex flex-row items-center">
                                                             <Circle
                                                                 fill="currentColor"
-                                                                className={`${testColor(allStates[i])} h-6 w-6 pr-2`}
+                                                                className={`${allStates && testColor(allStates[i].state)} h-6 w-6 pr-2`}
                                                             />
                                                             {q.title}
                                                         </div>

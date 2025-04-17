@@ -1,17 +1,29 @@
-import { atom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { API, tokenAtom } from './auth';
-import { TestResults } from '../types';
+import { TestResults, TestState } from '../types';
+import { useEffect } from 'react';
 
 type EVENT_MAPPING = {
     'game-paused': object;
     'game-unpaused': {
         timeLeftInSeconds: number;
     };
+    'team-update': {
+         team: string;
+         new_score: number;
+         new_states: TestState[];
+    };
 };
 
 type WebsocketSend =
     | { kind: 'run-test'; id: number; language: string; solution: string; problem: number; }
     | { kind: 'submit'; id: number; language: string; solution: string; problem: number; };
+
+interface WebsocketError {
+    kind: 'error';
+    id?: number;
+    message: string;
+};
 
 export interface WebsocketRes {
     'run-test': {
@@ -25,7 +37,8 @@ export interface WebsocketRes {
         id: number;
         results: TestResults;
         percent: number;
-    };
+        remaining_attempts: number;
+    } | WebsocketError;
 }
 
 type BroadcastEventKind = keyof EVENT_MAPPING;
@@ -42,6 +55,7 @@ class BasaltWSClient {
     } = {
             'game-paused': [],
             'game-unpaused': [],
+            'team-update': [],
         };
     private onCloseTasks: (() => void)[] = [];
     private pendingTasks: { id: number; resolve: (t: WebsocketRes[keyof WebsocketRes]) => void; reject: () => void }[] = [];
@@ -53,15 +67,16 @@ class BasaltWSClient {
 
     constructor(
         private endpoint: string,
-        private token: string | null,
+        public token: string | null,
         private enabled: boolean = true
     ) {
         console.debug('constructing WS');
-        this.establish(0);
+        this.establish(token, 0);
     }
 
-    public establish(retries: number = 0) {
+    public establish(token: string | null, retries: number = 0) {
         this.enabled = true;
+        this.token = token;
         this.ws = new WebSocket(this.endpoint, this.token ? [this.token] : undefined);
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
@@ -73,7 +88,7 @@ class BasaltWSClient {
                 // retry connection with exponential backoff
                 setTimeout(
                     () => {
-                        this.establish(this.retries + 1);
+                        this.establish(this.token, this.retries + 1);
                     },
                     2 ** retries * 1000
                 );
@@ -156,4 +171,20 @@ class BasaltWSClient {
 
 // TODO: Make this get the token once, perhaps move the token to "establish" and call that on login
 //       Or, add an auth method within the ws?  Seems kind of weird, though
-export const basaltWSClientAtom = atom((get) => new BasaltWSClient(`${API}/ws`, get(tokenAtom)));
+// export const basaltWSClientAtom = atom((get) => new BasaltWSClient(`${API}/ws`, get(tokenAtom)));
+
+const basaltWSClientAtom = atom(new BasaltWSClient(`${API}/ws`, null));
+
+export const useWebSocket = () => {
+    const [ws] = useAtom(basaltWSClientAtom);
+    const [token] = useAtom(tokenAtom);
+
+    useEffect(() => {
+        if (token !== ws.token) {
+            ws.closeConnection();
+            ws.establish(token);
+        }
+    }, [token, ws]);
+
+    return ws;
+};

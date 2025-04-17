@@ -21,6 +21,12 @@ export interface SimpleOutput {
 }
 export type TestOutput = 'Pass' | { Fail: 'Timeout' | { IncorrectOutput: SimpleOutput } | { Crash: SimpleOutput }; };
 export type TestResults =
+    | { kind: 'other-error'; message: string; }
     | { kind: 'internal-error'; }
     | ({ kind: 'compile-fail'; } & SimpleOutput)
     | { kind: 'individual'; tests: [TestOutput, Test][]; };
+
+export interface QuestionSubmissionState {
+    state: TestState;
+    remaining_attempts: number;
+}
