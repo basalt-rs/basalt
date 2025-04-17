@@ -9,8 +9,14 @@ export const Tooltip = ({
 }: PropsWithChildren<{ tooltip: ReactNode; side?: 'top' | 'right' | 'bottom' | 'left' }>) => (
     <CnTooltip.TooltipProvider>
         <CnTooltip.Tooltip>
-            <CnTooltip.TooltipTrigger asChild>{children}</CnTooltip.TooltipTrigger>
-            <CnTooltip.TooltipContent side={side}>{tooltip}</CnTooltip.TooltipContent>
+            <CnTooltip.TooltipTrigger asChild disabled={false}>
+                <span>
+                    {children}
+                </span>
+            </CnTooltip.TooltipTrigger>
+            <CnTooltip.TooltipContent side={side}>
+                {tooltip}
+            </CnTooltip.TooltipContent>
         </CnTooltip.Tooltip>
     </CnTooltip.TooltipProvider>
 );
