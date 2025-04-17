@@ -26,21 +26,7 @@ export const useTesting = () => {
             solution: editorContent,
         });
 
-
         setTestResults({ ...results, percent, submitKind: 'test' });
-        if (results.kind === 'compile-fail') {
-            toast({
-                title: 'Test code failed to comile',
-                variant: 'destructive',
-            });
-        } else if (results.kind === 'internal-error') {
-            toast({
-                title: 'There was an error while running your test.',
-                description: 'Please contact a competition host',
-                variant: 'destructive',
-            });
-        }
-
         setLoading(null);
     };
 
@@ -55,9 +41,12 @@ export const useTesting = () => {
 
         if (res.kind === 'submit') {
             setTestResults({ ...res.results, percent: res.percent, submitKind: 'submit' });
-            toast({
-                title: `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
-            });
+            const isPass = res.results.kind === 'individual' && res.results.tests.every(t => t[0] === 'Pass');
+            if (!isPass) {
+                toast({
+                    title: `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                });
+            }
             setCurrentState(s => ({
                 ...s,
                 remainingAttempts: res.remainingAttempts
