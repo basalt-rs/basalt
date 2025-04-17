@@ -212,28 +212,12 @@ export default function Competitor() {
     const [tab] = useAtom(currentTabAtom);
     const { setEditorContent } = useEditorContent();
 
-    if (isPaused) {
-        return (
-            <div className="h-[90vh]">
-                <div>
-                    <CompetitorNavbar />
-                </div>
-                <Separator />
-                <div className="flex h-full flex-col items-center justify-center">
-                    <WithPauseGuard>
-                        <p className="text-5xl font-bold opacity-65">Competition Paused</p>
-                    </WithPauseGuard>
-                    <Timer isHost={false} onPlay={unPause} onPause={pause} isPaused={isPaused} />
-                </div>
+    return (
+        <div className="h-screen">
+            <div>
+                <CompetitorNavbar />
             </div>
-        );
-    } else {
-        return (
-            <div className="h-screen">
-                <div>
-                    <CompetitorNavbar />
-                </div>
-
+            <WithPauseGuard isPaused={isPaused}>
                 <div className="flex h-[95vh]">
                     <div className="flex-grow">
                         <ResizablePanelGroup direction="horizontal">
@@ -301,7 +285,8 @@ export default function Competitor() {
                         </ResizablePanelGroup>
                     </div>
                 </div>
-            </div>
-        );
-    }
+            </WithPauseGuard>
+            is
+        </div>
+    );
 }
