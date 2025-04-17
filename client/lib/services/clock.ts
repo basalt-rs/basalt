@@ -1,5 +1,3 @@
-import { API } from './auth';
-
 export interface CurrentTime {
     isPaused: boolean;
     timeLeftInSeconds: number;
@@ -9,8 +7,8 @@ export interface ClockUpdateBody {
     isPaused: boolean;
 }
 
-export const getClock = async (): Promise<CurrentTime | null> => {
-    const res = await fetch(`${API}/clock`);
+export const getClock = async (ip: string): Promise<CurrentTime | null> => {
+    const res = await fetch(`${ip}/clock`);
     if (res.ok) {
         return (await res.json()) as CurrentTime;
     } else return null;
@@ -18,9 +16,10 @@ export const getClock = async (): Promise<CurrentTime | null> => {
 
 export const updateClock = async (
     body: ClockUpdateBody,
-    authToken: string
+    authToken: string,
+    ip: string
 ): Promise<CurrentTime | null> => {
-    const res = await fetch(`${API}/clock`, {
+    const res = await fetch(`${ip}/clock`, {
         method: 'PATCH',
         headers: {
             Authorization: `Bearer ${authToken}`,

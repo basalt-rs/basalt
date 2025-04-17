@@ -1,17 +1,19 @@
 import { clockAtom } from '@/lib/host-state';
-import { atom, useAtom } from 'jotai';
+import { atom, getDefaultStore, useAtom } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
 import { getClock, updateClock } from '@/lib/services/clock';
 import { tokenAtom } from '@/lib/services/auth';
-import { basaltWSClientAtom } from '@/lib/services/ws';
+import { ipAtom } from '@/lib/services/api';
+import { useWebSocket } from '@/lib/services/ws';
 
 const tickerAtom = atom<NodeJS.Timeout | null>(null);
 
 export const useClock = () => {
-    const [basaltWs] = useAtom(basaltWSClientAtom);
+    const basaltWs = useWebSocket();
     const [clock, setClock] = useAtom(clockAtom);
     const [ticker, setTicker] = useAtom(tickerAtom);
     const [authToken] = useAtom(tokenAtom);
+    const [ip] = useAtom(ipAtom);
 
     const startTicking = () => {
         setTicker((prev) => {
@@ -40,7 +42,13 @@ export const useClock = () => {
     useQuery({
         queryKey: ['clock', clock?.isPaused ?? true],
         queryFn: async () => {
-            const res = await getClock();
+            const ip = getDefaultStore().get(ipAtom);
+            if (ip === null) {
+                setClock({ isPaused: true, timeLeftInSeconds: 0 });
+                return 1;
+            }
+
+            const res = await getClock(ip);
             if (res === null) {
                 setClock({ isPaused: true, timeLeftInSeconds: 0 });
                 return 1;
@@ -67,22 +75,24 @@ export const useClock = () => {
     });
 
     const pause = async () => {
-        if (!authToken) return;
+        if (!authToken || !ip) return;
         await updateClock(
             {
                 isPaused: true,
             },
-            authToken
+            authToken,
+            ip
         );
     };
 
     const unPause = async () => {
-        if (!authToken) return;
+        if (!authToken || !ip) return;
         await updateClock(
             {
                 isPaused: false,
             },
-            authToken
+            authToken,
+            ip
         );
     };
 
