@@ -2,7 +2,7 @@
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { User, Sun, Moon, SunMoon, LogOut, Settings } from 'lucide-react';
+import { User, Sun, Moon, SunMoon, LogOut, Settings, Bell } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,12 +16,15 @@ import {
 } from './ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useRouter } from 'next/navigation';
-import { useSetAtom } from 'jotai';
+import { useSetAtom, useAtom } from 'jotai';
 import { tokenAtom } from '@/lib/services/auth';
 import { RESET } from 'jotai/utils';
 import { Editor } from './Settings';
+import { announcementAtom } from '@/lib/host-state';
 
 export default function UserMenu() {
+    const [announcementList] = useAtom(announcementAtom);
+    const [announcementsOpen, setAnnouncementsOpen] = useState(false);
     const { setTheme } = useTheme();
     const setToken = useSetAtom(tokenAtom);
     const router = useRouter();
@@ -41,6 +44,10 @@ export default function UserMenu() {
                 </DropdownMenuTrigger>
                 <DropdownMenuPortal>
                     <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => setAnnouncementsOpen(true)}>
+                            <Bell />
+                            Announcements
+                        </DropdownMenuItem>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
                                 <SunMoon />
@@ -77,6 +84,30 @@ export default function UserMenu() {
                         <DialogTitle className="flex justify-center">Settings</DialogTitle>
                     </DialogHeader>
                     <Editor />
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={announcementsOpen} onOpenChange={setAnnouncementsOpen}>
+                <DialogContent className="min-w-[600px] max-w-[40vw]">
+                    <DialogHeader>
+                        <DialogTitle className="flex justify-center">Announcements</DialogTitle>
+                    </DialogHeader>
+                    <div className="max-h-[50vh] space-y-4 overflow-y-auto">
+                        {announcementList.length > 0 ? (
+                            announcementList.map((announcement, index) => (
+                                <div key={index} className="rounded-lg border bg-muted p-3">
+                                    <p className="text-sm text-muted-foreground">
+                                        {new Date(announcement.timestamp).toLocaleString()}
+                                    </p>
+                                    <p>{announcement.message}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-center text-muted-foreground">
+                                No announcements available.
+                            </p>
+                        )}
+                    </div>
                 </DialogContent>
             </Dialog>
         </>
