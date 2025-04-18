@@ -286,7 +286,6 @@ export default function Competitor() {
                     </div>
                 </div>
             </WithPauseGuard>
-            is
         </div>
     );
 }

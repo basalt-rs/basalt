@@ -1,15 +1,18 @@
 import { PauseCircle } from 'lucide-react';
 import { PropsWithChildren } from 'react';
 import Timer from './Timer';
+import { currentTabAtom } from '@/lib/competitor-state';
+import { useAtom } from 'jotai';
+import Leaderboard from './Leaderboard';
 
 export interface PauseGuardProps {
     isPaused?: boolean;
-    withHeader?: boolean;
-    paragraph?: string | null;
 }
 
 export const WithPauseGuard = ({ isPaused, children }: PropsWithChildren<PauseGuardProps>) => {
-    if (isPaused)
+    const [tab] = useAtom(currentTabAtom);
+    // import atom for tab and return leaderboard if on that tab
+    if (isPaused && tab !== 'leaderboard') {
         return (
             <div className="relative min-h-full min-w-full cursor-not-allowed">
                 <div className="absolute inset-0 z-0 overflow-hidden">
@@ -17,10 +20,12 @@ export const WithPauseGuard = ({ isPaused, children }: PropsWithChildren<PauseGu
                 </div>
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 text-center">
                     <PauseCircle className="h-36 w-36" />
-                    <p className="mt-1 text-2xl opacity-50">Paused by Host</p>
+                    <p className="mt-1 text-2xl opacity-50">Competition Paused</p>
                     <Timer isPaused={isPaused} />
                 </div>
             </div>
         );
-    else return children;
+    } else if (isPaused && tab === 'leaderboard') {
+        return <Leaderboard />;
+    } else return children;
 };
