@@ -1,7 +1,6 @@
 'use client';
 import { Button } from './ui/button';
-import { Pause, Play, Wrench } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Pause, Play } from 'lucide-react';
 import { useAtom } from 'jotai';
 import { clockAtom } from '@/lib/host-state';
 
@@ -56,21 +55,6 @@ export default function Timer({ isHost = false, onPause, onPlay, isPaused }: Tim
                 >
                     {formatTime(clock?.timeLeftInSeconds ?? 0)}
                 </p>
-                {isHost && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                            toast({
-                                title: 'Coming Soon',
-                                description: 'This feature is coming soon!',
-                                variant: 'destructive',
-                            });
-                        }}
-                    >
-                        <Wrench strokeWidth={0} fill="currentColor" />
-                    </Button>
-                )}
             </span>
         </div>
     );
