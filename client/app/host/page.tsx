@@ -169,7 +169,7 @@ export default function Host() {
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel defaultSize={70} className="flex h-screen flex-col">
+            <ResizablePanel defaultSize={70} className="flex h-screen flex-col XXX">
                 <span className="flex w-full justify-start p-1.5">
                     <HostNavbar />
                 </span>
@@ -181,9 +181,7 @@ export default function Host() {
                         <QuestionAccordion />
                     </ScrollArea>
                 ) : (
-                    <ScrollArea className="w-full flex-grow pt-2">
-                        <TeamInspector />
-                    </ScrollArea>
+                    <TeamInspector />
                 )}
             </ResizablePanel>
         </ResizablePanelGroup>

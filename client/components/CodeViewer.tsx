@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
-import { editorSettingsAtom, useEditorContent } from '@/lib/competitor-state';
+import { editorSettingsAtom } from '@/lib/competitor-state';
 import 'ace-builds/src-noconflict/theme-monokai';
 import('ace-builds/src-noconflict/mode-javascript');
 import 'ace-builds/src-noconflict/keybinding-vim';
@@ -9,54 +9,7 @@ import 'ace-builds/src-noconflict/keybinding-emacs';
 import 'ace-builds/src-noconflict/keybinding-sublime';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
-// TODO: Need to have languages imported and hooked up in the Select to sync these items together
-// const languages = [
-//     'ada',
-//     'basic',
-//     'batchfile',
-//     'c_cpp',
-//     'clojure',
-//     'cobol',
-//     'csharp',
-//     'd',
-//     'dart',
-//     'ejs',
-//     'elixir',
-//     'elm',
-//     'erlang',
-//     'forth',
-//     'fortran',
-//     'fsharp',
-//     'golang',
-//     'java',
-//     'javascript',
-//     'julia',
-//     'kotlin',
-//     'lisp',
-//     'lua',
-//     'mips',
-//     'nim',
-//     'nix',
-//     'ocaml',
-//     'odin',
-//     'pascal',
-//     'perl',
-//     'php',
-//     'powershell',
-//     'prolog',
-//     'python',
-//     'r',
-//     'ruby',
-//     'rust',
-//     'scala',
-//     'scheme',
-//     'sh',
-//     'typescript',
-//     'zig',
-// ];
-
-export default function CodeEditor() {
-    const { editorContent, setEditorContent } = useEditorContent();
+export const CodeViewer = ({ code, className = '' }: { code: string; className?: string; }) => {
     const [editorSettings] = useAtom(editorSettingsAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
 
@@ -79,9 +32,10 @@ export default function CodeEditor() {
             editorProps={{ $blockScrolling: true }}
             width="100%"
             height="100%"
-            value={editorContent}
-            onChange={setEditorContent}
+            value={code}
+            className={className}
             setOptions={{
+                readOnly: true,
                 fontSize: editorSettings.fontSize,
                 tabSize: editorSettings.tabSize,
                 useSoftTabs: editorSettings.useSoftTabs,

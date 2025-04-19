@@ -3,12 +3,12 @@ import { atom, useAtom } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
 import { getClock, updateClock } from '@/lib/services/clock';
 import { tokenAtom } from '@/lib/services/auth';
-import { basaltWSClientAtom } from '@/lib/services/ws';
+import { useWebSocket } from '@/lib/services/ws';
 
 const tickerAtom = atom<NodeJS.Timeout | null>(null);
 
 export const useClock = () => {
-    const [basaltWs] = useAtom(basaltWSClientAtom);
+    const basaltWs = useWebSocket();
     const [clock, setClock] = useAtom(clockAtom);
     const [ticker, setTicker] = useAtom(tickerAtom);
     const [authToken] = useAtom(tokenAtom);

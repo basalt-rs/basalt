@@ -8,26 +8,38 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Wifi, WifiOff } from 'lucide-react';
-import { useTeams, useSelectedTeam, useSelectedTeamIdx } from '@/lib/host-state';
+import { useTeams, useSelectedTeam, useSelectedTeamIdx, selectedQuestionAtom } from '@/lib/host-state';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import TeamInfo from './TeamInfo';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useAtom } from 'jotai';
 
 export default function TeamInspector() {
     const { teamList } = useTeams();
     const { selectedTeam } = useSelectedTeam();
     const { setSelectedTeamIdx } = useSelectedTeamIdx();
+    const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
+
+    const back = () => {
+        if (selectedQuestion !== null) {
+            setSelectedQuestion(null);
+        } else if (selectedTeam !== null) {
+            setSelectedTeamIdx(-1);
+        } else {
+            throw 'unreachable';
+        }
+    };
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-grow">
             <div
-                className={`flex h-full w-full flex-row items-center px-2 ${selectedTeam === null ? 'justify-end' : 'justify-between'}`}
+                className={`flex flex-row items-center pt-2 px-2 ${selectedTeam === null ? 'justify-end' : 'justify-between'}`}
             >
                 {selectedTeam !== null && (
-                    <Button variant="ghost" className="flex" onClick={() => setSelectedTeamIdx(-1)}>
+                    <Button variant="ghost" className="flex" onClick={back}>
                         <ArrowLeft />
-                        View All Teams
+                        Back
                     </Button>
                 )}
                 <Select
@@ -68,7 +80,7 @@ export default function TeamInspector() {
                 </Select>
             </div>
             <Separator className="my-2" />
-            <div className="p-2">
+            <div className="p-2 flex-grow">
                 {selectedTeam === null ? (
                     <div className="flex w-full flex-col gap-1">
                         {teamList.map((team, index) => (
