@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip } from '@/components/util';
 import { selectedQuestionAtom, selectedTeamSubmissionsAtom, useSelectedTeam, useSubmissionHistory } from '@/lib/host-state';
+import { tokenAtom } from '@/lib/services/auth';
 import { allQuestionsAtom } from '@/lib/services/questions';
 import { atom, useAtom } from 'jotai';
 import { ArrowRight, RefreshCw } from 'lucide-react';
@@ -25,6 +26,8 @@ const HistoryTitle = () => {
     const [selectedItem] = useAtom(selectedItemAtom);
     const { history, refreshHistory } = useSubmissionHistory();
     const [loading, setLoading] = useState(false);
+    const { selectedTeam } = useSelectedTeam();
+    const [token] = useAtom(tokenAtom);
 
     if (selectedQuestion === null || history === null) {
         return <h1 className="text-2xl font-bold pb-4">Submission History</h1>;
@@ -32,7 +35,7 @@ const HistoryTitle = () => {
 
     const refresh = async () => {
         setLoading(true);
-        await refreshHistory();
+        await refreshHistory(selectedTeam, selectedQuestion, token);
         setLoading(false);
     };
 
