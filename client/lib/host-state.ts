@@ -2,6 +2,7 @@ import { atom, useAtom } from 'jotai';
 import { CurrentTime } from './services/clock';
 import { QuestionSubmissionState, SubmissionHistory, Team } from './types';
 import { API, tokenAtom, tryFetch } from './services/auth';
+import { useCallback, useEffect, useState } from 'react';
 
 const teamsAtom = atom<Team[]>([
     { name: 'team1', password: 'password1', points: 300, status: true },
@@ -42,25 +43,36 @@ export const useCurrentHostTab = () => {
 export const clockAtom = atom<CurrentTime | undefined>();
 export const selectedQuestionAtom = atom<number | null>(null);
 
-export const questionSubmissionHistoryAtom = atom(async (get) => {
-    const question = get(selectedQuestionAtom);
-    const team = get(selectedTeamAtom);
-    const token = get(tokenAtom);
+export const useSubmissionHistory = () => {
+    const [question] = useAtom(selectedQuestionAtom);
+    const [team] = useAtom(selectedTeamAtom);
+    const [token] = useAtom(tokenAtom);
     const ip = API;
+    const [history, setHistory] = useState<SubmissionHistory[] | null>([]);
 
-    if (team === null || question === null || token === null) return null;
+    const refreshHistory = async (team: Team | null, question: number | null, token: string | null) => {
+        if (team === null || question === null || token === null) {
+            setHistory(null);
+            return;
+        }
 
-    const submissionHistory = await tryFetch<SubmissionHistory[]>(
-        `${ip}/testing/submissions?username=${encodeURI(team.name)}&question_index=${question}`,
-        token,
-    );
+        const submissionHistory = await tryFetch<SubmissionHistory[]>(
+            `${ip}/testing/submissions?username=${encodeURI(team.name)}&question_index=${question}`,
+            token,
+        );
 
-    if (!submissionHistory) return null;
+        if (!submissionHistory) setHistory(null);
+        setHistory(submissionHistory);
+    };
 
-    console.log(submissionHistory);
+    useEffect(() => {
+        refreshHistory(team, question, token);
+    // ↓ this is for `refreshHistory` :/ ↓
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [team, question, token]);
 
-    return submissionHistory;
-});
+    return { history, refreshHistory };
+};
 
 export const selectedTeamSubmissionsAtom = atom(async (get) => {
     const team = get(selectedTeamAtom);

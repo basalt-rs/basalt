@@ -37,7 +37,7 @@ export type TestResults =
 
 export interface QuestionSubmissionState {
     state: TestState;
-    remainingAttempts: number;
+    remainingAttempts: number | null;
 }
 
 export interface Team {

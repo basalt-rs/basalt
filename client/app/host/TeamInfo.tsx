@@ -4,10 +4,12 @@ import { Status } from '@/components/Status';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { questionSubmissionHistoryAtom, selectedQuestionAtom, selectedTeamSubmissionsAtom, useSelectedTeam } from '@/lib/host-state';
+import { Tooltip } from '@/components/util';
+import { selectedQuestionAtom, selectedTeamSubmissionsAtom, useSelectedTeam, useSubmissionHistory } from '@/lib/host-state';
 import { allQuestionsAtom } from '@/lib/services/questions';
 import { atom, useAtom } from 'jotai';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
 
 const formatScore = (score: number): string => {
     if (score % 1 === 0) {
@@ -20,17 +22,29 @@ const selectedItemAtom = atom(0);
 const HistoryTitle = () => {
     const [questions] = useAtom(allQuestionsAtom);
     const [selectedQuestion] = useAtom(selectedQuestionAtom);
-    const [history] = useAtom(questionSubmissionHistoryAtom);
     const [selectedItem] = useAtom(selectedItemAtom);
+    const { history, refreshHistory } = useSubmissionHistory();
+    const [loading, setLoading] = useState(false);
 
     if (selectedQuestion === null || history === null) {
         return <h1 className="text-2xl font-bold pb-4">Submission History</h1>;
     }
 
+    const refresh = async () => {
+        setLoading(true);
+        await refreshHistory();
+        setLoading(false);
+    };
+
     return (
         <h1 className="text-2xl font-bold pb-4 flex flex-row justify-between">
-            <span>
+            <span className="flex gap-2">
                 Submission History - {questions[selectedQuestion].title}
+                <Tooltip tooltip="Refresh">
+                    <Button size="icon" variant="ghost" onClick={refresh}>
+                        <RefreshCw className={loading ? 'animate-spin' : ''} />
+                    </Button>
+                </Tooltip>
             </span>
             <span>
                 {formatScore(history[selectedItem].score)} {history[selectedItem].score === 1 ? 'point' : 'points'}
@@ -40,7 +54,7 @@ const HistoryTitle = () => {
 };
 
 const SubmissionHistory = () => {
-    const [history] = useAtom(questionSubmissionHistoryAtom);
+    const { history } = useSubmissionHistory();
     const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
 
     if (!history) return null;
@@ -67,7 +81,7 @@ const SubmissionHistory = () => {
                 </div>
             </ScrollArea>
             <div className="flex-grow h-full">
-                <CodeViewer code={history[selectedItem].code} className="rounded-md" />
+                <CodeViewer code={history[selectedItem]?.code} className="rounded-md" />
             </div>
         </div>
     );

@@ -22,7 +22,7 @@ import {
     useSubmissionStates,
 } from '@/lib/services/questions';
 import { ExtractAtomValue, useAtom } from 'jotai';
-import { Circle, FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
+import { FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
@@ -106,17 +106,16 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
                     tooltip={
                         <div className="text-center">
                             <p>Submit Solution</p>
-                            {currentState && (
-                                <p
-                                    className={
-                                        currentState.remainingAttempts === 0 ? 'text-fail' : ''
-                                    }
-                                >
-                                    {currentState.remainingAttempts}{' '}
-                                    {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'}{' '}
-                                    remaining
-                                </p>
-                            )}
+                            {(currentState && currentState.remainingAttempts !== null)
+                                && (
+                                    <p
+                                        className={
+                                            currentState.remainingAttempts === 0 ? 'text-fail' : ''
+                                        }
+                                    >
+                                        {currentState.remainingAttempts} {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining
+                                    </p>
+                                )}
                         </div>
                     }
                 >

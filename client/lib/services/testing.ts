@@ -52,7 +52,7 @@ export const useTesting = () => {
                     title: 'Submission Passed',
                     variant: 'success',
                 });
-            } else {
+            } else if (res.remainingAttempts !== null) {
                 toast({
                     title: 'Submission Failed',
                     description: `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
