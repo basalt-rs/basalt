@@ -23,7 +23,6 @@ import {
 } from '@/lib/services/questions';
 import { ExtractAtomValue, useAtom } from 'jotai';
 import { Circle, FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
-import { testColor } from '@/lib/utils';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
@@ -33,6 +32,7 @@ import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
 import { TestResults } from '@/components/TestResults';
 import { useTesting } from '@/lib/services/testing';
+import { Status } from '@/components/Status';
 
 interface EditorButtons {
     isPaused: boolean;
@@ -265,10 +265,7 @@ export default function Competitor() {
                                                 {allQuestions.map((q, i) => (
                                                     <SelectItem key={i} value={`${i}`}>
                                                         <div className="flex flex-row items-center">
-                                                            <Circle
-                                                                fill="currentColor"
-                                                                className={`${allStates && testColor(allStates[i].state)} h-6 w-6 pr-2`}
-                                                            />
+                                                            <Status status={allStates?.[i].state} />
                                                             {q.title}
                                                         </div>
                                                     </SelectItem>

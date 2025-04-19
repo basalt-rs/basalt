@@ -39,3 +39,21 @@ export interface QuestionSubmissionState {
     state: TestState;
     remainingAttempts: number;
 }
+
+export interface Team {
+    name: string;
+    points: number;
+    status: boolean;
+    password: string; // TODO: this should be removed
+}
+
+export interface SubmissionHistory {
+    id: string,
+    submitter: string,
+    time: string,
+    compile_fail: boolean,
+    code: string,
+    question_index: number,
+    score: number,
+    success: boolean,
+}

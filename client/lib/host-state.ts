@@ -1,14 +1,11 @@
 import { atom, useAtom } from 'jotai';
 import { CurrentTime } from './services/clock';
+import { QuestionSubmissionState, SubmissionHistory, Team } from './types';
+import { API, tokenAtom, tryFetch } from './services/auth';
 
-const teamsAtom = atom([
-    { name: 'Team1', password: 'password1', points: 300, status: true },
-    { name: 'Team2', password: 'password2', points: 126, status: true },
-    { name: 'Team3', password: 'password3', points: 0, status: false },
-    { name: 'Team4', password: 'password4', points: 299, status: true },
-    { name: 'Team5', password: 'password5', points: 0, status: true },
-    { name: 'Team6', password: 'password6', points: 5, status: false },
-    { name: 'Team7', password: 'password7', points: 125, status: true },
+const teamsAtom = atom<Team[]>([
+    { name: 'team1', password: 'password1', points: 300, status: true },
+    { name: 'team2', password: 'password2', points: 126, status: true },
 ]);
 export const useTeams = () => {
     const [teamList, setTeamList] = useAtom(teamsAtom);
@@ -43,3 +40,39 @@ export const useCurrentHostTab = () => {
 };
 
 export const clockAtom = atom<CurrentTime | undefined>();
+export const selectedQuestionAtom = atom<number | null>(null);
+
+export const questionSubmissionHistoryAtom = atom(async (get) => {
+    const question = get(selectedQuestionAtom);
+    const team = get(selectedTeamAtom);
+    const token = get(tokenAtom);
+    const ip = API;
+
+    if (team === null || question === null || token === null) return null;
+
+    const submissionHistory = await tryFetch<SubmissionHistory[]>(
+        `${ip}/testing/submissions?username=${encodeURI(team.name)}&question_index=${question}`,
+        token,
+    );
+
+    if (!submissionHistory) return null;
+
+    console.log(submissionHistory);
+
+    return submissionHistory;
+});
+
+export const selectedTeamSubmissionsAtom = atom(async (get) => {
+    const team = get(selectedTeamAtom);
+    const token = get(tokenAtom);
+    const ip = API;
+
+    if (team === null || token === null) return [];
+
+    const submissions = await tryFetch<QuestionSubmissionState[]>(
+        `${ip}/testing/state?username=${encodeURI(team.name)}`,
+        token,
+    );
+
+    return submissions ?? [];
+});

@@ -1,3 +1,4 @@
+import { toast } from '@/hooks';
 import { atom, createStore } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
@@ -46,6 +47,30 @@ export const login = async (username: string, password: string): Promise<Role | 
         store.set(tokenAtom, token);
         return role;
     } else {
+        return null;
+    }
+};
+
+export const tryFetch = async<T> (url: string | URL, token: string, init?: Partial<RequestInit>): Promise<T | null> => {
+    const innitBruv: RequestInit = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            ...(init?.headers ?? {}),
+        },
+        ...(init ?? {}),
+    };
+
+    const res = await fetch(url, innitBruv);
+
+    if (res.ok) {
+        return await res.json();
+    } else {
+        toast({
+            title: 'Error Loading',
+            description: 'There was an error while attempting to fetch a resource.',
+            variant: 'destructive',
+        });
+        console.error(await res.text());
         return null;
     }
 };
