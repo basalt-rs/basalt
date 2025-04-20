@@ -18,7 +18,7 @@ export const WithPauseGuard = ({ isPaused, children }: PropsWithChildren<PauseGu
                     <div className="h-full w-full blur-lg">{children}</div>
                 </div>
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 text-center">
-                    <Pause className="h-48 w-48" />
+                    <Pause fill="currentColor" stroke="none" className="h-48 w-48" />
                     <p className="mt-1 text-2xl opacity-50">Competition Paused</p>
                     <Timer isPaused={isPaused} />
                 </div>
