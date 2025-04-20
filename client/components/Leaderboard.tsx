@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { Circle, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import Timer from '@/components/Timer';
 import { useClock } from '@/hooks/use-clock';
 import { Status } from './Status';

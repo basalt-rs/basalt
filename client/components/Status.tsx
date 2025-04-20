@@ -1,6 +1,6 @@
-import { TestState } from "@/lib/types";
-import { Circle } from "lucide-react";
-import { Tooltip } from "./util";
+import { TestState } from '@/lib/types';
+import { Circle } from 'lucide-react';
+import { Tooltip } from './util';
 
 const color = (state: TestState) => {
     const map: Record<TestState, string> = {
@@ -24,11 +24,16 @@ const name = (state: TestState) => {
     return map[state];
 };
 
-
-export const Status = ({ status, showLabel = false }: { status: TestState | undefined; showLabel?: boolean; }) => {
+export const Status = ({
+    status,
+    showLabel = false,
+}: {
+    status: TestState | undefined;
+    showLabel?: boolean;
+}) => {
     if (showLabel) {
         return (
-            <span className="flex flex-row gap-2 items-center">
+            <span className="flex flex-row items-center gap-2">
                 <Circle
                     className={status ? color(status) : ''}
                     strokeWidth={0}

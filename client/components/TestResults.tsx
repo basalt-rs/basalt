@@ -97,13 +97,7 @@ const TestDetails = ({ output, test }: { output: TestOutput; test: Test }) => {
     }
 
     if (output.reason === 'incorrect-output') {
-        return (
-            <IncorrectOutput
-                input={test.input}
-                expected={test.output}
-                actual={output.stdout}
-            />
-        );
+        return <IncorrectOutput input={test.input} expected={test.output} actual={output.stdout} />;
     }
 
     return <GeneralError error="Solution crashed" output={output} />;

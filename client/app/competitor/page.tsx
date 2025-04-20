@@ -106,16 +106,17 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
                     tooltip={
                         <div className="text-center">
                             <p>Submit Solution</p>
-                            {(currentState && currentState.remainingAttempts !== null)
-                                && (
-                                    <p
-                                        className={
-                                            currentState.remainingAttempts === 0 ? 'text-fail' : ''
-                                        }
-                                    >
-                                        {currentState.remainingAttempts} {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining
-                                    </p>
-                                )}
+                            {currentState && currentState.remainingAttempts !== null && (
+                                <p
+                                    className={
+                                        currentState.remainingAttempts === 0 ? 'text-fail' : ''
+                                    }
+                                >
+                                    {currentState.remainingAttempts}{' '}
+                                    {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'}{' '}
+                                    remaining
+                                </p>
+                            )}
                         </div>
                     }
                 >

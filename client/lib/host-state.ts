@@ -2,7 +2,7 @@ import { atom, useAtom } from 'jotai';
 import { CurrentTime } from './services/clock';
 import { QuestionSubmissionState, SubmissionHistory, Team } from './types';
 import { API, tokenAtom, tryFetch } from './services/auth';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const teamsAtom = atom<Team[]>([
     { name: 'team1', password: 'password1', points: 300, status: true },
@@ -50,7 +50,11 @@ export const useSubmissionHistory = () => {
     const ip = API;
     const [history, setHistory] = useState<SubmissionHistory[] | null>([]);
 
-    const refreshHistory = async (team: Team | null, question: number | null, token: string | null) => {
+    const refreshHistory = async (
+        team: Team | null,
+        question: number | null,
+        token: string | null
+    ) => {
         if (team === null || question === null || token === null) {
             setHistory(null);
             return;
@@ -58,7 +62,7 @@ export const useSubmissionHistory = () => {
 
         const submissionHistory = await tryFetch<SubmissionHistory[]>(
             `${ip}/testing/submissions?username=${encodeURI(team.name)}&question_index=${question}`,
-            token,
+            token
         );
 
         if (!submissionHistory) setHistory(null);
@@ -67,8 +71,8 @@ export const useSubmissionHistory = () => {
 
     useEffect(() => {
         refreshHistory(team, question, token);
-    // ↓ this is for `refreshHistory` :/ ↓
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // ↓ this is for `refreshHistory` :/ ↓
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [team, question, token]);
 
     return { history, refreshHistory };
@@ -83,7 +87,7 @@ export const selectedTeamSubmissionsAtom = atom(async (get) => {
 
     const submissions = await tryFetch<QuestionSubmissionState[]>(
         `${ip}/testing/state?username=${encodeURI(team.name)}`,
-        token,
+        token
     );
 
     return submissions ?? [];

@@ -20,15 +20,13 @@ export interface SimpleOutput {
     status: number;
 }
 export type TestOutput =
-    | { kind: 'pass'; }
-    | (
-        { kind: 'fail'; } & (
-            | { reason: 'timeout' }
-            | ({ reason: 'incorrect-output'; } & SimpleOutput)
-            | ({ reason: 'crash'; } & SimpleOutput)
-        )
-      );
-    
+    | { kind: 'pass' }
+    | ({ kind: 'fail' } & (
+          | { reason: 'timeout' }
+          | ({ reason: 'incorrect-output' } & SimpleOutput)
+          | ({ reason: 'crash' } & SimpleOutput)
+      ));
+
 export type TestResults =
     | { kind: 'other-error'; message: string }
     | { kind: 'internal-error' }
@@ -48,12 +46,12 @@ export interface Team {
 }
 
 export interface SubmissionHistory {
-    id: string,
-    submitter: string,
-    time: string,
-    compile_fail: boolean,
-    code: string,
-    question_index: number,
-    score: number,
-    success: boolean,
+    id: string;
+    submitter: string;
+    time: string;
+    compile_fail: boolean;
+    code: string;
+    question_index: number;
+    score: number;
+    success: boolean;
 }

@@ -1,17 +1,13 @@
-import { humanTime, relativeTime } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import { Tooltip } from "./util";
+import { humanTime, relativeTime } from '@/lib/utils';
+import { useEffect, useState } from 'react';
+import { Tooltip } from './util';
 
 export const Elapsed = ({ time }: { time: Date | string }) => {
     const [text, setText] = useState(relativeTime(time));
 
     useEffect(() => {
-        setText(relativeTime(time))
+        setText(relativeTime(time));
     }, [time]);
 
-    return (
-        <Tooltip tooltip={humanTime(time)} >
-            {text}
-        </Tooltip>
-    );
+    return <Tooltip tooltip={humanTime(time)}>{text}</Tooltip>;
 };

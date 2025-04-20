@@ -51,7 +51,11 @@ export const login = async (username: string, password: string): Promise<Role | 
     }
 };
 
-export const tryFetch = async<T> (url: string | URL, token: string, init?: Partial<RequestInit>): Promise<T | null> => {
+export const tryFetch = async <T>(
+    url: string | URL,
+    token: string,
+    init?: Partial<RequestInit>
+): Promise<T | null> => {
     const innitBruv: RequestInit = {
         headers: {
             Authorization: `Bearer ${token}`,

@@ -9,7 +9,7 @@ import 'ace-builds/src-noconflict/keybinding-emacs';
 import 'ace-builds/src-noconflict/keybinding-sublime';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
-export const CodeViewer = ({ code, className = '' }: { code: string; className?: string; }) => {
+export const CodeViewer = ({ code, className = '' }: { code: string; className?: string }) => {
     const [editorSettings] = useAtom(editorSettingsAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
 
@@ -50,4 +50,4 @@ export const CodeViewer = ({ code, className = '' }: { code: string; className?:
             keyboardHandler={editorSettings.keybind}
         />
     );
-}
+};

@@ -7,17 +7,17 @@ export const Tooltip = ({
     children,
     side = 'bottom',
     delayDuration = 700,
-}: PropsWithChildren<{ tooltip: ReactNode; side?: 'top' | 'right' | 'bottom' | 'left'; delayDuration?: number }>) => (
+}: PropsWithChildren<{
+    tooltip: ReactNode;
+    side?: 'top' | 'right' | 'bottom' | 'left';
+    delayDuration?: number;
+}>) => (
     <CnTooltip.TooltipProvider>
         <CnTooltip.Tooltip delayDuration={delayDuration}>
             <CnTooltip.TooltipTrigger asChild disabled={false}>
-                <span>
-                    {children}
-                </span>
+                <span>{children}</span>
             </CnTooltip.TooltipTrigger>
-            <CnTooltip.TooltipContent side={side}>
-                {tooltip}
-            </CnTooltip.TooltipContent>
+            <CnTooltip.TooltipContent side={side}>{tooltip}</CnTooltip.TooltipContent>
         </CnTooltip.Tooltip>
     </CnTooltip.TooltipProvider>
 );

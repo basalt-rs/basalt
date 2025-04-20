@@ -4,7 +4,6 @@ import { currQuestionIdxAtom, useSubmissionStates } from './questions';
 import { useEditorContent } from '../competitor-state';
 import { useWebSocket } from './ws';
 import { TestResults } from '../types';
-import { NextQuestionAction } from '@/components/util';
 
 const selectedLanguageAtom = atom<string>('java');
 const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
