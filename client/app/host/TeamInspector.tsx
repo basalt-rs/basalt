@@ -1,5 +1,6 @@
 'use client';
 
+import { useAtom } from 'jotai';
 import {
     Select,
     SelectContent,
@@ -8,16 +9,16 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Wifi, WifiOff } from 'lucide-react';
-import { useTeams, useSelectedTeam, useSelectedTeamIdx } from '@/lib/host-state';
+import { teamsAtom, selectedTeamAtom, selectedTeamIdxAtom } from '@/lib/host-state';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import TeamInfo from './TeamInfo';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
 export default function TeamInspector() {
-    const { teamList } = useTeams();
-    const { selectedTeam } = useSelectedTeam();
-    const { setSelectedTeamIdx } = useSelectedTeamIdx();
+    const [teamList, _setTeamList] = useAtom(teamsAtom);
+    const [selectedTeam, _setSelectedTeam] = useAtom(selectedTeamAtom);
+    const [_selectedTeamIdx, setSelectedTeamIdx] = useAtom(selectedTeamIdxAtom);
 
     return (
         <div className="flex flex-col">
