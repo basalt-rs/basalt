@@ -182,5 +182,9 @@ jobs:
         run: npm install # change this to npm or pnpm depending on which one you use.
         working-directory: ./client
 
+      - name: build frontend
+        run: npm run build
+        working-directory: ./client
+
       - name: ensure app builds
         run: cargo build --release
