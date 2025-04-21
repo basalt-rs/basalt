@@ -1,27 +1,30 @@
+import { Pause } from 'lucide-react';
 import { PropsWithChildren } from 'react';
+import Timer from './Timer';
+import { currentTabAtom } from '@/lib/competitor-state';
+import { useAtom } from 'jotai';
+import Leaderboard from './Leaderboard';
 
 export interface PauseGuardProps {
     isPaused?: boolean;
-    withHeader?: boolean;
-    paragraph?: string | null;
 }
 
-export const WithPauseGuard = ({
-    isPaused,
-    withHeader,
-    paragraph,
-    children,
-}: PropsWithChildren<PauseGuardProps>) => {
-    if (isPaused)
+export const WithPauseGuard = ({ isPaused, children }: PropsWithChildren<PauseGuardProps>) => {
+    const [tab] = useAtom(currentTabAtom);
+    if (isPaused && tab !== 'leaderboard') {
         return (
-            <div className="min-h-full min-w-full">
-                {withHeader && <h1 className="text-4xl">Game Paused</h1>}
-                {paragraph ? (
-                    <p>{paragraph}</p>
-                ) : (
-                    <p>Please wait patiently for an administrator to unpause the game</p>
-                )}
+            <div className="relative min-h-full min-w-full cursor-not-allowed">
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                    <div className="h-full w-full blur-lg">{children}</div>
+                </div>
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 text-center">
+                    <Pause fill="currentColor" stroke="none" className="h-48 w-48" />
+                    <p className="mt-1 text-2xl opacity-50">Competition Paused</p>
+                    <Timer isPaused={isPaused} />
+                </div>
             </div>
         );
-    else return children;
+    } else if (isPaused && tab === 'leaderboard') {
+        return <Leaderboard />;
+    } else return children;
 };
