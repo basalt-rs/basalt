@@ -6,11 +6,13 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip } from '@/components/util';
 import {
+    getHistory,
     selectedQuestionAtom,
     selectedTeamSubmissionsAtom,
     useSelectedTeam,
     useSubmissionHistory,
 } from '@/lib/host-state';
+import { ipAtom } from '@/lib/services/api';
 import { tokenAtom } from '@/lib/services/auth';
 import { allQuestionsAtom } from '@/lib/services/questions';
 import { atom, useAtom } from 'jotai';
@@ -29,10 +31,11 @@ const HistoryTitle = () => {
     const [questions] = useAtom(allQuestionsAtom);
     const [selectedQuestion] = useAtom(selectedQuestionAtom);
     const [selectedItem] = useAtom(selectedItemAtom);
-    const { history, refreshHistory } = useSubmissionHistory();
+    const [history, setHistory] = useSubmissionHistory();
     const [loading, setLoading] = useState(false);
     const { selectedTeam } = useSelectedTeam();
     const [token] = useAtom(tokenAtom);
+    const [ip] = useAtom(ipAtom);
 
     if (selectedQuestion === null || history === null) {
         return <h1 className="pb-4 text-2xl font-bold">Submission History</h1>;
@@ -40,7 +43,7 @@ const HistoryTitle = () => {
 
     const refresh = async () => {
         setLoading(true);
-        await refreshHistory(selectedTeam, selectedQuestion, token);
+        if (ip) setHistory(await getHistory(ip, selectedTeam, selectedQuestion, token));
         setLoading(false);
     };
 
@@ -63,7 +66,7 @@ const HistoryTitle = () => {
 };
 
 const SubmissionHistory = () => {
-    const { history } = useSubmissionHistory();
+    const [history] = useSubmissionHistory();
     const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
 
     if (!history) return null;
