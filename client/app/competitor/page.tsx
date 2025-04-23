@@ -34,10 +34,7 @@ import { TestResults } from '@/components/TestResults';
 import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 
-interface EditorButtons {
-    isPaused: boolean;
-}
-const EditorButtons = ({ isPaused }: EditorButtons) => {
+const EditorButtons = () => {
     const { setEditorContent } = useEditorContent();
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
@@ -70,12 +67,7 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
         <div className="flex flex-row items-center justify-between gap-3 border-t p-1">
             <div className="flex flex-row">
                 <Tooltip tooltip="Load File">
-                    <Button
-                        disabled={isPaused}
-                        size="icon"
-                        variant="ghost"
-                        onClick={handleUploadBtnClick}
-                    >
+                    <Button size="icon" variant="ghost" onClick={handleUploadBtnClick}>
                         <Upload />
                     </Button>
                 </Tooltip>
@@ -152,21 +144,13 @@ const EditorButtons = ({ isPaused }: EditorButtons) => {
     );
 };
 
-const TabContent = ({
-    tab,
-    isPaused,
-}: {
-    tab: ExtractAtomValue<typeof currentTabAtom>;
-    isPaused: boolean;
-}) => {
+const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
     switch (tab) {
         case 'text-editor':
             return (
                 <div className="flex h-full flex-col">
-                    <WithPauseGuard isPaused={isPaused}>
-                        <EditorButtons isPaused={isPaused} />
-                        <CodeEditor />
-                    </WithPauseGuard>
+                    <EditorButtons />
+                    <CodeEditor />
                 </div>
             );
         case 'leaderboard':
@@ -180,18 +164,16 @@ const TabContent = ({
     }
 };
 
-const TestResultsPanel = ({ isPaused }: { isPaused: boolean }) => {
+const TestResultsPanel = () => {
     const { loading } = useTesting();
     return (
-        <WithPauseGuard isPaused={isPaused}>
-            <div className="w-full">
-                {loading ? (
-                    <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
-                ) : (
-                    <TestResults />
-                )}
-            </div>
-        </WithPauseGuard>
+        <div className="w-full">
+            {loading ? (
+                <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
+            ) : (
+                <TestResults />
+            )}
+        </div>
     );
 };
 
@@ -237,22 +219,21 @@ export default function Competitor() {
     return (
         <div className="h-screen">
             <div>
-                <CompetitorNavbar isPaused={isPaused} />
+                <CompetitorNavbar />
             </div>
-
-            <div className="flex h-[95vh]">
-                <div className="flex-grow">
-                    <ResizablePanelGroup direction="horizontal">
-                        <ResizablePanel
-                            defaultSize={35}
-                            maxSize={55}
-                            collapsible={true}
-                            collapsedSize={0}
-                            minSize={10}
-                            className="border-black-300 h-full border-t"
-                        >
-                            <ResizablePanelGroup direction="vertical" className="h-full">
-                                <WithPauseGuard isPaused={isPaused}>
+            <WithPauseGuard isPaused={isPaused}>
+                <div className="flex h-[95vh]">
+                    <div className="flex-grow">
+                        <ResizablePanelGroup direction="horizontal">
+                            <ResizablePanel
+                                defaultSize={35}
+                                maxSize={55}
+                                collapsible={true}
+                                collapsedSize={0}
+                                minSize={10}
+                                className="border-black-300 h-full border-t"
+                            >
+                                <ResizablePanelGroup direction="vertical" className="h-full">
                                     <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
                                         <Select
                                             defaultValue={`${currQuestion}`}
@@ -272,7 +253,12 @@ export default function Competitor() {
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        <QuestionDetails question={currentQuestion} status="pass" />
+                                        {currentQuestion && (
+                                            <QuestionDetails
+                                                question={currentQuestion}
+                                                status="pass"
+                                            />
+                                        )}
                                     </ScrollArea>
                                     <div className="py-2.5">
                                         <Separator className="mb-2.5 mt-2.5" />
@@ -283,28 +269,28 @@ export default function Competitor() {
                                             isPaused={isPaused}
                                         />
                                     </div>
-                                </WithPauseGuard>
-                            </ResizablePanelGroup>
-                        </ResizablePanel>
-                        <ResizableHandle withHandle />
-                        <ResizablePanel className="">
-                            <ResizablePanelGroup direction="vertical" className="h-full">
-                                <ResizablePanel defaultSize={400} className="h-full">
-                                    <TabContent isPaused={isPaused} tab={tab} />
-                                </ResizablePanel>
-                                <ResizableHandle />
-                                {(loading || testResults) && (
-                                    <ResizablePanel defaultSize={100} className="h-full">
-                                        <ScrollArea className="h-full w-full">
-                                            <TestResultsPanel isPaused={isPaused} />
-                                        </ScrollArea>
+                                </ResizablePanelGroup>
+                            </ResizablePanel>
+                            <ResizableHandle withHandle />
+                            <ResizablePanel className="">
+                                <ResizablePanelGroup direction="vertical" className="h-full">
+                                    <ResizablePanel defaultSize={400} className="h-full">
+                                        <TabContent tab={tab} />
                                     </ResizablePanel>
-                                )}
-                            </ResizablePanelGroup>
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
+                                    <ResizableHandle />
+                                    {(loading || testResults) && (
+                                        <ResizablePanel defaultSize={100} className="h-full">
+                                            <ScrollArea className="h-full w-full">
+                                                <TestResultsPanel />
+                                            </ScrollArea>
+                                        </ResizablePanel>
+                                    )}
+                                </ResizablePanelGroup>
+                            </ResizablePanel>
+                        </ResizablePanelGroup>
+                    </div>
                 </div>
-            </div>
+            </WithPauseGuard>
         </div>
     );
 }

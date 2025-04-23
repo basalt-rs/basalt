@@ -1,13 +1,16 @@
 import { atom, useAtom } from 'jotai';
-import { API, currentUserAtom, tokenAtom } from './auth'; // TODO: This will be moved after #13 is complete
+import { currentUserAtom, tokenAtom } from './auth';
 import { QuestionResponse, QuestionSubmissionState } from '../types';
 import { toast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 import { useWebSocket } from './ws';
+import { ipAtom } from './api';
 
 export const currQuestionIdxAtom = atom(0);
-export const allQuestionsAtom = atom(async () => {
-    const res = await fetch(`${API}/questions`);
+export const allQuestionsAtom = atom(async (get) => {
+    const ip = get(ipAtom);
+    if (ip === null) return [];
+    const res = await fetch(`${ip}/questions`);
     if (!res.ok) {
         toast({
             title: 'Error',
@@ -55,7 +58,7 @@ export const useSubmissionStates = () => {
     const [token] = useAtom(tokenAtom);
     const ws = useWebSocket();
     const [currentUser] = useAtom(currentUserAtom);
-    const ip = API;
+    const [ip] = useAtom(ipAtom);
     const [currentState, setCurrentState] = useAtom(currentStateAtom);
 
     useEffect(() => {

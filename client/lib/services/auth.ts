@@ -1,6 +1,7 @@
 import { toast } from '@/hooks';
-import { atom, createStore } from 'jotai';
+import { atom, useAtom, useSetAtom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
+import { ipAtom, resetIp } from './api';
 
 export type Role = 'competitor' | 'admin';
 export interface User {
@@ -8,47 +9,54 @@ export interface User {
     role: Role;
 }
 
-export const API = 'http://localhost:8517';
-
 export const tokenAtom = atomWithStorage<string | null>('auth_token', null);
-export const currentUserAtom = atom(async (get) => await getCurrentUser(get(tokenAtom)));
+export const currentUserAtom = atom(async (get) => {
+    const token = get(tokenAtom);
+    const ip = get(ipAtom);
+    if (token === null) return null;
+
+    try {
+        const res = await fetch(`${ip}/auth/me`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!res.ok) {
+            return null;
+        }
+        return (await res.json()) as User;
+    } catch (e: unknown) {
+        if (`${e}`.includes('Load failed')) {
+            resetIp();
+            return null;
+        }
+
+        throw e;
+    }
+});
 export const roleAtom = atom(async (get) => (await get(currentUserAtom))?.role);
 
-export const getCurrentUser = async (token: string | null = null): Promise<User | null> => {
-    const store = createStore();
-    if (token === null) {
-        token = store.get(tokenAtom);
-        if (token === null) return null;
-    }
+export const useLogin = () => {
+    const [ip] = useAtom(ipAtom);
+    const setTokenAtom = useSetAtom(tokenAtom);
 
-    const res = await fetch(`${API}/auth/me`, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
-    if (!res.ok) {
-        return null;
-    }
-    return (await res.json()) as User;
-};
-
-export const login = async (username: string, password: string): Promise<Role | null> => {
-    const store = createStore();
-    const res = await fetch(`${API}/auth/login`, {
-        method: 'POST',
-        body: JSON.stringify({ username, password }),
-        headers: {
-            'content-type': 'application/json',
-        },
-    });
-    if (res.ok) {
-        const { token, role } = await res.json();
-        store.set(tokenAtom, token);
-        return role;
-    } else {
-        return null;
-    }
+    return async (username: string, password: string): Promise<Role | null> => {
+        const res = await fetch(`${ip}/auth/login`, {
+            method: 'POST',
+            body: JSON.stringify({ username, password }),
+            headers: {
+                'content-type': 'application/json',
+            },
+        });
+        if (res.ok) {
+            const { token, role } = await res.json();
+            setTokenAtom(token);
+            return role;
+        } else {
+            return null;
+        }
+    };
 };
 
 export const tryFetch = async <T>(
