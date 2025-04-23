@@ -255,7 +255,12 @@ export default function Competitor() {
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        <QuestionDetails question={currentQuestion} status="pass" />
+                                        {currentQuestion && (
+                                            <QuestionDetails
+                                                question={currentQuestion}
+                                                status="pass"
+                                            />
+                                        )}
                                     </ScrollArea>
                                     <div className="py-2.5">
                                         <Separator className="mb-2.5 mt-2.5" />

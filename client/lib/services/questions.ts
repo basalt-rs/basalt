@@ -1,11 +1,13 @@
 import { atom } from 'jotai';
-import { API } from './auth'; // TODO: This will be moved after #13 is complete
 import { QuestionResponse, TestState } from '../types';
 import { toast } from '@/hooks/use-toast';
+import { ipAtom } from './api';
 
 export const currQuestionIdxAtom = atom(0);
-export const allQuestionsAtom = atom(async () => {
-    const res = await fetch(`${API}/questions`);
+export const allQuestionsAtom = atom(async (get) => {
+    const ip = get(ipAtom);
+    if (ip === null) return [];
+    const res = await fetch(`${ip}/questions`);
     if (!res.ok) {
         toast({
             title: 'Error',
