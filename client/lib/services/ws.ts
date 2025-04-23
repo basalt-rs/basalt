@@ -92,7 +92,10 @@ class BasaltWSClient {
         this.enabled = true;
         this.token = token;
         this.ip = ip;
-        this.ws = new WebSocket(`${this.ip}/${this.endpoint}`, this.token ? [this.token] : undefined);
+        this.ws = new WebSocket(
+            `${this.ip}/${this.endpoint}`,
+            this.token ? [this.token] : undefined
+        );
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
             this.isOpen = true;

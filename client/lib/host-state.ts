@@ -2,7 +2,7 @@ import { atom, useAtom } from 'jotai';
 import { CurrentTime } from './services/clock';
 import { QuestionSubmissionState, SubmissionHistory, Team } from './types';
 import { tokenAtom, tryFetch } from './services/auth';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { ipAtom } from './services/api';
 
 const teamsAtom = atom<Team[]>([
@@ -71,10 +71,9 @@ export const useSubmissionHistory = () => {
     const [ip] = useAtom(ipAtom);
     const [history, setHistory] = useAtom(historyAtom);
 
-
     useEffect(() => {
         if (ip) {
-            getHistory(ip, team, question, token).then(x => {
+            getHistory(ip, team, question, token).then((x) => {
                 console.log('hist');
                 setHistory(x);
             });
