@@ -15,6 +15,6 @@ export interface QuestionResponse {
 }
 
 export interface Languages {
-    language: string;
+    name: string;
     syntax: string;
 }
