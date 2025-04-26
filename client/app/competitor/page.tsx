@@ -37,17 +37,27 @@ import { currentTabAtom, useEditorContent } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
+import { isTauri } from '@tauri-apps/api/core';
+import Link from 'next/link';
+import { ipAtom } from '@/lib/services/api';
+import { download } from '@/lib/tauri';
 
 const EditorButtons = () => {
     const { setEditorContent } = useEditorContent();
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
+    const [ip] = useAtom(ipAtom);
+
     const notImplemented = () =>
         toast({
             title: 'Not Yet Implemented',
             description: 'Check back later!',
             variant: 'destructive',
         });
+
+    const downloadPdf = (ip: string) => {
+        download(`${ip}/competition/packet`);
+    };
 
     const handleUploadBtnClick = () => {
         fileUploadRef.current?.click();
@@ -78,9 +88,16 @@ const EditorButtons = () => {
                     className="hidden"
                 />
                 <Tooltip tooltip="Download Packet">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
-                        <FileDown />
-                    </Button>
+                    {isTauri()
+                        ? <Button size="icon" variant="ghost" onClick={() => downloadPdf(ip!)}>
+                            <FileDown />
+                        </Button>
+                        : <Button size="icon" variant="ghost" asChild>
+                            <Link href={`${ip}/competition/packet`} download>
+                                <FileDown />
+                            </Link>
+                        </Button>
+                    }
                 </Tooltip>
             </div>
             <div className="flex flex-row">
@@ -138,7 +155,7 @@ const TestResults = () => {
     return (
         <div className="w-full">
             <Accordion type="single" collapsible>
-                {currQuestion.tests
+                {currQuestion?.tests
                     .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
                     .map((test, i) => (
                         <AccordionItem key={i} value={`test-${i}`}>
