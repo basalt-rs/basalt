@@ -1,12 +1,14 @@
 import { atom, useAtom } from 'jotai';
 import { useEffect } from 'react';
 import { ipAtom } from './api';
+import { Announcement } from '../types';
 
 type EVENT_MAPPING = {
     'game-paused': object;
     'game-unpaused': {
         timeLeftInSeconds: number;
     };
+    'new-announcement': Announcement;
 };
 
 type BroadcastEventKind = keyof EVENT_MAPPING;
@@ -23,6 +25,7 @@ class BasaltWSClient {
     } = {
         'game-paused': [],
         'game-unpaused': [],
+        'new-announcement': [],
     };
     private onCloseTasks: (() => void)[] = [];
 

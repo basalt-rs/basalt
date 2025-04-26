@@ -20,10 +20,10 @@ import { useSetAtom, useAtom } from 'jotai';
 import { tokenAtom } from '@/lib/services/auth';
 import { RESET } from 'jotai/utils';
 import { Editor } from './Settings';
-import { announcementAtom } from '@/lib/host-state';
+import { announcementsAtom } from '@/lib/host-state';
 
 export default function UserMenu() {
-    const [announcementList] = useAtom(announcementAtom);
+    const [announcementList, _setAnnouncementList] = useAtom(announcementsAtom);
     const [announcementsOpen, setAnnouncementsOpen] = useState(false);
     const { setTheme } = useTheme();
     const setToken = useSetAtom(tokenAtom);
@@ -97,7 +97,7 @@ export default function UserMenu() {
                             announcementList.map((announcement, index) => (
                                 <div key={index} className="rounded-lg border bg-muted p-3">
                                     <p className="text-sm text-muted-foreground">
-                                        {new Date(announcement.timestamp).toLocaleString()}
+                                        {new Date(announcement.time).toLocaleString()}
                                     </p>
                                     <p>{announcement.message}</p>
                                 </div>

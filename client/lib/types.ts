@@ -13,3 +13,10 @@ export interface QuestionResponse {
     description?: string;
     tests: TestResponse[];
 }
+
+export interface Announcement {
+    message: string;
+    id: string;
+    time: string;
+    sender: string;
+}

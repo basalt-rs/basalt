@@ -1,7 +1,8 @@
 import { atom } from 'jotai';
 import { CurrentTime } from './services/clock';
+import { Announcement } from './types';
 
-export const announcementAtom = atom<{ timestamp: string; message: string }[]>([]);
+export const announcementsAtom = atom<Announcement[]>([]);
 
 export const teamsAtom = atom([
     { name: 'Team1', password: 'password1', points: 300, status: true },
