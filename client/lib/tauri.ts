@@ -9,10 +9,12 @@ export const download = async (url: string) => {
     const path = await save({
         title: 'Save Packet PDF',
         defaultPath: `${await downloadDir()}/packet.pdf`,
-        filters: [{
-            name: 'PDF',
-            extensions: ['pdf'],
-        }]
+        filters: [
+            {
+                name: 'PDF',
+                extensions: ['pdf'],
+            },
+        ],
     });
 
     if (!path) return;

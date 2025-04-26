@@ -28,16 +28,17 @@ export default function HostNavbar() {
         <div className="flex w-full justify-between">
             <span>
                 <Tooltip tooltip="Download Packet">
-                    {isTauri()
-                        ? <Button size="icon" variant="ghost" onClick={() => downloadPdf(ip!)}>
+                    {isTauri() ? (
+                        <Button size="icon" variant="ghost" onClick={() => downloadPdf(ip!)}>
                             <FileDown />
                         </Button>
-                        : <Button size="icon" variant="ghost" asChild>
+                    ) : (
+                        <Button size="icon" variant="ghost" asChild>
                             <Link href={`${ip}/competition/packet`} download>
                                 <FileDown />
                             </Link>
                         </Button>
-                    }
+                    )}
                 </Tooltip>
             </span>
             <span>

@@ -88,16 +88,17 @@ const EditorButtons = () => {
                     className="hidden"
                 />
                 <Tooltip tooltip="Download Packet">
-                    {isTauri()
-                        ? <Button size="icon" variant="ghost" onClick={() => downloadPdf(ip!)}>
+                    {isTauri() ? (
+                        <Button size="icon" variant="ghost" onClick={() => downloadPdf(ip!)}>
                             <FileDown />
                         </Button>
-                        : <Button size="icon" variant="ghost" asChild>
+                    ) : (
+                        <Button size="icon" variant="ghost" asChild>
                             <Link href={`${ip}/competition/packet`} download>
                                 <FileDown />
                             </Link>
                         </Button>
-                    }
+                    )}
                 </Tooltip>
             </div>
             <div className="flex flex-row">
