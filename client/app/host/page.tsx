@@ -18,32 +18,24 @@ import { Ellipsis, Copy, Wifi, WifiOff } from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useSelectedTeamIdx, useCurrentHostTab, useTeams } from '@/lib/host-state';
+import { useSelectedTeamIdx, useCurrentHostTab } from '@/lib/host-state';
 import TeamInspector from './TeamInspector';
 import { useClock } from '@/hooks/use-clock';
+import { useTeams } from '@/hooks/use-teams';
 
 export default function Host() {
-    const { teamList, setTeamList } = useTeams();
+    const { teamList } = useTeams();
     const { setSelectedTeamIdx } = useSelectedTeamIdx();
     const { currentTab, setCurrentTab } = useCurrentHostTab();
     const { isPaused, pause, unPause } = useClock();
 
-    const disconnectAllTeams = () => {
-        const updatedTeams = teamList.map((team) => ({
-            ...team,
-            status: false,
-        }));
-        setTeamList(updatedTeams);
+    const handleDisconnectTeam = (_: string) => {
+        // TODO(Jack): Add toast
+        console.log('TOAST HERE');
     };
 
-    const handleDisconnectTeam = (teamName: string) => {
-        setTeamList((prev) =>
-            prev.map((team) => (team.name === teamName ? { ...team, status: false } : team))
-        );
-    };
-
-    const handleRemoveTeam = (teamName: string) => {
-        setTeamList((prev) => prev.filter((team) => team.name !== teamName));
+    const handleRemoveTeam = (_: string) => {
+        //setTeamList((prev) => prev.filter((team) => team.name !== teamName));
     };
 
     return (
@@ -57,9 +49,7 @@ export default function Host() {
                             <Ellipsis />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuItem onClick={disconnectAllTeams}>
-                                Kick All
-                            </DropdownMenuItem>
+                            <DropdownMenuItem disabled>Kick All</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

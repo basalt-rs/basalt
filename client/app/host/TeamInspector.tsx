@@ -8,14 +8,15 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Wifi, WifiOff } from 'lucide-react';
-import { useTeams, useSelectedTeam, useSelectedTeamIdx } from '@/lib/host-state';
+import { useSelectedTeam, useSelectedTeamIdx } from '@/lib/host-state';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import TeamInfo from './TeamInfo';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useTeams } from '@/hooks/use-teams';
 
 export default function TeamInspector() {
-    const { teamList } = useTeams();
+    const { teamsList, isLoading } = useTeams();
     const { selectedTeam } = useSelectedTeam();
     const { setSelectedTeamIdx } = useSelectedTeamIdx();
 
@@ -52,15 +53,19 @@ export default function TeamInspector() {
                         </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                        {teamList.map((team, index) => (
+                        {teamsList.map((team, index) => (
                             <SelectItem value={`${index}`} key={index}>
                                 <span className="flex gap-1">
-                                    {team.status ? (
+                                    {team.info.disconnected ||
+                                    (team.info.lastSeen
+                                        ? team.info.lastSeen.getMilliseconds() - Date.now() >
+                                          60 * 1000
+                                        : false) ? (
                                         <Wifi className="text-green-500" />
                                     ) : (
                                         <WifiOff className="text-gray-300 dark:text-gray-500" />
                                     )}
-                                    {team.name}
+                                    {team.team}
                                 </span>
                             </SelectItem>
                         ))}
@@ -71,7 +76,7 @@ export default function TeamInspector() {
             <div className="p-2">
                 {selectedTeam === null ? (
                     <div className="flex w-full flex-col gap-1">
-                        {teamList.map((team, index) => (
+                        {teamsList.map((team, index) => (
                             <Card
                                 key={index}
                                 className="cursor-pointer"
@@ -80,14 +85,19 @@ export default function TeamInspector() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center justify-between">
                                         <span className="flex items-center gap-1">
-                                            {team.status ? (
+                                            {team.info.disconnected ||
+                                            (team.info.lastSeen
+                                                ? team.info.lastSeen.getMilliseconds() -
+                                                      Date.now() >
+                                                  60 * 1000
+                                                : false) ? (
                                                 <Wifi className="text-green-500" />
                                             ) : (
                                                 <WifiOff className="text-gray-300 dark:text-gray-500" />
                                             )}
-                                            {team.name}
+                                            {team.team}
                                         </span>
-                                        <p>{team.points} points</p>
+                                        <p>{40} points</p>
                                     </CardTitle>
                                 </CardHeader>
                             </Card>
