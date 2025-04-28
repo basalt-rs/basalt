@@ -3,7 +3,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAtom } from 'jotai';
 import { selectedTeamAtom } from '@/lib/host-state';
 export default function TeamInfo() {
-    const [selectedTeam, _setSelectedTeam] = useAtom(selectedTeamAtom);
+    const [selectedTeam] = useAtom(selectedTeamAtom);
 
     return (
         selectedTeam !== null && (

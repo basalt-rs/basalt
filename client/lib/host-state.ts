@@ -1,8 +1,5 @@
 import { atom } from 'jotai';
 import { CurrentTime } from './services/clock';
-import { Announcement } from './types';
-
-export const announcementsAtom = atom<Announcement[]>([]);
 
 export const teamsAtom = atom([
     { name: 'Team1', password: 'password1', points: 300, status: true },
@@ -12,9 +9,9 @@ export const teamsAtom = atom([
     { name: 'Team5', password: 'password5', points: 0, status: true },
     { name: 'Team6', password: 'password6', points: 5, status: false },
     { name: 'Team7', password: 'password7', points: 125, status: true },
-    { name: 'Team5', password: 'password5', points: 0, status: true },
-    { name: 'Team6', password: 'password6', points: 5, status: false },
-    { name: 'Team7', password: 'password7', points: 125, status: true },
+    { name: 'Team8', password: 'password8', points: 0, status: true },
+    { name: 'Team9', password: 'password9', points: 5, status: false },
+    { name: 'Team10', password: 'password10', points: 125, status: true },
 ]);
 
 export const selectedTeamIdxAtom = atom(-1);

@@ -23,12 +23,15 @@ import { selectedTeamIdxAtom, currentHostTabAtom, teamsAtom } from '@/lib/host-s
 import TeamInspector from './TeamInspector';
 import { useClock } from '@/hooks/use-clock';
 import AnnouncementForm from './AnnoucementForm';
+import { useAnnouncements } from '@/lib/services/announcement';
 
 export default function Host() {
     const [teamList, setTeamList] = useAtom(teamsAtom);
     const [_selectedTeamIdx, setSelectedTeamIdx] = useAtom(selectedTeamIdxAtom);
     const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
     const { isPaused, pause, unPause } = useClock();
+
+    useAnnouncements();
 
     const disconnectAllTeams = () => {
         const updatedTeams = teamList.map((team) => ({
@@ -165,9 +168,9 @@ export default function Host() {
                             ))}
                     </div>
                 </div>
+                <Separator />
                 <div>
-                    <Separator />
-                    <div className="flex h-[34vh] flex-col justify-end px-2">
+                    <div className="flex h-80 flex-col justify-end px-2">
                         <AnnouncementForm />
                     </div>
                     <Separator className="mb-2.5" />
