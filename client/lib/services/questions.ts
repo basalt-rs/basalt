@@ -56,7 +56,7 @@ const currentStateAtom = atom(
 export const useSubmissionStates = () => {
     const [states, setStates] = useAtom(statesAtom);
     const [token] = useAtom(tokenAtom);
-    const ws = useWebSocket();
+    const [ws] = useWebSocket();
     const [currentUser] = useAtom(currentUserAtom);
     const [ip] = useAtom(ipAtom);
     const [currentState, setCurrentState] = useAtom(currentStateAtom);

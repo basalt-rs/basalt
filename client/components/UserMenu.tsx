@@ -15,21 +15,15 @@ import {
     DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { useRouter } from 'next/navigation';
-import { useSetAtom } from 'jotai';
-import { tokenAtom } from '@/lib/services/auth';
-import { RESET } from 'jotai/utils';
+import { useLogin } from '@/lib/services/auth';
 import { Editor } from './Settings';
+import { useRouter } from 'next/navigation';
 
 export default function UserMenu() {
     const { setTheme } = useTheme();
-    const setToken = useSetAtom(tokenAtom);
+    const { logout } = useLogin();
     const router = useRouter();
     const [settingsOpen, setOpen] = useState(false);
-    const logout = () => {
-        setToken(RESET);
-        router.replace('/');
-    };
 
     return (
         <>
@@ -63,7 +57,7 @@ export default function UserMenu() {
                             <Settings /> Settings
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={logout}>
+                        <DropdownMenuItem onClick={() => { logout(); router.replace('/') }}>
                             <LogOut />
                             Log Out
                         </DropdownMenuItem>

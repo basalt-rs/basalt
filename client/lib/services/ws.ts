@@ -89,7 +89,9 @@ class BasaltWSClient {
     }
 
     public establish(ip: string, token: string | null, retries: number = 0) {
+        console.log('connecting to foo');
         this.enabled = true;
+        this.isOpen = true;
         this.token = token;
         this.ip = ip;
         this.ws = new WebSocket(
@@ -191,7 +193,7 @@ class BasaltWSClient {
     }
 
     public closeConnection() {
-        console.debug('websocket closed');
+        console.debug('websocket closed, ws=', this.ws);
         if (this.ws) {
             this.ws.close();
         }
@@ -211,21 +213,18 @@ class BasaltWSClient {
     }
 }
 
-const basaltWSClientAtom = atom(new BasaltWSClient('ws'));
+export const basaltWSClientAtom = atom(new BasaltWSClient('ws'));
 
 export const useWebSocket = () => {
-    const [ws, setWs] = useAtom(basaltWSClientAtom);
-    const [ip] = useAtom(ipAtom);
-    const [token] = useAtom(tokenAtom);
+    const [ws] = useAtom(basaltWSClientAtom);
 
-    useEffect(() => {
-        if (ip !== ws.ip) {
-            ws.closeConnection();
-            if (ip) {
-                ws.establish(ip, token);
-            }
-        }
-    }, [ip, token, ws, setWs]);
+    const establish = (ip: string, token: string | null) => {
+        ws.establish(ip, token);
+    };
 
-    return ws;
+    const drop = () => {
+        ws.closeConnection();
+    };
+
+    return [ws, establish, drop] as const;
 };

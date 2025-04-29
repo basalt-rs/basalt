@@ -3,6 +3,11 @@ import { Trophy } from 'lucide-react';
 import Timer from '@/components/Timer';
 import { useClock } from '@/hooks/use-clock';
 import { Status } from './Status';
+import { useWebSocket } from '@/lib/services/ws';
+import { useEffect } from 'react';
+import { useAtom } from 'jotai';
+import { tokenAtom } from '@/lib/services/auth';
+import { ipAtom } from '@/lib/services/api';
 
 type TestState = 'pass' | 'fail' | 'in-progress' | 'not-attempted';
 
@@ -152,6 +157,12 @@ const TeamRank = () => {
 
 export default function Leaderboard({ showTimer = true }) {
     const { clock, isPaused } = useClock();
+    const [ip] = useAtom(ipAtom);
+    const [token] = useAtom(tokenAtom);
+    const [, connectWs] = useWebSocket();
+    useEffect(() => {
+        if (ip) connectWs(ip, token)
+    }, [connectWs, ip, token]);
     return (
         <div className="h-full">
             {showTimer && clock && (
