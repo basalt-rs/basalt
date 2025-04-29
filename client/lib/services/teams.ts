@@ -1,15 +1,28 @@
+export type RawTeamInfo = {
+    team: string;
+    score: number;
+    checkedIn: boolean;
+    lastSeen?: string | null;
+    disconnected: boolean;
+};
+
 export type TeamInfo = {
     team: string;
-    info: {
-        checkedIn: boolean;
-        lastSeen?: Date | null;
-        disconnected: boolean;
-    };
+    score: number;
+    checkedIn: boolean;
+    lastSeenMs?: number | null;
+    disconnected: boolean;
 };
+
+const parseDate = (r: RawTeamInfo): TeamInfo => ({
+    ...r,
+    lastSeenMs: r.lastSeen ? Date.parse(r.lastSeen) : null,
+});
 
 export const getTeams = async (ip: string) => {
     const res = await fetch(`${ip}/teams`);
     if (res.ok) {
-        return (await res.json()) as TeamInfo[];
+        const result = (await res.json()) as TeamInfo[];
+        return result.map(parseDate);
     } else throw new Error('');
 };

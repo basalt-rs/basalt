@@ -4,7 +4,7 @@ import { useWebSocket } from '@/lib/services/ws';
 import { useQuery } from '@tanstack/react-query';
 import { atom, useAtom, useAtomValue } from 'jotai';
 
-const teamsAtom = atom<Record<TeamInfo['team'], TeamInfo['info']>>({});
+const teamsAtom = atom<Record<string, TeamInfo>>({});
 const teamsListAtom = atom<TeamInfo[]>([]);
 export const useTeams = () => {
     const ip = useAtomValue(ipAtom);
@@ -13,12 +13,12 @@ export const useTeams = () => {
     const [teamsList, setTeamsList] = useAtom(teamsListAtom);
 
     const updateTeams = (teams: TeamInfo[]) => {
-        setTeams(teams.reduce((acc, t) => ({ ...acc, [t.team]: t.info }), {}));
+        setTeams(teams.reduce((acc, t) => ({ ...acc, [t.team]: t }), {}));
         setTeamsList(teams);
     };
     const updateTeam = (team: TeamInfo) => {
-        setTeams((prev) => ({ ...prev, [team.team]: team.info }));
-        setTeamsList(Object.entries(teams).map(([t, info]) => ({ team: t, info })));
+        setTeams((prev) => ({ ...prev, [team.team]: team }));
+        setTeamsList(Object.values(teams).map((t) => t));
     };
 
     const { isLoading, isError } = useQuery({

@@ -1,7 +1,6 @@
 'use client';
 import QuestionAccordion from './QuestionAccordion';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/hooks/use-toast';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import {
     DropdownMenu,
@@ -14,7 +13,7 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Ellipsis, Copy, Wifi, WifiOff } from 'lucide-react';
+import { Ellipsis, Wifi, WifiOff } from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,7 +23,7 @@ import { useClock } from '@/hooks/use-clock';
 import { useTeams } from '@/hooks/use-teams';
 
 export default function Host() {
-    const { teamList } = useTeams();
+    const { teamsList: teamList } = useTeams();
     const { setSelectedTeamIdx } = useSelectedTeamIdx();
     const { currentTab, setCurrentTab } = useCurrentHostTab();
     const { isPaused, pause, unPause } = useClock();
@@ -32,10 +31,6 @@ export default function Host() {
     const handleDisconnectTeam = (_: string) => {
         // TODO(Jack): Add toast
         console.log('TOAST HERE');
-    };
-
-    const handleRemoveTeam = (_: string) => {
-        //setTeamList((prev) => prev.filter((team) => team.name !== teamName));
     };
 
     return (
@@ -56,7 +51,7 @@ export default function Host() {
                 <Separator />
                 <div className="flex flex-col gap-1.5 overflow-y-auto p-2.5">
                     {teamList
-                        .sort((a, b) => b.points - a.points)
+                        .sort((a, b) => b.score - a.score)
                         .map((team, index) => (
                             <span
                                 className="flex w-full justify-between rounded border p-1.5"
@@ -64,21 +59,27 @@ export default function Host() {
                             >
                                 <p className="w-1/2 truncate">
                                     <span className="flex gap-1">
-                                        {team.status ? (
+                                        {!team.disconnected &&
+                                        (team.lastSeenMs
+                                            ? Math.abs(Date.now() - team.lastSeenMs) < 45 * 1000
+                                            : false) ? (
                                             <Wifi className="text-green-500" />
                                         ) : (
                                             <WifiOff className="text-gray-300 dark:text-gray-500" />
                                         )}
-                                        {team.name}
+                                        {team.team}
                                     </span>
                                 </p>
-                                <p>{team.points} pts</p>
+                                <p>{team.score} pts</p>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger className="pr-0.5">
                                         <Ellipsis />
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
-                                        {team.status ? (
+                                        {!team.disconnected &&
+                                        (team.lastSeenMs
+                                            ? Math.abs(Date.now() - team.lastSeenMs) < 45
+                                            : false) ? (
                                             <div>
                                                 <DropdownMenuItem>Message</DropdownMenuItem>
                                                 <DropdownMenuItem
@@ -94,55 +95,19 @@ export default function Host() {
                                                         Info
                                                     </DropdownMenuSubTrigger>
                                                     <DropdownMenuPortal>
-                                                        <DropdownMenuSubContent>
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    navigator.clipboard.writeText(
-                                                                        team.password
-                                                                    );
-                                                                    toast({
-                                                                        title: 'Password Copied',
-                                                                        description: `The password for '${team.name}' has been saved to your clipboard`,
-                                                                        variant: 'default',
-                                                                    });
-                                                                }}
-                                                            >
-                                                                <Copy />
-                                                                Copy Password
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuSubContent>
+                                                        <DropdownMenuSubContent />
                                                     </DropdownMenuPortal>
                                                 </DropdownMenuSub>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem
-                                                    onClick={() => handleDisconnectTeam(team.name)}
+                                                    onClick={() => handleDisconnectTeam(team.team)}
                                                 >
                                                     Kick
                                                 </DropdownMenuItem>
                                             </div>
                                         ) : (
                                             <div>
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(
-                                                            team.password
-                                                        );
-                                                        toast({
-                                                            title: 'Password Copied',
-                                                            description: `The password for '${team.name}' has been saved to your clipboard`,
-                                                            variant: 'default',
-                                                        });
-                                                    }}
-                                                >
-                                                    <Copy />
-                                                    Copy Password
-                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    onClick={() => handleRemoveTeam(team.name)}
-                                                >
-                                                    Delete
-                                                </DropdownMenuItem>
                                             </div>
                                         )}
                                     </DropdownMenuContent>

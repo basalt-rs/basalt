@@ -56,10 +56,9 @@ export default function TeamInspector() {
                         {teamsList.map((team, index) => (
                             <SelectItem value={`${index}`} key={index}>
                                 <span className="flex gap-1">
-                                    {team.info.disconnected ||
-                                    (team.info.lastSeen
-                                        ? team.info.lastSeen.getMilliseconds() - Date.now() >
-                                          60 * 1000
+                                    {team.disconnected ||
+                                    (team.lastSeenMs
+                                        ? team.lastSeenMs - Date.now() > 45 * 1000
                                         : false) ? (
                                         <Wifi className="text-green-500" />
                                     ) : (
@@ -85,12 +84,12 @@ export default function TeamInspector() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center justify-between">
                                         <span className="flex items-center gap-1">
-                                            {team.info.disconnected ||
-                                            (team.info.lastSeen
-                                                ? team.info.lastSeen.getMilliseconds() -
-                                                      Date.now() >
-                                                  60 * 1000
-                                                : false) ? (
+                                            {!(
+                                                team.disconnected ||
+                                                (team.lastSeenMs
+                                                    ? team.lastSeenMs - Date.now() > 45 * 1000
+                                                    : false)
+                                            ) ? (
                                                 <Wifi className="text-green-500" />
                                             ) : (
                                                 <WifiOff className="text-gray-300 dark:text-gray-500" />
