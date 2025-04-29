@@ -44,19 +44,6 @@ const EditorButtons = () => {
     const [currQuestion] = useAtom(currQuestionAtom);
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
 
-    const languageLookup = Object.fromEntries(
-        (currQuestion?.languages ?? []).map((l) => [l.name, l.syntax])
-    );
-
-    if (!selectedLanguage && currQuestion?.languages?.[0]?.syntax) {
-        setSelectedLanguage(currQuestion.languages[0].syntax);
-    }
-
-    const handleLanguageChange = (name: string) => {
-        const syntax = languageLookup[name];
-        if (syntax) setSelectedLanguage(syntax);
-    };
-
     const notImplemented = () =>
         toast({
             title: 'Not Yet Implemented',
@@ -112,14 +99,7 @@ const EditorButtons = () => {
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
-                    <Select
-                        value={
-                            Object.entries(languageLookup).find(
-                                ([_, syntax]) => syntax === selectedLanguage
-                            )?.[0] || ''
-                        }
-                        onValueChange={handleLanguageChange}
-                    >
+                    <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
                         <SelectTrigger className="w-56">
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
