@@ -27,9 +27,11 @@ const name = (state: TestState) => {
 export const Status = ({
     status,
     showLabel = false,
+    size = 18,
 }: {
     status: TestState | undefined;
     showLabel?: boolean;
+    size?: number;
 }) => {
     if (showLabel) {
         return (
@@ -37,6 +39,7 @@ export const Status = ({
                 <Circle
                     className={status ? color(status) : ''}
                     strokeWidth={0}
+                    size={size}
                     color="currentColor"
                     fill="currentColor"
                 />
@@ -49,6 +52,7 @@ export const Status = ({
                 <Circle
                     className={status ? color(status) : ''}
                     strokeWidth={0}
+                    size={size}
                     color="currentColor"
                     fill="currentColor"
                 />
