@@ -139,28 +139,37 @@ export default function TeamInfo() {
                     {selectedQuestion === null ? (
                         <div className="flex w-full flex-col gap-1 py-2">
                             {questions.map((q, i) => (
-                                <Card
+                                <Tooltip
                                     key={i}
-                                    className={
-                                        selectedTeamSubmissions[i].state === 'not-attempted'
-                                            ? 'text-muted-foreground'
-                                            : 'cursor-pointer hover:bg-muted/20 hover:underline'
-                                    }
-                                    onClick={() => setSelectedQuestion(i)}
+                                    tooltip="This question has not been attempted"
+                                    disabled={selectedTeamSubmissions[i].state !== 'not-attempted'}
                                 >
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center justify-between">
-                                            {q.title}
-                                            <span className="flex w-72 flex-row justify-between gap-2">
-                                                <Status
-                                                    status={selectedTeamSubmissions[i].state}
-                                                    showLabel
-                                                />
-                                                <ArrowRight />
-                                            </span>
-                                        </CardTitle>
-                                    </CardHeader>
-                                </Card>
+                                    <Card
+                                        className={
+                                            selectedTeamSubmissions[i].state === 'not-attempted'
+                                                ? 'text-muted-foreground cursor-not-allowed'
+                                                : 'cursor-pointer hover:bg-muted/20 hover:underline'
+                                        }
+                                        onClick={
+                                            selectedTeamSubmissions[i].state === 'not-attempted'
+                                                ? () => { }
+                                                : () => setSelectedQuestion(i)
+                                        }
+                                    >
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center justify-between">
+                                                {q.title}
+                                                <span className="flex w-72 flex-row justify-between gap-2">
+                                                    <Status
+                                                        status={selectedTeamSubmissions[i].state}
+                                                        showLabel
+                                                    />
+                                                    <ArrowRight />
+                                                </span>
+                                            </CardTitle>
+                                        </CardHeader>
+                                    </Card>
+                                </Tooltip>
                             ))}
                         </div>
                     ) : (

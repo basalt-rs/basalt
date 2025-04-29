@@ -7,19 +7,23 @@ export const Tooltip = ({
     children,
     side = 'bottom',
     delayDuration = 700,
+    disabled = false,
 }: PropsWithChildren<{
     tooltip: ReactNode;
     side?: 'top' | 'right' | 'bottom' | 'left';
     delayDuration?: number;
+    disabled?: boolean;
 }>) => (
-    <CnTooltip.TooltipProvider>
-        <CnTooltip.Tooltip delayDuration={delayDuration}>
-            <CnTooltip.TooltipTrigger asChild disabled={false}>
-                <span>{children}</span>
-            </CnTooltip.TooltipTrigger>
-            <CnTooltip.TooltipContent side={side}>{tooltip}</CnTooltip.TooltipContent>
-        </CnTooltip.Tooltip>
-    </CnTooltip.TooltipProvider>
+    disabled
+        ? <span>{children}</span>
+        : <CnTooltip.TooltipProvider>
+            <CnTooltip.Tooltip delayDuration={delayDuration}>
+                <CnTooltip.TooltipTrigger asChild disabled={false}>
+                    <span>{children}</span>
+                </CnTooltip.TooltipTrigger>
+                <CnTooltip.TooltipContent side={side}>{tooltip}</CnTooltip.TooltipContent>
+            </CnTooltip.Tooltip>
+        </CnTooltip.TooltipProvider>
 );
 
 export const CodeBlock = ({ text, rawHtml = false }: { text: string; rawHtml?: boolean }) =>
@@ -53,9 +57,9 @@ export const Diff = ({ left, right, inline }: { left: string; right: string; inl
             d.count === 1
                 ? { ...d, value: d.value.replace(/\n$/, '') }
                 : d.value
-                      .replace(/\n$/, '')
-                      .split('\n')
-                      .map((value) => ({ ...d, value: value || ' ' }))
+                    .replace(/\n$/, '')
+                    .split('\n')
+                    .map((value) => ({ ...d, value: value || ' ' }))
         );
         setDiff(diff2);
     }, [left, right, inline, setDiff]);
