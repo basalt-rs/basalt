@@ -4,14 +4,13 @@ import { useWebSocket } from './ws';
 import { toast } from '@/hooks';
 import { useEffect } from 'react';
 import { ipAtom } from './api';
-import { roleAtom, tokenAtom } from './auth';
+import { tokenAtom } from './auth';
 import { get } from 'react-hook-form';
 
 export const announcementsAtom = atom<Announcement[]>([]);
 
 export const useAnnouncements = () => {
     const authToken = get(tokenAtom);
-    const role = get(roleAtom);
     const [ip] = useAtom(ipAtom);
     const setAnnouncements = useSetAtom(announcementsAtom);
     const basaltWs = useWebSocket();
@@ -41,17 +40,15 @@ export const useAnnouncements = () => {
         fetchAnnouncements();
     }, [ip, authToken, setAnnouncements]);
 
-    if (role !== 'host') {
-        basaltWs.registerEvent(
-            'new-announcement',
-            (announcement) => {
-                setAnnouncements((prev) => [...prev, announcement]);
-                toast({
-                    title: 'New Announcement',
-                    description: announcement.message,
-                });
-            },
-            'new-announcements'
-        );
-    }
+    basaltWs.registerEvent(
+        'new-announcement',
+        (announcement) => {
+            setAnnouncements((prev) => [...prev, announcement]);
+            toast({
+                title: 'New Announcement',
+                description: announcement.message,
+            });
+        },
+        'new-announcements'
+    );
 };

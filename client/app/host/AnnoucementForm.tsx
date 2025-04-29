@@ -61,6 +61,11 @@ export default function AnnouncementForm() {
         setInput('');
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await addAnnouncement();
+    };
+
     useEffect(() => {
         if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
@@ -79,23 +84,17 @@ export default function AnnouncementForm() {
                     </div>
                 ))}
             </div>
-            <span className="flex items-center gap-1">
+            <form onSubmit={handleSubmit} className="flex items-center gap-1">
                 <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addAnnouncement();
-                        }
-                    }}
                     placeholder="Announcement ..."
                     className="h-fit w-full rounded-lg border-2 p-2"
                 />
-                <Button onClick={addAnnouncement}>
+                <Button type="submit">
                     <Send />
                 </Button>
-            </span>
+            </form>
         </div>
     );
 }

@@ -23,6 +23,7 @@ import { RESET } from 'jotai/utils';
 import { Editor } from './Settings';
 import { announcementsAtom } from '@/lib/services/announcement';
 import { Separator } from './ui/separator';
+import { Elapsed } from './Elapsed';
 
 export default function UserMenu() {
     const [announcementList] = useAtom(announcementsAtom);
@@ -52,7 +53,7 @@ export default function UserMenu() {
                                 [...announcementList].reverse().map((announcement, index) => (
                                     <div key={index} className="rounded-lg border bg-muted p-3">
                                         <p className="text-sm text-muted-foreground">
-                                            {new Date(announcement.time).toLocaleString()}
+                                            <Elapsed time={announcement.time} />
                                         </p>
                                         <p>{announcement.message}</p>
                                     </div>
