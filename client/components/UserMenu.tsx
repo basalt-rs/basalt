@@ -57,7 +57,12 @@ export default function UserMenu() {
                             <Settings /> Settings
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => { logout(); router.replace('/') }}>
+                        <DropdownMenuItem
+                            onClick={() => {
+                                logout();
+                                router.replace('/');
+                            }}
+                        >
                             <LogOut />
                             Log Out
                         </DropdownMenuItem>

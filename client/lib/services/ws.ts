@@ -1,8 +1,5 @@
 import { atom, useAtom } from 'jotai';
-import { tokenAtom } from './auth';
 import { TestResults, TestState } from '../types';
-import { useEffect } from 'react';
-import { ipAtom } from './api';
 
 type EVENT_MAPPING = {
     'game-paused': object;

@@ -161,7 +161,7 @@ export default function Leaderboard({ showTimer = true }) {
     const [token] = useAtom(tokenAtom);
     const [, connectWs] = useWebSocket();
     useEffect(() => {
-        if (ip) connectWs(ip, token)
+        if (ip) connectWs(ip, token);
     }, [connectWs, ip, token]);
     return (
         <div className="h-full">
