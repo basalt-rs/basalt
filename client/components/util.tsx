@@ -13,10 +13,11 @@ export const Tooltip = ({
     side?: 'top' | 'right' | 'bottom' | 'left';
     delayDuration?: number;
     disabled?: boolean;
-}>) => (
-    disabled
-        ? <span>{children}</span>
-        : <CnTooltip.TooltipProvider>
+}>) =>
+    disabled ? (
+        <span>{children}</span>
+    ) : (
+        <CnTooltip.TooltipProvider>
             <CnTooltip.Tooltip delayDuration={delayDuration}>
                 <CnTooltip.TooltipTrigger asChild disabled={false}>
                     <span>{children}</span>
@@ -24,7 +25,7 @@ export const Tooltip = ({
                 <CnTooltip.TooltipContent side={side}>{tooltip}</CnTooltip.TooltipContent>
             </CnTooltip.Tooltip>
         </CnTooltip.TooltipProvider>
-);
+    );
 
 export const CodeBlock = ({ text, rawHtml = false }: { text: string; rawHtml?: boolean }) =>
     rawHtml ? (
@@ -57,9 +58,9 @@ export const Diff = ({ left, right, inline }: { left: string; right: string; inl
             d.count === 1
                 ? { ...d, value: d.value.replace(/\n$/, '') }
                 : d.value
-                    .replace(/\n$/, '')
-                    .split('\n')
-                    .map((value) => ({ ...d, value: value || ' ' }))
+                      .replace(/\n$/, '')
+                      .split('\n')
+                      .map((value) => ({ ...d, value: value || ' ' }))
         );
         setDiff(diff2);
     }, [left, right, inline, setDiff]);

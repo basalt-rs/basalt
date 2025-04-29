@@ -67,11 +67,11 @@ const HistoryTitle = () => {
                 </Tooltip>
             </span>
             <span>
-                {history[selectedItem]
-                    ? formatScore(history[selectedItem].score)
-                    : <Loader className="animate-spin" />
-                }
-
+                {history[selectedItem] ? (
+                    formatScore(history[selectedItem].score)
+                ) : (
+                    <Loader className="animate-spin" />
+                )}
             </span>
         </h1>
     );
@@ -147,12 +147,12 @@ export default function TeamInfo() {
                                     <Card
                                         className={
                                             selectedTeamSubmissions[i].state === 'not-attempted'
-                                                ? 'text-muted-foreground cursor-not-allowed'
+                                                ? 'cursor-not-allowed text-muted-foreground'
                                                 : 'cursor-pointer hover:bg-muted/20 hover:underline'
                                         }
                                         onClick={
                                             selectedTeamSubmissions[i].state === 'not-attempted'
-                                                ? () => { }
+                                                ? () => {}
                                                 : () => setSelectedQuestion(i)
                                         }
                                     >
