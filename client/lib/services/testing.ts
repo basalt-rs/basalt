@@ -48,7 +48,7 @@ export const useTesting = () => {
                 res.results.tests.every(([output]) => output.kind === 'pass');
             if (isPass) {
                 toast({
-                    title: 'Submission Passed',
+                    title: 'Submission Passed!',
                     variant: 'success',
                 });
             } else if (res.remainingAttempts !== null) {
