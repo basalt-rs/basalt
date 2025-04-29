@@ -55,3 +55,9 @@ export interface SubmissionHistory {
     score: number;
     success: boolean;
 }
+
+export interface LeaderboardEntry {
+    username: string;
+    score: number;
+    submissionStates: TestState[];
+}
