@@ -17,14 +17,12 @@ import { tokenAtom } from '@/lib/services/auth';
 import { allQuestionsAtom } from '@/lib/services/questions';
 import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
-import { ArrowRight, RefreshCw } from 'lucide-react';
+import { ArrowRight, Loader, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
 const formatScore = (score: number): string => {
-    if (score % 1 === 0) {
-        return score.toLocaleString();
-    }
-    return score.toFixed(2);
+    const s = score % 1 ? score.toFixed(2) : score.toLocaleString();
+    return s + ' ' + (score === 1 ? 'point' : 'points');
 };
 
 const selectedItemAtom = atom(0);
@@ -69,8 +67,11 @@ const HistoryTitle = () => {
                 </Tooltip>
             </span>
             <span>
-                {formatScore(history[selectedItem].score)}{' '}
-                {history[selectedItem].score === 1 ? 'point' : 'points'}
+                {history[selectedItem]
+                    ? formatScore(history[selectedItem].score)
+                    : <Loader className="animate-spin" />
+                }
+
             </span>
         </h1>
     );
