@@ -49,10 +49,14 @@ const HistoryTitle = () => {
         setLoading(false);
     };
 
-    ws.registerEvent('team-update', (_) => {
-        refresh();
-        setSelectedItem(i => i + 1);
-    }, 'submission-history');
+    ws.registerEvent(
+        'team-update',
+        (_) => {
+            refresh();
+            setSelectedItem((i) => i + 1);
+        },
+        'submission-history'
+    );
 
     return (
         <h1 className="flex flex-row justify-between pb-4 text-2xl font-bold">
