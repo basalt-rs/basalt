@@ -173,7 +173,6 @@ class BasaltWSClient {
     public sendAndWait<T extends Omit<WebsocketSend, 'id'>, U extends WebsocketRes[T['kind']]>(
         data: T
     ): Promise<U> {
-        console.log(data);
         const id = this.nextId++;
         const send: WebsocketSend = { ...data, id };
         let resolve: ((u: WebsocketRes[keyof WebsocketRes]) => void) | undefined = undefined;
