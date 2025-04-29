@@ -8,11 +8,12 @@ import {
     NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCurrentHostTab } from '@/lib/host-state';
+import { currentHostTabAtom } from '@/lib/host-state';
 import { toast } from '@/hooks/use-toast';
+import { useAtom } from 'jotai';
 
 export default function HostNavbar() {
-    const { currentTab, setCurrentTab } = useCurrentHostTab();
+    const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
 
     return (
         <div className="flex w-full justify-between">

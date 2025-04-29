@@ -1,22 +1,6 @@
 import { atomWithStorage } from 'jotai/utils';
 import { atom, useAtom } from 'jotai';
 
-export interface EditorSettings {
-    theme: string;
-    useSoftTabs: boolean;
-    showGutter: boolean;
-    enableBasicAutocompletion: boolean;
-    enableLiveAutocompletion: boolean;
-    highlightActiveLine: boolean;
-    relativeLineNumbers: boolean;
-    displayIndentGuides: boolean;
-    fontSize: number;
-    tabSize: number;
-    keybind: 'ace' | 'vscode' | 'vim' | 'emacs' | 'sublime' | undefined;
-    cursorStyle: 'ace' | 'slim' | 'smooth' | 'smooth-slim' | 'wide' | undefined;
-    foldStyle: 'manual' | 'markbegin' | 'markbeginend' | undefined;
-}
-
 // Default Editor Configurations
 export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settings', {
     theme: 'monokai',
