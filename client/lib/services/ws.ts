@@ -86,7 +86,6 @@ class BasaltWSClient {
     }
 
     public establish(ip: string, token: string | null, retries: number = 0) {
-        console.log('connecting to foo');
         this.enabled = true;
         this.isOpen = true;
         this.token = token;
@@ -216,7 +215,9 @@ export const useWebSocket = () => {
     const [ws] = useAtom(basaltWSClientAtom);
 
     const establish = (ip: string, token: string | null) => {
-        ws.establish(ip, token);
+        if (!ws.isOpen) {
+            ws.establish(ip, token);
+        }
     };
 
     const drop = () => {

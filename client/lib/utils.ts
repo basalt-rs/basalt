@@ -15,7 +15,6 @@ const RTF = new Intl.RelativeTimeFormat(undefined, { style: 'long' });
 export const relativeTime = (date: Date | string) => {
     const date2 = typeof date === 'string' ? new Date(date) : date;
     const elapsedSecs = (date2.valueOf() - Date.now()) / 1000;
-    console.log(elapsedSecs);
     if (Math.abs(elapsedSecs) < 60) {
         return RTF.format(Math.round(elapsedSecs), 'second');
     }

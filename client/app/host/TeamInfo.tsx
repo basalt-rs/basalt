@@ -15,6 +15,7 @@ import {
 import { ipAtom } from '@/lib/services/api';
 import { tokenAtom } from '@/lib/services/auth';
 import { allQuestionsAtom } from '@/lib/services/questions';
+import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
 import { ArrowRight, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
@@ -30,12 +31,13 @@ const selectedItemAtom = atom(0);
 const HistoryTitle = () => {
     const [questions] = useAtom(allQuestionsAtom);
     const [selectedQuestion] = useAtom(selectedQuestionAtom);
-    const [selectedItem] = useAtom(selectedItemAtom);
+    const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
     const [history, setHistory] = useSubmissionHistory();
     const [loading, setLoading] = useState(false);
     const { selectedTeam } = useSelectedTeam();
     const [token] = useAtom(tokenAtom);
     const [ip] = useAtom(ipAtom);
+    const [ws] = useWebSocket();
 
     if (selectedQuestion === null || history === null) {
         return <h1 className="pb-4 text-2xl font-bold">Submission History</h1>;
@@ -46,6 +48,11 @@ const HistoryTitle = () => {
         if (ip) setHistory(await getHistory(ip, selectedTeam, selectedQuestion, token));
         setLoading(false);
     };
+
+    ws.registerEvent('team-update', (_) => {
+        refresh();
+        setSelectedItem(i => i + 1);
+    }, 'submission-history');
 
     return (
         <h1 className="flex flex-row justify-between pb-4 text-2xl font-bold">
