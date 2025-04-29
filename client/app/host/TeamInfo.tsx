@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { useSelectedTeam } from '@/lib/host-state';
-
+import { useAtom } from 'jotai';
+import { selectedTeamAtom } from '@/lib/host-state';
 export default function TeamInfo() {
-    const { selectedTeam } = useSelectedTeam();
+    const [selectedTeam] = useAtom(selectedTeamAtom);
 
     return (
         selectedTeam !== null && (
