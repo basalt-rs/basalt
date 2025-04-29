@@ -37,6 +37,7 @@ import { currentTabAtom, selectedLanguageAtom, useEditorContent } from '@/lib/co
 import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
+import { useAnnouncements } from '@/lib/services/announcement';
 
 const EditorButtons = () => {
     const { setEditorContent } = useEditorContent();
@@ -142,7 +143,7 @@ const TestResults = () => {
     return (
         <div className="w-full">
             <Accordion type="single" collapsible>
-                {currQuestion.tests
+                {currQuestion?.tests
                     .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
                     .map((test, i) => (
                         <AccordionItem key={i} value={`test-${i}`}>
@@ -215,6 +216,8 @@ export default function Competitor() {
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
     const { setEditorContent } = useEditorContent();
+
+    useAnnouncements();
 
     return (
         <div className="h-screen">

@@ -18,3 +18,10 @@ export interface Languages {
     name: string;
     syntax: string;
 }
+
+export interface Announcement {
+    message: string;
+    id: string;
+    time: string;
+    sender: string;
+}
