@@ -137,7 +137,7 @@ const EditorButtons = () => {
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
-                    <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                    <Select value={selectedLanguage} onValueChange={l => { setSelectedLanguage(l); console.log('set lang', l); }}>
                         <SelectTrigger className="w-56">
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
