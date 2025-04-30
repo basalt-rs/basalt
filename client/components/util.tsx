@@ -105,4 +105,26 @@ export const Diff = ({ left, right, inline }: { left: string; right: string; inl
             </div>
         </>
     );
+}
+
+const DTF = Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'medium' });
+export const humanTime = (date: Date | string) => {
+    const date2 = typeof date === 'string' ? new Date(date) : date;
+    return DTF.format(date2);
+};
+
+const RTF = new Intl.RelativeTimeFormat(undefined, { style: 'long' });
+export const relativeTime = (date: Date | string) => {
+    const date2 = typeof date === 'string' ? new Date(date) : date;
+    const elapsedSecs = (date2.valueOf() - Date.now()) / 1000;
+    console.log(elapsedSecs);
+    if (Math.abs(elapsedSecs) < 60) {
+        return RTF.format(elapsedSecs, 'second');
+    }
+    const elapsedMins = Math.trunc(elapsedSecs / 60);
+    if (Math.abs(elapsedMins) < 60) {
+        return RTF.format(elapsedMins, 'minute');
+    }
+    const elapsedHours = Math.trunc(elapsedMins / 60);
+    return RTF.format(elapsedHours, 'hour');
 };

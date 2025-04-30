@@ -9,7 +9,6 @@ import {
     getHistory,
     selectedQuestionAtom,
     selectedTeamSubmissionsAtom,
-    useSelectedTeam,
     useSubmissionHistory,
 } from '@/lib/host-state';
 import { ipAtom } from '@/lib/services/api';
@@ -19,6 +18,7 @@ import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
 import { ArrowRight, Loader, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
+import { useTeams } from '@/hooks/use-teams';
 
 const formatScore = (score: number): string => {
     const s = score % 1 ? score.toFixed(2) : score.toLocaleString();
@@ -32,7 +32,7 @@ const HistoryTitle = () => {
     const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
     const [history, setHistory] = useSubmissionHistory();
     const [loading, setLoading] = useState(false);
-    const { selectedTeam } = useSelectedTeam();
+    const { selectedTeam } = useTeams();
     const [token] = useAtom(tokenAtom);
     const [ip] = useAtom(ipAtom);
     const [ws] = useWebSocket();
@@ -114,25 +114,24 @@ const SubmissionHistory = () => {
 export default function TeamInfo() {
     const [questions] = useAtom(allQuestionsAtom);
     const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
-    const { selectedTeam } = useSelectedTeam();
     const [selectedTeamSubmissions] = useAtom(selectedTeamSubmissionsAtom);
+    const { selectedTeam } = useTeams();
 
     return (
         selectedTeam !== null && (
-            <div className="flex h-full w-full flex-col gap-4 p-4">
-                <div className="flex items-center justify-between font-bold">
-                    <div className="flex flex-col">
-                        <p className="text-2xl">{selectedTeam.name}</p>
-                        <p>
-                            <strong>Points: </strong>
-                            {selectedTeam.points}
-                        </p>
-                    </div>
-                    {selectedTeam.status ? (
-                        <p className="text-2xl text-green-500">Connected</p>
-                    ) : (
-                        <p className="text-2xl text-gray-300 dark:text-gray-500">Disconnected</p>
-                    )}
+            <div className="flex h-full w-full flex-col p-4">
+                <div className="w-full">
+                    <span className="flex items-center justify-between text-2xl font-bold">
+                        {selectedTeam.team}
+                        {!selectedTeam.disconnected &&
+                        (selectedTeam.lastSeenMs
+                            ? Math.abs(Date.now() - selectedTeam.lastSeenMs) < 45 * 1000
+                            : false) ? (
+                            <p className="text-green-500">Connected</p>
+                        ) : (
+                            <p className="text-gray-300 dark:text-gray-500">Disconnected</p>
+                        )}
+                    </span>
                 </div>
                 <div className="flex flex-grow flex-col">
                     <HistoryTitle />

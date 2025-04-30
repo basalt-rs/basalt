@@ -1,7 +1,7 @@
 import { toast } from '@/hooks';
 import { atom, useAtom } from 'jotai';
 import { currQuestionIdxAtom, useSubmissionStates } from './questions';
-import { useEditorContent } from '../competitor-state';
+import { editorContentAtom } from '../competitor-state';
 import { useWebSocket } from './ws';
 import { TestResults } from '../types';
 
@@ -14,7 +14,7 @@ export const useTesting = () => {
     const [loading, setLoading] = useAtom(testsLoadingAtom);
     const [testResults, setTestResults] = useAtom(testResultsAtom);
     const [ws] = useWebSocket();
-    const { editorContent } = useEditorContent();
+    const [editorContent] = useAtom(editorContentAtom);
     const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [selectedLanguage] = useAtom(selectedLanguageAtom);
     const { setCurrentState } = useSubmissionStates();

@@ -21,14 +21,11 @@ import {
     currQuestionIdxAtom,
     useSubmissionStates,
 } from '@/lib/services/questions';
-import { ExtractAtomValue, useAtom } from 'jotai';
+import { ExtractAtomValue, useAtom, useSetAtom } from 'jotai';
 import { FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom, useEditorContent } from '@/lib/competitor-state';
-import { WithPauseGuard } from '@/components/PauseGuard';
-import { useClock } from '@/hooks/use-clock';
 import { TestResults } from '@/components/TestResults';
 import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
@@ -36,9 +33,13 @@ import { isTauri } from '@tauri-apps/api/core';
 import Link from 'next/link';
 import { ipAtom } from '@/lib/services/api';
 import { download } from '@/lib/tauri';
+import { currentTabAtom, editorContentAtom, selectedLanguageAtom } from '@/lib/competitor-state';
+import { WithPauseGuard } from '@/components/PauseGuard';
+import { useClock } from '@/hooks/use-clock';
+import { useAnnouncements } from '@/lib/services/announcement';
 
 const EditorButtons = () => {
-    const { setEditorContent } = useEditorContent();
+    const setEditorContent = useSetAtom(editorContentAtom);
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
     const { loading, runTests, submit } = useTesting();
@@ -48,6 +49,7 @@ const EditorButtons = () => {
     const downloadPdf = (ip: string) => {
         download(`${ip}/competition/packet`);
     };
+    const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
 
     const handleUploadBtnClick = () => {
         fileUploadRef.current?.click();
@@ -135,14 +137,14 @@ const EditorButtons = () => {
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
-                    <Select>
-                        <SelectTrigger className="w-56" defaultValue={currQuestion?.languages?.[0]}>
+                    <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                        <SelectTrigger className="w-56">
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
                         <SelectContent>
                             {currQuestion?.languages?.map((l) => (
-                                <SelectItem key={l} value={l}>
-                                    {l}
+                                <SelectItem key={l.name} value={l.name}>
+                                    {l.name}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -224,6 +226,8 @@ export default function Competitor() {
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
     const { loading, testResults } = useTesting();
+
+    useAnnouncements();
 
     return (
         <div className="h-screen">

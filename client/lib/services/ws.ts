@@ -1,5 +1,7 @@
 import { atom, useAtom } from 'jotai';
 import { TestResults, TestState } from '../types';
+import { Announcement } from '../types';
+import { TeamInfo } from './teams';
 
 type EVENT_MAPPING = {
     'game-paused': object;
@@ -11,6 +13,9 @@ type EVENT_MAPPING = {
         new_score: number;
         new_states: TestState[];
     };
+    'new-announcement': Announcement;
+    'team-connected': TeamInfo;
+    'team-disconnected': TeamInfo;
 };
 
 type WebsocketSend =
@@ -62,6 +67,9 @@ class BasaltWSClient {
         'game-paused': [],
         'game-unpaused': [],
         'team-update': [],
+        'new-announcement': [],
+        'team-connected': [],
+        'team-disconnected': [],
     };
     private onCloseTasks: (() => void)[] = [];
     private pendingTasks: {
