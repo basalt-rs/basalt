@@ -1,17 +1,19 @@
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { useAtom } from 'jotai';
-import { selectedTeamAtom } from '@/lib/host-state';
+import { useTeams } from '@/hooks/use-teams';
 export default function TeamInfo() {
-    const [selectedTeam] = useAtom(selectedTeamAtom);
+    const { selectedTeam } = useTeams();
 
     return (
         selectedTeam !== null && (
             <div className="flex h-full w-full flex-col p-4">
                 <div className="w-full">
                     <span className="flex items-center justify-between text-2xl font-bold">
-                        {selectedTeam.name}
-                        {selectedTeam.status ? (
+                        {selectedTeam.team}
+                        {!selectedTeam.disconnected &&
+                        (selectedTeam.lastSeenMs
+                            ? Math.abs(Date.now() - selectedTeam.lastSeenMs) < 45 * 1000
+                            : false) ? (
                             <p className="text-green-500">Connected</p>
                         ) : (
                             <p className="text-gray-300 dark:text-gray-500">Disconnected</p>
@@ -22,7 +24,7 @@ export default function TeamInfo() {
                     <span className="flex justify-between align-middle">
                         <p>
                             <strong>Points: </strong>
-                            {selectedTeam.points}
+                            {selectedTeam.score}
                         </p>
                         <Button
                             variant="outline"

@@ -1,5 +1,5 @@
 import { atom, useAtom, useSetAtom } from 'jotai';
-import { atomWithStorage } from 'jotai/utils';
+import { atomWithStorage, RESET } from 'jotai/utils';
 import { ipAtom, resetIp } from './api';
 
 export type Role = 'competitor' | 'admin';
@@ -38,9 +38,9 @@ export const roleAtom = atom(async (get) => (await get(currentUserAtom))?.role);
 
 export const useLogin = () => {
     const [ip] = useAtom(ipAtom);
-    const setTokenAtom = useSetAtom(tokenAtom);
+    const [token, setToken] = useAtom(tokenAtom);
 
-    return async (username: string, password: string): Promise<Role | null> => {
+    const login = async (username: string, password: string): Promise<Role | null> => {
         const res = await fetch(`${ip}/auth/login`, {
             method: 'POST',
             body: JSON.stringify({ username, password }),
@@ -50,10 +50,30 @@ export const useLogin = () => {
         });
         if (res.ok) {
             const { token, role } = await res.json();
-            setTokenAtom(token);
+            setToken(token);
             return role;
         } else {
             return null;
         }
     };
+
+    const logout = async (): Promise<void> => {
+        if (!token || !ip) {
+            console.error('Tried to logout missing session or IP');
+        }
+        const res = await fetch(`${ip}/auth/logout`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (res.ok) {
+            setToken(RESET);
+        } else {
+            console.error('Something went wrong logging out');
+            console.error(await res.text());
+        }
+    };
+
+    return { login, logout };
 };
