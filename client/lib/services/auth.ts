@@ -1,4 +1,4 @@
-import { atom, useAtom, useSetAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { atomWithStorage, RESET } from 'jotai/utils';
 import { ipAtom, resetIp } from './api';
 

@@ -17,9 +17,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useRouter } from 'next/navigation';
-import { useSetAtom, useAtom } from 'jotai';
-import { tokenAtom, useLogin } from '@/lib/services/auth';
-import { RESET } from 'jotai/utils';
+import { useAtom } from 'jotai';
+import { useLogin } from '@/lib/services/auth';
 import { Editor } from './Settings';
 import { announcementsAtom } from '@/lib/services/announcement';
 import { Separator } from './ui/separator';
