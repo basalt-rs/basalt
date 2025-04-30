@@ -1,64 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
-import { editorSettingsAtom, useEditorContent } from '@/lib/competitor-state';
+import { editorSettingsAtom, selectedLanguageAtom, useEditorContent } from '@/lib/competitor-state';
+import 'ace-builds/esm-resolver';
 import 'ace-builds/src-noconflict/theme-monokai';
-import('ace-builds/src-noconflict/mode-javascript');
-import 'ace-builds/src-noconflict/keybinding-vim';
-import 'ace-builds/src-noconflict/keybinding-emacs';
-import 'ace-builds/src-noconflict/keybinding-sublime';
 import 'ace-builds/src-noconflict/ext-language_tools';
-
-// TODO: Need to have languages imported and hooked up in the Select to sync these items together
-// const languages = [
-//     'ada',
-//     'basic',
-//     'batchfile',
-//     'c_cpp',
-//     'clojure',
-//     'cobol',
-//     'csharp',
-//     'd',
-//     'dart',
-//     'ejs',
-//     'elixir',
-//     'elm',
-//     'erlang',
-//     'forth',
-//     'fortran',
-//     'fsharp',
-//     'golang',
-//     'java',
-//     'javascript',
-//     'julia',
-//     'kotlin',
-//     'lisp',
-//     'lua',
-//     'mips',
-//     'nim',
-//     'nix',
-//     'ocaml',
-//     'odin',
-//     'pascal',
-//     'perl',
-//     'php',
-//     'powershell',
-//     'prolog',
-//     'python',
-//     'r',
-//     'ruby',
-//     'rust',
-//     'scala',
-//     'scheme',
-//     'sh',
-//     'typescript',
-//     'zig',
-// ];
+import { currQuestionAtom } from '@/lib/services/questions';
 
 export default function CodeEditor() {
     const { editorContent, setEditorContent } = useEditorContent();
     const [editorSettings] = useAtom(editorSettingsAtom);
+    const [languageValue] = useAtom(selectedLanguageAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
+    const [question] = useAtom(currQuestionAtom);
 
     useEffect(() => {
         (async () => {
@@ -68,12 +22,17 @@ export default function CodeEditor() {
             if (editorSettings.keybind !== 'ace') {
                 await import(`ace-builds/src-noconflict/keybinding-${editorSettings.keybind}`);
             }
+            if (languageValue) {
+                await import(
+                    `ace-builds/src-noconflict/mode-${question?.languages?.find((l) => l.name === languageValue)?.syntax || 'plaintext'}`
+                );
+            }
         })();
-    }, [editorSettings]);
+    }, [editorSettings, languageValue, question]);
 
     return (
         <AceEditor
-            mode="javascript"
+            mode={question?.languages?.find((l) => l.name === languageValue)?.syntax || 'plaintext'}
             theme={editorTheme}
             name="code-editor"
             editorProps={{ $blockScrolling: true }}
