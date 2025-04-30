@@ -5,24 +5,7 @@ import { tokenAtom, tryFetch } from './services/auth';
 import { useEffect } from 'react';
 import { ipAtom } from './services/api';
 import { TeamInfo } from './services/teams';
-import { useTeams } from '@/hooks/use-teams';
-
-const teamsAtom = atom<Team[]>([
-    { name: 'team1', password: 'password1', points: 300, status: true },
-    { name: 'team2', password: 'password2', points: 126, status: true },
-]);
-
-export const selectedTeamIdxAtom = atom(-1);
-export const selectedTeamAtom = atom((get) => {
-    const idx = get(selectedTeamIdxAtom);
-    const allTeams = get(teamsAtom);
-
-    if (idx === -1) {
-        return null;
-    } else {
-        return allTeams[idx];
-    }
-});
+import { selectedTeamAtom, useTeams } from '@/hooks/use-teams';
 
 export const currentHostTabAtom = atom<'questions' | 'teams'>('questions');
 
@@ -72,12 +55,14 @@ export const selectedTeamSubmissionsAtom = atom(async (get) => {
     const token = get(tokenAtom);
     const ip = get(ipAtom);
 
+    console.log('hehehe', { team, token });
     if (team === null || token === null) return [];
 
     const submissions = await tryFetch<QuestionSubmissionState[]>(
-        `${ip}/testing/state?username=${encodeURI(team.name)}`,
+        `${ip}/testing/state?username=${encodeURI(team.team)}`,
         token
     );
+    console.log({ submissions });
 
     return submissions ?? [];
 });

@@ -1,5 +1,5 @@
 import { atomWithStorage } from 'jotai/utils';
-import { atom, useAtom } from 'jotai';
+import { atom } from 'jotai';
 import { currQuestionIdxAtom } from './services/questions';
 
 // Default Editor Configurations

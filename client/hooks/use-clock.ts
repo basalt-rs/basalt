@@ -40,9 +40,8 @@ export const useClock = () => {
     };
 
     useQuery({
-        queryKey: ['clock', clock?.isPaused ?? true],
+        queryKey: ['clock', clock?.isPaused ?? true,ip],
         queryFn: async () => {
-            const ip = getDefaultStore().get(ipAtom);
             if (ip === null) {
                 setClock({ isPaused: true, timeLeftInSeconds: 0 });
                 return 1;
