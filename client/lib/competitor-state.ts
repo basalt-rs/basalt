@@ -36,6 +36,8 @@ export interface EditorSettings {
 
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
 
+export const selectedLanguageAtom = atom<string>();
+
 const editorContentAtom = atom<string>('');
 export const useEditorContent = () => {
     const [editorContent, setEditorContent] = useAtom(editorContentAtom);
