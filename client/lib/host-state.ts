@@ -74,7 +74,6 @@ export const useSubmissionHistory = () => {
     useEffect(() => {
         if (ip) {
             getHistory(ip, team, question, token).then((x) => {
-                console.log('hist');
                 setHistory(x);
             });
         }

@@ -13,7 +13,7 @@ const testResultsAtom = atom<
 export const useTesting = () => {
     const [loading, setLoading] = useAtom(testsLoadingAtom);
     const [testResults, setTestResults] = useAtom(testResultsAtom);
-    const ws = useWebSocket();
+    const [ws] = useWebSocket();
     const { editorContent } = useEditorContent();
     const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [selectedLanguage] = useAtom(selectedLanguageAtom);
@@ -48,7 +48,7 @@ export const useTesting = () => {
                 res.results.tests.every(([output]) => output.kind === 'pass');
             if (isPass) {
                 toast({
-                    title: 'Submission Passed',
+                    title: 'Submission Passed!',
                     variant: 'success',
                 });
             } else if (res.remainingAttempts !== null) {

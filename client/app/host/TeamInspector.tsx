@@ -23,7 +23,7 @@ import { useAtom } from 'jotai';
 export default function TeamInspector() {
     const { teamList } = useTeams();
     const { selectedTeam } = useSelectedTeam();
-    const { setSelectedTeamIdx } = useSelectedTeamIdx();
+    const { selectedTeamIdx, setSelectedTeamIdx } = useSelectedTeamIdx();
     const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
 
     const back = () => {
@@ -48,37 +48,23 @@ export default function TeamInspector() {
                     </Button>
                 )}
                 <Select
-                    value={selectedTeam?.name || ''}
+                    value={selectedTeamIdx < 0 ? '' : `${selectedTeamIdx}`}
                     onValueChange={(value) => setSelectedTeamIdx(+value)}
                 >
                     <SelectTrigger className="flex w-fit">
-                        <SelectValue placeholder="Select A Team">
-                            {selectedTeam === null ? (
-                                ''
-                            ) : (
-                                <span className="flex gap-1">
-                                    {selectedTeam.status ? (
-                                        <Wifi className="text-green-500" />
-                                    ) : (
-                                        <WifiOff className="text-gray-300 dark:text-gray-500" />
-                                    )}
-                                    {selectedTeam.name}
-                                </span>
-                            )}
-                            {selectedTeam?.name || 'Select A Team'}
-                        </SelectValue>
+                        <SelectValue placeholder="Select A Team" />
                     </SelectTrigger>
                     <SelectContent>
                         {teamList.map((team, index) => (
                             <SelectItem value={`${index}`} key={index}>
-                                <span className="flex gap-1">
+                                <div className="flex gap-1">
                                     {team.status ? (
                                         <Wifi className="text-green-500" />
                                     ) : (
                                         <WifiOff className="text-gray-300 dark:text-gray-500" />
                                     )}
                                     {team.name}
-                                </span>
+                                </div>
                             </SelectItem>
                         ))}
                     </SelectContent>

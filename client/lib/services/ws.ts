@@ -1,8 +1,5 @@
 import { atom, useAtom } from 'jotai';
-import { tokenAtom } from './auth';
 import { TestResults, TestState } from '../types';
-import { useEffect } from 'react';
-import { ipAtom } from './api';
 
 type EVENT_MAPPING = {
     'game-paused': object;
@@ -90,6 +87,7 @@ class BasaltWSClient {
 
     public establish(ip: string, token: string | null, retries: number = 0) {
         this.enabled = true;
+        this.isOpen = true;
         this.token = token;
         this.ip = ip;
         this.ws = new WebSocket(
@@ -175,7 +173,6 @@ class BasaltWSClient {
     public sendAndWait<T extends Omit<WebsocketSend, 'id'>, U extends WebsocketRes[T['kind']]>(
         data: T
     ): Promise<U> {
-        console.log(data);
         const id = this.nextId++;
         const send: WebsocketSend = { ...data, id };
         let resolve: ((u: WebsocketRes[keyof WebsocketRes]) => void) | undefined = undefined;
@@ -191,7 +188,7 @@ class BasaltWSClient {
     }
 
     public closeConnection() {
-        console.debug('websocket closed');
+        console.debug('websocket closed, ws=', this.ws);
         if (this.ws) {
             this.ws.close();
         }
@@ -211,21 +208,20 @@ class BasaltWSClient {
     }
 }
 
-const basaltWSClientAtom = atom(new BasaltWSClient('ws'));
+export const basaltWSClientAtom = atom(new BasaltWSClient('ws'));
 
 export const useWebSocket = () => {
-    const [ws, setWs] = useAtom(basaltWSClientAtom);
-    const [ip] = useAtom(ipAtom);
-    const [token] = useAtom(tokenAtom);
+    const [ws] = useAtom(basaltWSClientAtom);
 
-    useEffect(() => {
-        if (ip !== ws.ip) {
-            ws.closeConnection();
-            if (ip) {
-                ws.establish(ip, token);
-            }
+    const establish = (ip: string, token: string | null) => {
+        if (!ws.isOpen) {
+            ws.establish(ip, token);
         }
-    }, [ip, token, ws, setWs]);
+    };
 
-    return ws;
+    const drop = () => {
+        ws.closeConnection();
+    };
+
+    return [ws, establish, drop] as const;
 };

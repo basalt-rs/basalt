@@ -245,7 +245,7 @@ export default function Competitor() {
                                             <SelectContent>
                                                 {allQuestions.map((q, i) => (
                                                     <SelectItem key={i} value={`${i}`}>
-                                                        <div className="flex flex-row items-center">
+                                                        <div className="flex flex-row items-center gap-2">
                                                             <Status status={allStates?.[i].state} />
                                                             {q.title}
                                                         </div>

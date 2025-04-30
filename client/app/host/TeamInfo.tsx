@@ -15,27 +15,27 @@ import {
 import { ipAtom } from '@/lib/services/api';
 import { tokenAtom } from '@/lib/services/auth';
 import { allQuestionsAtom } from '@/lib/services/questions';
+import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
-import { ArrowRight, RefreshCw } from 'lucide-react';
+import { ArrowRight, Loader, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
 const formatScore = (score: number): string => {
-    if (score % 1 === 0) {
-        return score.toLocaleString();
-    }
-    return score.toFixed(2);
+    const s = score % 1 ? score.toFixed(2) : score.toLocaleString();
+    return s + ' ' + (score === 1 ? 'point' : 'points');
 };
 
 const selectedItemAtom = atom(0);
 const HistoryTitle = () => {
     const [questions] = useAtom(allQuestionsAtom);
     const [selectedQuestion] = useAtom(selectedQuestionAtom);
-    const [selectedItem] = useAtom(selectedItemAtom);
+    const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
     const [history, setHistory] = useSubmissionHistory();
     const [loading, setLoading] = useState(false);
     const { selectedTeam } = useSelectedTeam();
     const [token] = useAtom(tokenAtom);
     const [ip] = useAtom(ipAtom);
+    const [ws] = useWebSocket();
 
     if (selectedQuestion === null || history === null) {
         return <h1 className="pb-4 text-2xl font-bold">Submission History</h1>;
@@ -46,6 +46,15 @@ const HistoryTitle = () => {
         if (ip) setHistory(await getHistory(ip, selectedTeam, selectedQuestion, token));
         setLoading(false);
     };
+
+    ws.registerEvent(
+        'team-update',
+        (_) => {
+            refresh();
+            setSelectedItem((i) => i + 1);
+        },
+        'submission-history'
+    );
 
     return (
         <h1 className="flex flex-row justify-between pb-4 text-2xl font-bold">
@@ -58,8 +67,11 @@ const HistoryTitle = () => {
                 </Tooltip>
             </span>
             <span>
-                {formatScore(history[selectedItem].score)}{' '}
-                {history[selectedItem].score === 1 ? 'point' : 'points'}
+                {history[selectedItem] ? (
+                    formatScore(history[selectedItem].score)
+                ) : (
+                    <Loader className="animate-spin" />
+                )}
             </span>
         </h1>
     );
@@ -127,28 +139,37 @@ export default function TeamInfo() {
                     {selectedQuestion === null ? (
                         <div className="flex w-full flex-col gap-1 py-2">
                             {questions.map((q, i) => (
-                                <Card
+                                <Tooltip
                                     key={i}
-                                    className={
-                                        selectedTeamSubmissions[i].state === 'not-attempted'
-                                            ? 'text-muted-foreground'
-                                            : 'cursor-pointer hover:bg-muted/20 hover:underline'
-                                    }
-                                    onClick={() => setSelectedQuestion(i)}
+                                    tooltip="This question has not been attempted"
+                                    disabled={selectedTeamSubmissions[i].state !== 'not-attempted'}
                                 >
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center justify-between">
-                                            {q.title}
-                                            <span className="flex w-72 flex-row justify-between gap-2">
-                                                <Status
-                                                    status={selectedTeamSubmissions[i].state}
-                                                    showLabel
-                                                />
-                                                <ArrowRight />
-                                            </span>
-                                        </CardTitle>
-                                    </CardHeader>
-                                </Card>
+                                    <Card
+                                        className={
+                                            selectedTeamSubmissions[i].state === 'not-attempted'
+                                                ? 'cursor-not-allowed text-muted-foreground'
+                                                : 'cursor-pointer hover:bg-muted/20 hover:underline'
+                                        }
+                                        onClick={
+                                            selectedTeamSubmissions[i].state === 'not-attempted'
+                                                ? () => {}
+                                                : () => setSelectedQuestion(i)
+                                        }
+                                    >
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center justify-between">
+                                                {q.title}
+                                                <span className="flex w-72 flex-row justify-between gap-2">
+                                                    <Status
+                                                        status={selectedTeamSubmissions[i].state}
+                                                        showLabel
+                                                    />
+                                                    <ArrowRight />
+                                                </span>
+                                            </CardTitle>
+                                        </CardHeader>
+                                    </Card>
+                                </Tooltip>
                             ))}
                         </div>
                     ) : (

@@ -9,7 +9,7 @@ import { useWebSocket } from '@/lib/services/ws';
 const tickerAtom = atom<NodeJS.Timeout | null>(null);
 
 export const useClock = () => {
-    const basaltWs = useWebSocket();
+    const [basaltWs] = useWebSocket();
     const [clock, setClock] = useAtom(clockAtom);
     const [ticker, setTicker] = useAtom(tickerAtom);
     const [authToken] = useAtom(tokenAtom);
