@@ -105,7 +105,7 @@ export const Diff = ({ left, right, inline }: { left: string; right: string; inl
             </div>
         </>
     );
-}
+};
 
 const DTF = Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'medium' });
 export const humanTime = (date: Date | string) => {
