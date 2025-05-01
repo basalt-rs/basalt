@@ -50,9 +50,7 @@ export default function Timer({ isHost = false, onPause, onPlay, isPaused }: Tim
                         </Button>
                     </div>
                 )}
-                <p
-                    className={`my-2 text-[8vmin] font-thin ${!isPaused ? `` : `text-muted-foreground`}`}
-                >
+                <p className="my-2 text-[8vmin] font-thin">
                     {formatTime(clock?.timeLeftInSeconds ?? 0)}
                 </p>
             </span>

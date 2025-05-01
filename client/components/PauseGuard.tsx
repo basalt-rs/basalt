@@ -13,13 +13,13 @@ export const WithPauseGuard = ({ isPaused, children }: PropsWithChildren<PauseGu
     const [tab] = useAtom(currentTabAtom);
     if (isPaused && tab !== 'leaderboard') {
         return (
-            <div className="relative min-h-full min-w-full cursor-not-allowed">
+            <div className="relative min-h-[95vh] min-w-full cursor-not-allowed">
                 <div className="absolute inset-0 z-0 overflow-hidden">
                     <div className="h-full w-full blur-lg">{children}</div>
                 </div>
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 text-center">
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background p-8 text-center opacity-50">
                     <Pause fill="currentColor" stroke="none" className="h-48 w-48" />
-                    <p className="mt-1 text-2xl opacity-50">Competition Paused</p>
+                    <p className="mt-1 text-3xl font-bold">Competition Paused</p>
                     <Timer isPaused={isPaused} />
                 </div>
             </div>

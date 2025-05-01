@@ -9,7 +9,6 @@ import {
     getHistory,
     selectedQuestionAtom,
     selectedTeamSubmissionsAtom,
-    useSelectedTeam,
     useSubmissionHistory,
 } from '@/lib/host-state';
 import { ipAtom } from '@/lib/services/api';
@@ -19,6 +18,7 @@ import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
 import { ArrowRight, Loader, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
+import { selectedTeamAtom } from '@/lib/host-state';
 
 const formatScore = (score: number): string => {
     const s = score % 1 ? score.toFixed(2) : score.toLocaleString();
@@ -32,7 +32,7 @@ const HistoryTitle = () => {
     const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
     const [history, setHistory] = useSubmissionHistory();
     const [loading, setLoading] = useState(false);
-    const { selectedTeam } = useSelectedTeam();
+    const [selectedTeam] = useAtom(selectedTeamAtom);
     const [token] = useAtom(tokenAtom);
     const [ip] = useAtom(ipAtom);
     const [ws] = useWebSocket();
@@ -114,8 +114,8 @@ const SubmissionHistory = () => {
 export default function TeamInfo() {
     const [questions] = useAtom(allQuestionsAtom);
     const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
-    const { selectedTeam } = useSelectedTeam();
     const [selectedTeamSubmissions] = useAtom(selectedTeamSubmissionsAtom);
+    const [selectedTeam] = useAtom(selectedTeamAtom);
 
     return (
         selectedTeam !== null && (
