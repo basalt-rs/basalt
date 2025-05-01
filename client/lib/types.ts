@@ -7,7 +7,7 @@ export interface Test {
 }
 
 export interface QuestionResponse {
-    languages?: string[];
+    languages?: Languages[];
     title: string;
     points: number;
     description?: string;
@@ -54,4 +54,16 @@ export interface SubmissionHistory {
     question_index: number;
     score: number;
     success: boolean;
+}
+
+export interface Languages {
+    name: string;
+    syntax: string;
+}
+
+export interface Announcement {
+    message: string;
+    id: string;
+    time: string;
+    sender: string;
 }

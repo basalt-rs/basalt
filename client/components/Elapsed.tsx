@@ -1,4 +1,4 @@
-import { humanTime, relativeTime } from '@/lib/utils';
+import { humanTime, relativeTime } from './util';
 import { useEffect, useState } from 'react';
 import { Tooltip } from './util';
 

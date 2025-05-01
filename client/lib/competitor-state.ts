@@ -1,5 +1,5 @@
 import { atomWithStorage } from 'jotai/utils';
-import { atom, useAtom } from 'jotai';
+import { atom } from 'jotai';
 import { currQuestionIdxAtom } from './services/questions';
 
 export interface EditorSettings {
@@ -38,7 +38,7 @@ export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settin
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
 
 const editorsAtom = atomWithStorage<string[]>('editors', []);
-const editorContentAtom = atom(
+export const editorContentAtom = atom(
     // get the entry from editorsAtom or default to the empty string
     async (get) => {
         const editors = get(editorsAtom);
@@ -55,13 +55,7 @@ const editorContentAtom = atom(
     }
 );
 
-export const useEditorContent = () => {
-    const [editorContent, setEditorContent] = useAtom(editorContentAtom);
-    return {
-        editorContent,
-        setEditorContent,
-    };
-};
+export const selectedLanguageAtom = atom<string>();
 
 export interface TestResult {
     state: 'pass' | 'fail';

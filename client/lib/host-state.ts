@@ -5,17 +5,13 @@ import { tokenAtom, tryFetch } from './services/auth';
 import { useEffect } from 'react';
 import { ipAtom } from './services/api';
 
-const teamsAtom = atom<Team[]>([
+export const teamsAtom = atom<Team[]>([
     { name: 'team1', password: 'password1', points: 300, status: true },
     { name: 'team2', password: 'password2', points: 126, status: true },
 ]);
-export const useTeams = () => {
-    const [teamList, setTeamList] = useAtom(teamsAtom);
-    return { teamList, setTeamList };
-};
 
-const selectedTeamIdxAtom = atom(-1);
-const selectedTeamAtom = atom((get) => {
+export const selectedTeamIdxAtom = atom(-1);
+export const selectedTeamAtom = atom((get) => {
     const idx = get(selectedTeamIdxAtom);
     const allTeams = get(teamsAtom);
 
@@ -25,21 +21,8 @@ const selectedTeamAtom = atom((get) => {
         return allTeams[idx];
     }
 });
-export const useSelectedTeam = () => {
-    const [selectedTeam] = useAtom(selectedTeamAtom);
-    return { selectedTeam };
-};
 
-export const useSelectedTeamIdx = () => {
-    const [selectedTeamIdx, setSelectedTeamIdx] = useAtom(selectedTeamIdxAtom);
-    return { selectedTeamIdx, setSelectedTeamIdx };
-};
-
-const currentHostTabAtom = atom<'questions' | 'teams'>('questions');
-export const useCurrentHostTab = () => {
-    const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
-    return { currentTab, setCurrentTab };
-};
+export const currentHostTabAtom = atom<'questions' | 'teams'>('questions');
 
 export const clockAtom = atom<CurrentTime | undefined>();
 export const selectedQuestionAtom = atom<number | null>(null);

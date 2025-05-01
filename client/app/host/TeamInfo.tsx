@@ -8,8 +8,8 @@ import { Tooltip } from '@/components/util';
 import {
     getHistory,
     selectedQuestionAtom,
+    selectedTeamAtom,
     selectedTeamSubmissionsAtom,
-    useSelectedTeam,
     useSubmissionHistory,
 } from '@/lib/host-state';
 import { ipAtom } from '@/lib/services/api';
@@ -32,7 +32,7 @@ const HistoryTitle = () => {
     const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
     const [history, setHistory] = useSubmissionHistory();
     const [loading, setLoading] = useState(false);
-    const { selectedTeam } = useSelectedTeam();
+    const [selectedTeam] = useAtom(selectedTeamAtom);
     const [token] = useAtom(tokenAtom);
     const [ip] = useAtom(ipAtom);
     const [ws] = useWebSocket();
@@ -114,7 +114,7 @@ const SubmissionHistory = () => {
 export default function TeamInfo() {
     const [questions] = useAtom(allQuestionsAtom);
     const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
-    const { selectedTeam } = useSelectedTeam();
+    const [selectedTeam] = useAtom(selectedTeamAtom);
     const [selectedTeamSubmissions] = useAtom(selectedTeamSubmissionsAtom);
 
     return (
