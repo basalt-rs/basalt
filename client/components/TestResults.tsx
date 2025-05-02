@@ -1,7 +1,8 @@
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { CodeBlock, Diff } from './util';
+import { Diff } from './Diff';
+import { CodeBlock } from './util';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { inlineDiffAtom } from '@/lib/competitor-state';
 import AnsiConvert from 'ansi-to-html';
