@@ -4,7 +4,6 @@ about: Report a bug that you found to help us improve
 title: ''
 labels: bug
 assignees: ''
-
 ---
 
 **Describe the bug**
@@ -26,6 +25,7 @@ If applicable, add screenshots to help explain your problem.
 **Device:**
 - Device: [e.g. iPhone 11, Dell XPS 13]
  - OS: [e.g. Windows, Arch Linux, iOS]
+   - CPU Architecture: [e.g. x86_64, ARM, Apple Silicon]
  - Client: [e.g. Chrome, Safari, Basalt Desktop]
 
 **Additional context**
