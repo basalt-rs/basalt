@@ -73,4 +73,3 @@ export const Diff = ({ left, right, inline }: { left: string; right: string; inl
         </>
     );
 };
-
