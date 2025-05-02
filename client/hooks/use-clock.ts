@@ -9,7 +9,7 @@ import { useWebSocket } from '@/lib/services/ws';
 const tickerAtom = atom<NodeJS.Timeout | null>(null);
 
 export const useClock = () => {
-    const [basaltWs] = useWebSocket();
+    const { ws } = useWebSocket();
     const [clock, setClock] = useAtom(clockAtom);
     const [ticker, setTicker] = useAtom(tickerAtom);
     const [authToken] = useAtom(tokenAtom);
@@ -62,14 +62,14 @@ export const useClock = () => {
         refetchInterval: 15 * 1000,
     });
 
-    basaltWs.registerEvent('game-paused', () => {
+    ws.registerEvent('game-paused', () => {
         stopTicking();
         setClock((prev) =>
             prev ? { ...prev, isPaused: true } : { timeLeftInSeconds: 0, isPaused: true }
         );
     });
 
-    basaltWs.registerEvent('game-unpaused', (data) => {
+    ws.registerEvent('game-unpaused', (data) => {
         setClock({ isPaused: false, ...data });
         startTicking();
     });

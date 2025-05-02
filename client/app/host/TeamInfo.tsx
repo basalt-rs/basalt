@@ -35,7 +35,7 @@ const HistoryTitle = () => {
     const [selectedTeam] = useAtom(selectedTeamAtom);
     const [token] = useAtom(tokenAtom);
     const [ip] = useAtom(ipAtom);
-    const [ws] = useWebSocket();
+    const { ws } = useWebSocket();
 
     if (selectedQuestion === null || history === null) {
         return <h1 className="pb-4 text-2xl font-bold">Submission History</h1>;

@@ -1,5 +1,5 @@
 import * as CnTooltip from '@/components/ui/tooltip';
-import { PropsWithChildren, ReactNode, useEffect, useState } from 'react';
+import { PropsWithChildren, ReactNode } from 'react';
 
 export const Tooltip = ({
     tooltip,

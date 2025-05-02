@@ -33,14 +33,14 @@ export interface WebsocketRes {
         percent: number;
     };
     submit:
-        | {
-              kind: 'submit';
-              id: number;
-              results: TestResults;
-              percent: number;
-              remainingAttempts: number | null;
-          }
-        | WebsocketError;
+    | {
+        kind: 'submit';
+        id: number;
+        results: TestResults;
+        percent: number;
+        remainingAttempts: number | null;
+    }
+    | WebsocketError;
 }
 
 type BroadcastEventKind = keyof EVENT_MAPPING;
@@ -61,11 +61,11 @@ class BasaltWSClient {
             oneTime: boolean;
         }[];
     } = {
-        'game-paused': [],
-        'game-unpaused': [],
-        'team-update': [],
-        'new-announcement': [],
-    };
+            'game-paused': [],
+            'game-unpaused': [],
+            'team-update': [],
+            'new-announcement': [],
+        };
     private onCloseTasks: (() => void)[] = [];
     private pendingTasks: {
         id: number;
@@ -135,7 +135,7 @@ class BasaltWSClient {
                     default:
                         {
                             if (Object.hasOwn(msg, 'id')) {
-                                for (let i = this.pendingTasks.length; i--; ) {
+                                for (let i = this.pendingTasks.length; i--;) {
                                     const { id, resolve } = this.pendingTasks[i];
                                     if (id === msg.id) {
                                         this.pendingTasks.splice(i, 1);
@@ -216,15 +216,15 @@ export const basaltWSClientAtom = atom(new BasaltWSClient('ws'));
 export const useWebSocket = () => {
     const [ws] = useAtom(basaltWSClientAtom);
 
-    const establish = (ip: string, token: string | null) => {
-        if (!ws.isOpen) {
-            ws.establish(ip, token);
+    return {
+        ws,
+        establishWs: (ip: string, token: string | null) => {
+            if (!ws.isOpen) {
+                ws.establish(ip, token);
+            }
+        },
+        dropWs: () => {
+            ws.closeConnection();
         }
     };
-
-    const drop = () => {
-        ws.closeConnection();
-    };
-
-    return [ws, establish, drop] as const;
 };

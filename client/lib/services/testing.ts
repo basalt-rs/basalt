@@ -13,7 +13,7 @@ const testResultsAtom = atom<
 export const useTesting = () => {
     const [loading, setLoading] = useAtom(testsLoadingAtom);
     const [testResults, setTestResults] = useAtom(testResultsAtom);
-    const [ws] = useWebSocket();
+    const { ws } = useWebSocket();
     const [editorContent] = useAtom(editorContentAtom);
     const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [selectedLanguage] = useAtom(selectedLanguageAtom);

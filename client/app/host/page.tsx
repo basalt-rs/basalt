@@ -34,13 +34,13 @@ export default function Host() {
     const setSelectedTeamIdx = useSetAtom(selectedTeamIdxAtom);
     const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
     const { isPaused, pause, unPause } = useClock();
-    const [, connect] = useWebSocket();
+    const { establishWs } = useWebSocket();
     const [ip] = useAtom(ipAtom);
     const [token] = useAtom(tokenAtom);
 
     useEffect(() => {
-        if (ip) connect(ip, token);
-    }, [connect, ip, token]);
+        if (ip) establishWs(ip, token);
+    }, [establishWs, ip, token]);
 
     useAnnouncements();
 
