@@ -1,6 +1,6 @@
 ---
-name: Feature request
-about: Suggest an idea for basalt
+name: Feature Request
+about: Suggest an idea for Basalt
 title: ''
 labels: enhancement
 assignees: ''
