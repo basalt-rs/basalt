@@ -1,4 +1,3 @@
-'use client';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { Button } from './ui/button';
@@ -17,9 +16,12 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useLogin } from '@/lib/services/auth';
-import { Editor } from './Settings';
 import { useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
+<<<<<<< HEAD
+=======
+import { Editor } from './Settings';
+>>>>>>> Sync-Leaderboard
 import { announcementsAtom } from '@/lib/services/announcement';
 import { Separator } from './ui/separator';
 import { Elapsed } from './Elapsed';
@@ -66,6 +68,10 @@ export default function UserMenu() {
                         </div>
                     </PopoverContent>
                 </Popover>
+<<<<<<< HEAD
+=======
+
+>>>>>>> Sync-Leaderboard
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="outline">
