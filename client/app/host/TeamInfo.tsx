@@ -143,11 +143,6 @@ export default function TeamInfo() {
                             </p>
                         </span>
                     </div>
-                    {selectedTeam.status ? (
-                        <p className="text-2xl text-green-500">Connected</p>
-                    ) : (
-                        <p className="text-2xl text-gray-300 dark:text-gray-500">Disconnected</p>
-                    )}
                 </div>
                 <div className="flex flex-grow flex-col">
                     <HistoryTitle />
