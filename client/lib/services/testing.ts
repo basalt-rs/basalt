@@ -3,9 +3,8 @@ import { atom, useAtom } from 'jotai';
 import { currQuestionIdxAtom, useSubmissionStates } from './questions';
 import { useWebSocket } from './ws';
 import { TestResults } from '../types';
-import { editorContentAtom } from '../competitor-state';
+import { editorContentAtom, selectedLanguageAtom } from '../competitor-state';
 
-const selectedLanguageAtom = atom<string>('java');
 const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
 const testResultsAtom = atom<
     (TestResults & { percent: number; submitKind: 'test' | 'submit' }) | null
@@ -23,7 +22,7 @@ export const useTesting = () => {
         setLoading('test');
         const { results, percent } = await ws.sendAndWait({
             kind: 'run-test',
-            language: selectedLanguage,
+            language: selectedLanguage?.toLowerCase() || 'java',
             problem: currentQuestionIdx,
             solution: editorContent,
         });
@@ -36,7 +35,7 @@ export const useTesting = () => {
         setLoading('submit');
         const res = await ws.sendAndWait({
             kind: 'submit',
-            language: selectedLanguage,
+            language: selectedLanguage?.toLowerCase() || 'java',
             problem: currentQuestionIdx,
             solution: editorContent,
         });
