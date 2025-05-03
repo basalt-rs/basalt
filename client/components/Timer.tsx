@@ -41,24 +41,24 @@ export default function Timer({ isHost = false, onPause, onPlay, isPaused }: Tim
                     </div>
                 )}
                 {clock && isHost && (
-                    <>
-                        <div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => (isPaused ? handlePlay() : handlePause())}
-                            >
-                                {isPaused ? (
-                                    <Play strokeWidth={0} fill="currentColor" />
-                                ) : (
-                                    <Pause strokeWidth={0} fill="currentColor" />
-                                )}
-                            </Button>
-                        </div>
-                        <p className="my-2 text-[8vmin] font-thin">
-                            {formatTime(clock?.timeLeftInSeconds ?? 0)}
-                        </p>
-                    </>
+                    <div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => (isPaused ? handlePlay() : handlePause())}
+                        >
+                            {isPaused ? (
+                                <Play strokeWidth={0} fill="currentColor" />
+                            ) : (
+                                <Pause strokeWidth={0} fill="currentColor" />
+                            )}
+                        </Button>
+                    </div>
+                )}
+                {clock && (
+                    <p className="my-2 text-[8vmin] font-thin">
+                        {formatTime(clock?.timeLeftInSeconds ?? 0)}
+                    </p>
                 )}
             </span>
         </div>
