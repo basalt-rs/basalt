@@ -14,7 +14,7 @@ export type TeamInfo = {
     disconnected: boolean;
 };
 
-const parseDate = (r: RawTeamInfo): TeamInfo => ({
+export const convertTeam = (r: RawTeamInfo): TeamInfo => ({
     ...r,
     lastSeenMs: r.lastSeen ? Date.parse(r.lastSeen) : null,
 });
@@ -23,6 +23,6 @@ export const getTeams = async (ip: string) => {
     const res = await fetch(`${ip}/teams`);
     if (res.ok) {
         const result = (await res.json()) as TeamInfo[];
-        return result.map(parseDate);
+        return result.map(convertTeam);
     } else throw new Error('');
 };

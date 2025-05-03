@@ -1,5 +1,5 @@
 import { ipAtom } from '@/lib/services/api';
-import { getTeams, TeamInfo } from '@/lib/services/teams';
+import { convertTeam, getTeams, RawTeamInfo, TeamInfo } from '@/lib/services/teams';
 import { useWebSocket } from '@/lib/services/ws';
 import { useQuery } from '@tanstack/react-query';
 import { atom, useAtom, useAtomValue } from 'jotai';
@@ -18,13 +18,15 @@ export const useTeams = () => {
         setSelectedTeam((prev) => teams.find((t) => t.team === prev?.team) ?? null);
         setTeams(teams.reduce((acc, t) => ({ ...acc, [t.team]: t }), {}));
     };
-    const updateTeam = (team: TeamInfo) => {
-        console.log('updating team', team);
-        setSelectedTeam((prev) => (prev ? (prev.team === team.team ? team : prev) : prev));
+    const updateTeam = (rawTeam: RawTeamInfo) => {
+        const parsedTeam = convertTeam(rawTeam);
+        setSelectedTeam((prev) =>
+            prev ? (prev.team === parsedTeam.team ? parsedTeam : prev) : prev
+        );
         setTeams((prev) => {
-            prev[team.team] = team;
-            console.log('new data', prev);
-            return prev;
+            prev[parsedTeam.team] = parsedTeam;
+            // has to be new object so jotai actually knows it changed... (L)
+            return { ...prev };
         });
     };
 
