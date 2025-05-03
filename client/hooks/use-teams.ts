@@ -6,7 +6,7 @@ import { atom, useAtom, useAtomValue } from 'jotai';
 
 const teamsAtom = atom<Record<string, TeamInfo>>({});
 const teamsListAtom = atom((get) => Object.values(get(teamsAtom)));
-const selectedTeamAtom = atom<TeamInfo | null>(null);
+export const selectedTeamAtom = atom<TeamInfo | null>(null);
 export const useTeams = () => {
     const ip = useAtomValue(ipAtom);
     const { ws } = useWebSocket();

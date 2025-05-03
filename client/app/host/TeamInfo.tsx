@@ -8,7 +8,6 @@ import { Tooltip } from '@/components/util';
 import {
     getHistory,
     selectedQuestionAtom,
-    selectedTeamAtom,
     selectedTeamSubmissionsAtom,
     useSubmissionHistory,
 } from '@/lib/host-state';
@@ -19,7 +18,7 @@ import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
 import { ArrowRight, Loader, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
-import { useTeams } from '@/hooks/use-teams';
+import { selectedTeamAtom, useTeams } from '@/hooks/use-teams';
 
 const formatScore = (score: number): string => {
     const s = score % 1 ? score.toFixed(2) : score.toLocaleString();
