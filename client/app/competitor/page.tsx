@@ -27,13 +27,16 @@ import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
 import { currentTabAtom, editorContentAtom, selectedLanguageAtom } from '@/lib/competitor-state';
-import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
 import { TestResults } from '@/components/TestResults';
 import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
+import { isTauri } from '@tauri-apps/api/core';
+import Link from 'next/link';
+import { ipAtom } from '@/lib/services/api';
+import { download } from '@/lib/tauri';
 
 const EditorButtons = () => {
     const setEditorContent = useSetAtom(editorContentAtom);
@@ -42,13 +45,11 @@ const EditorButtons = () => {
     const { loading, runTests, submit } = useTesting();
     const { currentState } = useSubmissionStates();
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
+    const [ip] = useAtom(ipAtom);
 
-    const notImplemented = () =>
-        toast({
-            title: 'Not Yet Implemented',
-            description: 'Check back later!',
-            variant: 'destructive',
-        });
+    const downloadPdf = (ip: string) => {
+        download(`${ip}/competition/packet`);
+    };
 
     const handleUploadBtnClick = () => {
         fileUploadRef.current?.click();
@@ -81,9 +82,17 @@ const EditorButtons = () => {
                     className="hidden"
                 />
                 <Tooltip tooltip="Download Packet">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
-                        <FileDown />
-                    </Button>
+                    {isTauri() ? (
+                        <Button size="icon" variant="ghost" onClick={() => downloadPdf(ip!)}>
+                            <FileDown />
+                        </Button>
+                    ) : (
+                        <Button size="icon" variant="ghost" asChild>
+                            <Link href={`${ip}/competition/packet`} download>
+                                <FileDown />
+                            </Link>
+                        </Button>
+                    )}
                 </Tooltip>
             </div>
             <div className="flex flex-row">
