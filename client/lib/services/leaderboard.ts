@@ -10,7 +10,7 @@ const leaderboardAtom = atom<LeaderboardEntry[]>([]);
 
 export const useLeaderboard = () => {
     const [ip] = useAtom(ipAtom);
-    const [ws] = useWebSocket();
+    const { ws } = useWebSocket();
     const [leaderboard, setLeaderboard] = useAtom(leaderboardAtom);
 
     const rankLeaderboard = (data: LeaderboardEntry[]) => {
