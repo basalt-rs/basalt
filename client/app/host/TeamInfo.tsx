@@ -19,6 +19,7 @@ import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
 import { ArrowRight, Loader, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
+import { useTeams } from '@/hooks/use-teams';
 
 const formatScore = (score: number): string => {
     const s = score % 1 ? score.toFixed(2) : score.toLocaleString();
@@ -114,19 +115,33 @@ const SubmissionHistory = () => {
 export default function TeamInfo() {
     const [questions] = useAtom(allQuestionsAtom);
     const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
-    const [selectedTeam] = useAtom(selectedTeamAtom);
     const [selectedTeamSubmissions] = useAtom(selectedTeamSubmissionsAtom);
+    const { selectedTeam } = useTeams();
 
     return (
         selectedTeam !== null && (
-            <div className="flex h-full w-full flex-col gap-4 p-4">
-                <div className="flex items-center justify-between font-bold">
-                    <div className="flex flex-col">
-                        <p className="text-2xl">{selectedTeam.name}</p>
-                        <p>
-                            <strong>Points: </strong>
-                            {selectedTeam.points}
-                        </p>
+            <div>
+                <div className="flex h-full w-full flex-col p-4">
+                    <div className="w-full">
+                        <span className="flex items-center justify-between text-2xl font-bold">
+                            {selectedTeam.team}
+                            {!selectedTeam.disconnected &&
+                                (selectedTeam.lastSeenMs
+                                    ? Math.abs(Date.now() - selectedTeam.lastSeenMs) < 45 * 1000
+                                    : false) ? (
+                                <p className="text-green-500">Connected</p>
+                            ) : (
+                                <p className="text-gray-300 dark:text-gray-500">Disconnected</p>
+                            )}
+                        </span>
+                    </div>
+                    <div className="flex h-full w-full flex-col gap-4 text-lg">
+                        <span className="flex justify-between align-middle">
+                            <p>
+                                <strong>Points: </strong>
+                                {selectedTeam.score}
+                            </p>
+                        </span>
                     </div>
                     {selectedTeam.status ? (
                         <p className="text-2xl text-green-500">Connected</p>
@@ -152,7 +167,7 @@ export default function TeamInfo() {
                                         }
                                         onClick={
                                             selectedTeamSubmissions[i].state === 'not-attempted'
-                                                ? () => {}
+                                                ? () => { }
                                                 : () => setSelectedQuestion(i)
                                         }
                                     >
@@ -176,7 +191,7 @@ export default function TeamInfo() {
                         <SubmissionHistory />
                     )}
                 </div>
-            </div>
+            </div >
         )
     );
 }

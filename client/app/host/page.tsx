@@ -2,24 +2,20 @@
 import QuestionAccordion from './QuestionAccordion';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuPortal,
     DropdownMenuSeparator,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Ellipsis, Copy, Wifi, WifiOff } from 'lucide-react';
+import { Ellipsis, Loader2, Wifi, WifiOff } from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { selectedTeamIdxAtom, currentHostTabAtom, teamsAtom } from '@/lib/host-state';
+import { currentHostTabAtom } from '@/lib/host-state';
 import TeamInspector from './TeamInspector';
 import { useClock } from '@/hooks/use-clock';
 import { useWebSocket } from '@/lib/services/ws';
@@ -28,10 +24,11 @@ import { ipAtom } from '@/lib/services/api';
 import { tokenAtom } from '@/lib/services/auth';
 import AnnouncementForm from './AnnoucementForm';
 import { useAnnouncements } from '@/lib/services/announcement';
+import { useTeams } from '@/hooks/use-teams';
+import { TeamInfo } from '@/lib/services/teams';
 
 export default function Host() {
-    const [teamList, setTeamList] = useAtom(teamsAtom);
-    const setSelectedTeamIdx = useSetAtom(selectedTeamIdxAtom);
+    const { teamsList, setSelectedTeam, isLoading } = useTeams();
     const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
     const { isPaused, pause, unPause } = useClock();
     const { establishWs } = useWebSocket();
@@ -44,22 +41,23 @@ export default function Host() {
 
     useAnnouncements();
 
+    const notYetImplemented = () =>
+        toast({
+            title: 'Not Yet Implemented',
+            description: 'Check back later!',
+            variant: 'destructive',
+        });
+
     const disconnectAllTeams = () => {
-        const updatedTeams = teamList.map((team) => ({
-            ...team,
-            status: false,
-        }));
-        setTeamList(updatedTeams);
+        notYetImplemented();
     };
 
-    const handleDisconnectTeam = (teamName: string) => {
-        setTeamList((prev) =>
-            prev.map((team) => (team.name === teamName ? { ...team, status: false } : team))
-        );
+    const handleDisconnectTeam = (_: TeamInfo) => {
+        notYetImplemented();
     };
 
-    const handleRemoveTeam = (teamName: string) => {
-        setTeamList((prev) => prev.filter((team) => team.name !== teamName));
+    const handleRemoveTeam = (_: TeamInfo) => {
+        notYetImplemented();
     };
 
     return (
@@ -81,9 +79,14 @@ export default function Host() {
                         </DropdownMenu>
                     </div>
                     <Separator />
+                    {isLoading && (
+                        <div className="flex flex-col items-center pt-4">
+                            <Loader2 className="animate-spin" />
+                        </div>
+                    )}
                     <div className="flex max-h-[45vh] flex-col gap-1.5 space-y-1 overflow-y-auto overflow-x-hidden p-2.5">
-                        {teamList
-                            .sort((a, b) => b.points - a.points)
+                        {teamsList
+                            .sort((a, b) => b.score - a.score || a.team.localeCompare(b.team))
                             .map((team, index) => (
                                 <span
                                     className="flex w-full justify-between rounded border p-1.5"
@@ -91,83 +94,48 @@ export default function Host() {
                                 >
                                     <p className="w-1/2 truncate">
                                         <span className="flex gap-1">
-                                            {team.status ? (
+                                            {!team.disconnected &&
+                                            (team.lastSeenMs
+                                                ? Math.abs(Date.now() - team.lastSeenMs) < 45 * 1000
+                                                : false) ? (
                                                 <Wifi className="text-green-500" />
                                             ) : (
                                                 <WifiOff className="text-gray-300 dark:text-gray-500" />
                                             )}
-                                            {team.name}
+                                            {team.team}
                                         </span>
                                     </p>
-                                    <p>{team.points} pts</p>
+                                    <p>{team.score} pts</p>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger className="pr-0.5">
                                             <Ellipsis />
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            {team.status ? (
+                                            {!team.disconnected &&
+                                            (team.lastSeenMs
+                                                ? Math.abs(Date.now() - team.lastSeenMs) < 45 * 1000
+                                                : false) ? (
                                                 <div>
                                                     <DropdownMenuItem
                                                         onClick={() => {
-                                                            setSelectedTeamIdx(index);
+                                                            setSelectedTeam(team);
                                                             setCurrentTab('teams');
                                                         }}
                                                     >
                                                         View
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuSub>
-                                                        <DropdownMenuSubTrigger>
-                                                            Info
-                                                        </DropdownMenuSubTrigger>
-                                                        <DropdownMenuPortal>
-                                                            <DropdownMenuSubContent>
-                                                                <DropdownMenuItem
-                                                                    onClick={() => {
-                                                                        navigator.clipboard.writeText(
-                                                                            team.password
-                                                                        );
-                                                                        toast({
-                                                                            title: 'Password Copied',
-                                                                            description: `The password for '${team.name}' has been saved to your clipboard`,
-                                                                            variant: 'default',
-                                                                        });
-                                                                    }}
-                                                                >
-                                                                    <Copy />
-                                                                    Copy Password
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuSubContent>
-                                                        </DropdownMenuPortal>
-                                                    </DropdownMenuSub>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
-                                                        onClick={() =>
-                                                            handleDisconnectTeam(team.name)
-                                                        }
+                                                        onClick={() => handleDisconnectTeam(team)}
                                                     >
                                                         Kick
                                                     </DropdownMenuItem>
                                                 </div>
                                             ) : (
                                                 <div>
-                                                    <DropdownMenuItem
-                                                        onClick={() => {
-                                                            navigator.clipboard.writeText(
-                                                                team.password
-                                                            );
-                                                            toast({
-                                                                title: 'Password Copied',
-                                                                description: `The password for '${team.name}' has been saved to your clipboard`,
-                                                                variant: 'default',
-                                                            });
-                                                        }}
-                                                    >
-                                                        <Copy />
-                                                        Copy Password
-                                                    </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
-                                                        onClick={() => handleRemoveTeam(team.name)}
+                                                        onClick={() => handleRemoveTeam(team)}
                                                     >
                                                         Delete
                                                     </DropdownMenuItem>

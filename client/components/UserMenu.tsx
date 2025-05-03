@@ -18,10 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useLogin } from '@/lib/services/auth';
 import { useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
-<<<<<<< HEAD
-=======
 import { Editor } from './Settings';
->>>>>>> Sync-Leaderboard
 import { announcementsAtom } from '@/lib/services/announcement';
 import { Separator } from './ui/separator';
 import { Elapsed } from './Elapsed';
@@ -33,8 +30,8 @@ export default function UserMenu() {
     const router = useRouter();
     const [settingsOpen, setOpen] = useState(false);
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         router.replace('/');
     };
 
@@ -68,10 +65,6 @@ export default function UserMenu() {
                         </div>
                     </PopoverContent>
                 </Popover>
-<<<<<<< HEAD
-=======
-
->>>>>>> Sync-Leaderboard
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="outline">
