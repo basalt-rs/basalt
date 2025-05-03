@@ -43,18 +43,22 @@ export const useTesting = () => {
 
         if (res.kind === 'submit') {
             setTestResults({ ...res.results, percent: res.percent, submitKind: 'submit' });
-            const isPass =
-                res.results.kind === 'individual' &&
-                res.results.tests.every(([output]) => output.kind === 'pass');
-            if (isPass) {
+            if (res.percent >= 100) {
                 toast({
                     title: 'Submission Passed!',
                     variant: 'success',
                 });
             } else if (res.remainingAttempts !== null) {
                 toast({
-                    title: 'Submission Failed',
+                    title: 'Submission Failed!',
                     description: `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                    variant: 'destructive',
+                });
+            } else {
+                toast({
+                    title: 'Submission Failed!',
+                    description: `Pass rate: ${res.percent}%`,
+                    variant: 'destructive',
                 });
             }
             setCurrentState((s) => ({
