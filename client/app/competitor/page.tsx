@@ -4,12 +4,6 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
 import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion';
-import {
     Select,
     SelectTrigger,
     SelectValue,
@@ -23,26 +17,30 @@ import CodeEditor from '@/components/Editor';
 import { QuestionResponse, TestState } from '@/lib/types';
 import {
     allQuestionsAtom,
-    allStatesAtom,
     currQuestionAtom,
     currQuestionIdxAtom,
+    useSubmissionStates,
 } from '@/lib/services/questions';
-import { ExtractAtomValue, useAtom } from 'jotai';
-import { Circle, FileDown, FlaskConical, SendHorizonal, Upload } from 'lucide-react';
-import { testColor } from '@/lib/utils';
+import { ExtractAtomValue, useAtom, useSetAtom } from 'jotai';
+import { FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
 import { Markdown } from '@/components/Markdown';
 import { CodeBlock, Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
-import { currentTabAtom, selectedLanguageAtom, useEditorContent } from '@/lib/competitor-state';
+import { currentTabAtom, editorContentAtom, selectedLanguageAtom } from '@/lib/competitor-state';
 import { toast } from '@/hooks/use-toast';
 import { WithPauseGuard } from '@/components/PauseGuard';
 import { useClock } from '@/hooks/use-clock';
+import { TestResults } from '@/components/TestResults';
+import { useTesting } from '@/lib/services/testing';
+import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
 
 const EditorButtons = () => {
-    const { setEditorContent } = useEditorContent();
+    const setEditorContent = useSetAtom(editorContentAtom);
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
+    const { loading, runTests, submit } = useTesting();
+    const { currentState } = useSubmissionStates();
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
 
     const notImplemented = () =>
@@ -90,13 +88,43 @@ const EditorButtons = () => {
             </div>
             <div className="flex flex-row">
                 <Tooltip tooltip="Run Tests">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
-                        <FlaskConical className="text-in-progress" />
+                    <Button size="icon" variant="ghost" onClick={runTests} disabled={!!loading}>
+                        {loading === 'test' ? (
+                            <Loader2 className="animate-spin text-in-progress" />
+                        ) : (
+                            <FlaskConical className="text-in-progress" />
+                        )}
                     </Button>
                 </Tooltip>
-                <Tooltip tooltip="Submit Solution">
-                    <Button size="icon" variant="ghost" onClick={notImplemented}>
-                        <SendHorizonal className="text-pass" />
+                <Tooltip
+                    tooltip={
+                        <div className="text-center">
+                            <p>Submit Solution</p>
+                            {currentState && currentState.remainingAttempts !== null && (
+                                <p
+                                    className={
+                                        currentState.remainingAttempts === 0 ? 'text-fail' : ''
+                                    }
+                                >
+                                    {currentState.remainingAttempts}{' '}
+                                    {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'}{' '}
+                                    remaining
+                                </p>
+                            )}
+                        </div>
+                    }
+                >
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={submit}
+                        disabled={!!loading || currentState?.remainingAttempts === 0}
+                    >
+                        {loading === 'submit' ? (
+                            <Loader2 className="animate-spin text-pass" />
+                        ) : (
+                            <SendHorizonal className="text-pass" />
+                        )}
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
@@ -138,42 +166,15 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
     }
 };
 
-const TestResults = () => {
-    const [currQuestion] = useAtom(currQuestionAtom);
+const TestResultsPanel = () => {
+    const { loading } = useTesting();
     return (
         <div className="w-full">
-            <Accordion type="single" collapsible>
-                {currQuestion?.tests
-                    .flatMap((t) => [t, t, t]) // TODO: remove flatmap once this uses the actual test output
-                    .map((test, i) => (
-                        <AccordionItem key={i} value={`test-${i}`}>
-                            <AccordionTrigger className="items-center justify-between px-8">
-                                <h1>
-                                    <b>Test Case {i + 1}</b>
-                                </h1>
-                                <h1 className="flex items-center justify-center text-pass">
-                                    <b>PASS</b>
-                                </h1>
-                            </AccordionTrigger>
-                            <AccordionContent className="flex flex-row gap-4 px-8">
-                                {test.input && (
-                                    <div className="flex h-full flex-grow flex-col gap-2">
-                                        <b>Input</b>
-                                        <CodeBlock text={test.input} />
-                                    </div>
-                                )}
-                                <div className="flex h-full flex-grow flex-col gap-2">
-                                    <b>Expected Output</b>
-                                    <CodeBlock text={test.output} />
-                                </div>
-                                <div className="flex h-full flex-grow flex-col gap-2">
-                                    <b>Actual Output</b>
-                                    <CodeBlock text="Not yet implemented" />
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-            </Accordion>
+            {loading ? (
+                <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
+            ) : (
+                <TestResults />
+            )}
         </div>
     );
 };
@@ -211,11 +212,11 @@ const QuestionDetails = ({
 export default function Competitor() {
     const [currentQuestion] = useAtom(currQuestionAtom);
     const [allQuestions] = useAtom(allQuestionsAtom);
-    const [allStates] = useAtom(allStatesAtom);
+    const { allStates } = useSubmissionStates();
     const { pause, unPause, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
-    const { setEditorContent } = useEditorContent();
+    const { loading, testResults } = useTesting();
 
     useAnnouncements();
 
@@ -240,10 +241,7 @@ export default function Competitor() {
                                     <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
                                         <Select
                                             defaultValue={`${currQuestion}`}
-                                            onValueChange={(v) => {
-                                                setCurrQuestionIdx(+v);
-                                                setEditorContent('');
-                                            }}
+                                            onValueChange={(v) => setCurrQuestionIdx(+v)}
                                         >
                                             <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
                                                 <SelectValue placeholder="Select a Question..." />
@@ -251,11 +249,8 @@ export default function Competitor() {
                                             <SelectContent>
                                                 {allQuestions.map((q, i) => (
                                                     <SelectItem key={i} value={`${i}`}>
-                                                        <div className="flex flex-row items-center">
-                                                            <Circle
-                                                                fill="currentColor"
-                                                                className={`${testColor(allStates[i])} h-6 w-6 pr-2`}
-                                                            />
+                                                        <div className="flex flex-row items-center gap-2">
+                                                            <Status status={allStates?.[i].state} />
                                                             {q.title}
                                                         </div>
                                                     </SelectItem>
@@ -287,11 +282,13 @@ export default function Competitor() {
                                         <TabContent tab={tab} />
                                     </ResizablePanel>
                                     <ResizableHandle />
-                                    <ResizablePanel defaultSize={100} className="h-full">
-                                        <ScrollArea className="h-full w-full">
-                                            <TestResults />
-                                        </ScrollArea>
-                                    </ResizablePanel>
+                                    {(loading || testResults) && (
+                                        <ResizablePanel defaultSize={100} className="h-full">
+                                            <ScrollArea className="h-full w-full">
+                                                <TestResultsPanel />
+                                            </ScrollArea>
+                                        </ResizablePanel>
+                                    )}
                                 </ResizablePanelGroup>
                             </ResizablePanel>
                         </ResizablePanelGroup>

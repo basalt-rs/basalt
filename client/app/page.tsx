@@ -43,7 +43,7 @@ const Loading = () => {
 const Login = () => {
     const router = useRouter();
     const [message, setMessage] = useState<string>('');
-    const login = useLogin();
+    const { login } = useLogin();
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(LoginFormSchema),
