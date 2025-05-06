@@ -16,11 +16,10 @@ import {
 } from './ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { useRouter } from 'next/navigation';
-import { useSetAtom, useAtom } from 'jotai';
-import { tokenAtom } from '@/lib/services/auth';
-import { RESET } from 'jotai/utils';
+import { useLogin } from '@/lib/services/auth';
 import { Editor } from './Settings';
+import { useRouter } from 'next/navigation';
+import { useAtom } from 'jotai';
 import { announcementsAtom } from '@/lib/services/announcement';
 import { Separator } from './ui/separator';
 import { Elapsed } from './Elapsed';
@@ -28,11 +27,12 @@ import { Elapsed } from './Elapsed';
 export default function UserMenu() {
     const [announcementList] = useAtom(announcementsAtom);
     const { setTheme } = useTheme();
-    const setToken = useSetAtom(tokenAtom);
+    const { logout } = useLogin();
     const router = useRouter();
     const [settingsOpen, setOpen] = useState(false);
-    const logout = () => {
-        setToken(RESET);
+
+    const handleLogout = () => {
+        logout();
         router.replace('/');
     };
 
@@ -66,7 +66,6 @@ export default function UserMenu() {
                         </div>
                     </PopoverContent>
                 </Popover>
-
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="outline">
@@ -97,7 +96,7 @@ export default function UserMenu() {
                                 <Settings /> Settings
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={logout}>
+                            <DropdownMenuItem onClick={handleLogout}>
                                 <LogOut />
                                 Log Out
                             </DropdownMenuItem>

@@ -76,7 +76,7 @@ const eslintConfig = [
         },
     },
     {
-        ignores: ['**/*.config*', '.next'],
+        ignores: ['**/*.config*', '.next', 'out'],
     },
 ];
 

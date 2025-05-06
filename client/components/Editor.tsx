@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
-import { editorSettingsAtom, selectedLanguageAtom, useEditorContent } from '@/lib/competitor-state';
+import {
+    editorContentAtom,
+    editorSettingsAtom,
+    selectedLanguageAtom,
+} from '@/lib/competitor-state';
 import 'ace-builds/src-noconflict/theme-monokai';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import { currQuestionAtom } from '@/lib/services/questions';
@@ -191,7 +195,7 @@ const languages = [
 languages.forEach(l => import(`ace-builds/src-noconflict/mode-${l}`));
 
 export default function CodeEditor() {
-    const { editorContent, setEditorContent } = useEditorContent();
+    const [editorContent, setEditorContent] = useAtom(editorContentAtom);
     const [editorSettings] = useAtom(editorSettingsAtom);
     const [languageValue] = useAtom(selectedLanguageAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
@@ -222,7 +226,7 @@ export default function CodeEditor() {
             width="100%"
             height="100%"
             value={editorContent}
-            onChange={(newValue) => setEditorContent(newValue)}
+            onChange={setEditorContent}
             setOptions={{
                 fontSize: editorSettings.fontSize,
                 tabSize: editorSettings.tabSize,

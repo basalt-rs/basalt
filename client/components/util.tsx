@@ -6,24 +6,35 @@ export const Tooltip = ({
     children,
     side = 'bottom',
     delayDuration = 700,
+    disabled = false,
 }: PropsWithChildren<{
     tooltip: ReactNode;
     side?: 'top' | 'right' | 'bottom' | 'left';
     delayDuration?: number;
-}>) => (
-    <CnTooltip.TooltipProvider>
-        <CnTooltip.Tooltip delayDuration={delayDuration}>
-            <CnTooltip.TooltipTrigger asChild disabled={false}>
-                <span>{children}</span>
-            </CnTooltip.TooltipTrigger>
-            <CnTooltip.TooltipContent side={side}>{tooltip}</CnTooltip.TooltipContent>
-        </CnTooltip.Tooltip>
-    </CnTooltip.TooltipProvider>
-);
+    disabled?: boolean;
+}>) =>
+    disabled ? (
+        <span>{children}</span>
+    ) : (
+        <CnTooltip.TooltipProvider>
+            <CnTooltip.Tooltip delayDuration={delayDuration}>
+                <CnTooltip.TooltipTrigger asChild disabled={false}>
+                    <span>{children}</span>
+                </CnTooltip.TooltipTrigger>
+                <CnTooltip.TooltipContent side={side}>{tooltip}</CnTooltip.TooltipContent>
+            </CnTooltip.Tooltip>
+        </CnTooltip.TooltipProvider>
+    );
 
-export const CodeBlock = ({ text }: { text: string }) => (
-    <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">{text}</pre>
-);
+export const CodeBlock = ({ text, rawHtml = false }: { text: string; rawHtml?: boolean }) =>
+    rawHtml ? (
+        <pre
+            className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white"
+            dangerouslySetInnerHTML={{ __html: text }}
+        />
+    ) : (
+        <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-white">{text}</pre>
+    );
 
 const DTF = Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'medium' });
 export const humanTime = (date: Date | string) => {

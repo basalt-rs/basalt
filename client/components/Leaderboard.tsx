@@ -1,7 +1,13 @@
 import { Card } from '@/components/ui/card';
-import { Circle, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import Timer from '@/components/Timer';
 import { useClock } from '@/hooks/use-clock';
+import { Status } from './Status';
+import { useWebSocket } from '@/lib/services/ws';
+import { useEffect } from 'react';
+import { useAtom } from 'jotai';
+import { tokenAtom } from '@/lib/services/auth';
+import { ipAtom } from '@/lib/services/api';
 
 type TestState = 'pass' | 'fail' | 'in-progress' | 'not-attempted';
 
@@ -13,17 +19,6 @@ interface Data {
 }
 
 const trophyColor = (rank: number) => ['text-yellow-500', 'text-gray-500', 'text-amber-600'][rank];
-
-const testColor = (testOutput: TestState) => {
-    const classMap: Record<TestState, string> = {
-        pass: 'text-pass',
-        fail: 'text-fail',
-        'in-progress': 'text-in-progress',
-        'not-attempted': 'text-not-attempted',
-    };
-
-    return classMap[testOutput];
-};
 
 const TeamRank = () => {
     const data: Data[] = [
@@ -149,13 +144,7 @@ const TeamRank = () => {
 
                     <div className="flex w-1/3 items-center justify-center gap-2">
                         {player.tests.map((testResult, index) => (
-                            <Circle
-                                className={testColor(testResult)}
-                                strokeWidth={0}
-                                key={index}
-                                color="currentColor"
-                                fill="currentColor"
-                            />
+                            <Status key={index} status={testResult} />
                         ))}
                     </div>
 
@@ -168,6 +157,12 @@ const TeamRank = () => {
 
 export default function Leaderboard({ showTimer = true }) {
     const { clock, isPaused } = useClock();
+    const [ip] = useAtom(ipAtom);
+    const [token] = useAtom(tokenAtom);
+    const { establishWs } = useWebSocket();
+    useEffect(() => {
+        if (ip) establishWs(ip, token);
+    }, [establishWs, ip, token]);
     return (
         <div className="h-full">
             {showTimer && clock && (

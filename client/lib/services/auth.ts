@@ -1,6 +1,8 @@
+import { toast } from '@/hooks';
 import { atom, useAtom, useSetAtom } from 'jotai';
-import { atomWithStorage } from 'jotai/utils';
+import { atomWithStorage, RESET } from 'jotai/utils';
 import { ipAtom, resetIp } from './api';
+import { basaltWSClientAtom, useWebSocket } from './ws';
 
 export type Role = 'competitor' | 'admin';
 export interface User {
@@ -24,6 +26,10 @@ export const currentUserAtom = atom(async (get) => {
         if (!res.ok) {
             return null;
         }
+        const ws = get(basaltWSClientAtom);
+        if (ip && !ws.isOpen) {
+            ws.establish(ip, token);
+        }
         return (await res.json()) as User;
     } catch (e: unknown) {
         if (`${e}`.includes('Load failed')) {
@@ -38,9 +44,10 @@ export const roleAtom = atom(async (get) => (await get(currentUserAtom))?.role);
 
 export const useLogin = () => {
     const [ip] = useAtom(ipAtom);
+    const { establishWs, dropWs } = useWebSocket();
     const setTokenAtom = useSetAtom(tokenAtom);
 
-    return async (username: string, password: string): Promise<Role | null> => {
+    const login = async (username: string, password: string): Promise<Role | null> => {
         const res = await fetch(`${ip}/auth/login`, {
             method: 'POST',
             body: JSON.stringify({ username, password }),
@@ -51,9 +58,45 @@ export const useLogin = () => {
         if (res.ok) {
             const { token, role } = await res.json();
             setTokenAtom(token);
+            if (ip) establishWs(ip, token);
             return role;
         } else {
             return null;
         }
     };
+
+    const logout = async () => {
+        setTokenAtom(RESET);
+        dropWs();
+    };
+
+    return { login, logout };
+};
+
+export const tryFetch = async <T>(
+    url: string | URL,
+    token: string,
+    init?: Partial<RequestInit>
+): Promise<T | null> => {
+    const innitBruv: RequestInit = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            ...(init?.headers ?? {}),
+        },
+        ...(init ?? {}),
+    };
+
+    const res = await fetch(url, innitBruv);
+
+    if (res.ok) {
+        return await res.json();
+    } else {
+        toast({
+            title: 'Error Loading',
+            description: 'There was an error while attempting to fetch a resource.',
+            variant: 'destructive',
+        });
+        console.error(await res.text());
+        return null;
+    }
 };

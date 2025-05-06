@@ -2,7 +2,7 @@
 import QuestionAccordion from './QuestionAccordion';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import {
     DropdownMenu,
@@ -22,14 +22,25 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { selectedTeamIdxAtom, currentHostTabAtom, teamsAtom } from '@/lib/host-state';
 import TeamInspector from './TeamInspector';
 import { useClock } from '@/hooks/use-clock';
+import { useWebSocket } from '@/lib/services/ws';
+import { useEffect } from 'react';
+import { ipAtom } from '@/lib/services/api';
+import { tokenAtom } from '@/lib/services/auth';
 import AnnouncementForm from './AnnoucementForm';
 import { useAnnouncements } from '@/lib/services/announcement';
 
 export default function Host() {
     const [teamList, setTeamList] = useAtom(teamsAtom);
-    const [_selectedTeamIdx, setSelectedTeamIdx] = useAtom(selectedTeamIdxAtom);
+    const setSelectedTeamIdx = useSetAtom(selectedTeamIdxAtom);
     const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
     const { isPaused, pause, unPause } = useClock();
+    const { establishWs } = useWebSocket();
+    const [ip] = useAtom(ipAtom);
+    const [token] = useAtom(tokenAtom);
+
+    useEffect(() => {
+        if (ip) establishWs(ip, token);
+    }, [establishWs, ip, token]);
 
     useAnnouncements();
 
@@ -194,9 +205,7 @@ export default function Host() {
                         <QuestionAccordion />
                     </ScrollArea>
                 ) : (
-                    <ScrollArea className="w-full flex-grow pt-2">
-                        <TeamInspector />
-                    </ScrollArea>
+                    <TeamInspector />
                 )}
             </ResizablePanel>
         </ResizablePanelGroup>
