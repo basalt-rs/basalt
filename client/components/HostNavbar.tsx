@@ -8,16 +8,16 @@ import {
     NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCurrentHostTab } from '@/lib/host-state';
 import { Tooltip } from './util';
 import { useAtom } from 'jotai';
 import { ipAtom } from '@/lib/services/api';
 import { download } from '@/lib/tauri';
 import { isTauri } from '@tauri-apps/api/core';
 import Link from 'next/link';
+import { currentHostTabAtom } from '@/lib/host-state';
 
 export default function HostNavbar() {
-    const { currentTab, setCurrentTab } = useCurrentHostTab();
+    const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
     const [ip] = useAtom(ipAtom);
 
     const downloadPdf = (ip: string) => {
