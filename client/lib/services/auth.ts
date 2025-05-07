@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 import { toast } from '@/hooks';
 import { atom, useAtom, useSetAtom } from 'jotai';
-=======
-import { atom, useAtom } from 'jotai';
->>>>>>> jack/sync-teams-2
 import { atomWithStorage, RESET } from 'jotai/utils';
 import { ipAtom, resetIp } from './api';
 import { basaltWSClientAtom, useWebSocket } from './ws';
@@ -118,6 +114,4 @@ export const tryFetch = async <T>(
         console.error(await res.text());
         return null;
     }
-
-    return { login, logout };
 };

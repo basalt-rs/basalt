@@ -2,7 +2,7 @@
 import QuestionAccordion from './QuestionAccordion';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import {
     DropdownMenu,
@@ -28,12 +28,7 @@ import { useTeams } from '@/hooks/use-teams';
 import { TeamInfo } from '@/lib/services/teams';
 
 export default function Host() {
-<<<<<<< HEAD
-    const [teamList, setTeamList] = useAtom(teamsAtom);
-    const setSelectedTeamIdx = useSetAtom(selectedTeamIdxAtom);
-=======
     const { teamsList, setSelectedTeam, isLoading } = useTeams();
->>>>>>> jack/sync-teams-2
     const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
     const { isPaused, pause, unPause } = useClock();
     const { establishWs } = useWebSocket();

@@ -19,7 +19,6 @@ import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
 import { ArrowRight, Loader, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
 import { useTeams } from '@/hooks/use-teams';
 
 const formatScore = (score: number): string => {
@@ -142,11 +141,6 @@ export default function TeamInfo() {
                             {selectedTeam.score}
                         </p>
                     </span>
-                    {selectedTeam.status ? (
-                        <p className="text-2xl text-green-500">Connected</p>
-                    ) : (
-                        <p className="text-2xl text-gray-300 dark:text-gray-500">Disconnected</p>
-                    )}
                 </div>
                 <div className="flex flex-grow flex-col">
                     <HistoryTitle />

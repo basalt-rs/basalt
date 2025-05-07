@@ -7,7 +7,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Wifi, WifiOff } from 'lucide-react';
-import { selectedQuestionAtom, selectedTeamAtom, selectedTeamIdxAtom, teamsAtom } from '@/lib/host-state';
+import { selectedQuestionAtom } from '@/lib/host-state';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import TeamInfo from './TeamInfo';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,6 @@ import { Separator } from '@/components/ui/separator';
 import { useTeams } from '@/hooks/use-teams';
 
 export default function TeamInspector() {
-    const [teamList] = useAtom(teamsAtom);
     const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
     const { teamsList, selectedTeam, setSelectedTeam, setSelectedTeamByName } = useTeams();
 

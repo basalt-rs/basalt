@@ -9,7 +9,7 @@ const teamsListAtom = atom((get) => Object.values(get(teamsAtom)));
 const selectedTeamAtom = atom<TeamInfo | null>(null);
 export const useTeams = () => {
     const ip = useAtomValue(ipAtom);
-    const basaltWs = useWebSocket();
+    const { ws } = useWebSocket();
     const [teams, setTeams] = useAtom(teamsAtom);
     const teamsList = useAtomValue(teamsListAtom);
     const [selectedTeam, setSelectedTeam] = useAtom(selectedTeamAtom);
@@ -53,8 +53,8 @@ export const useTeams = () => {
         refetchInterval: 15 * 1000,
     });
 
-    basaltWs.registerEvent('team-connected', updateTeam, 'use-team-connection-handler');
-    basaltWs.registerEvent('team-disconnected', updateTeam, 'use-team-disconnection-handler');
+    ws.registerEvent('team-connected', updateTeam, 'use-team-connection-handler');
+    ws.registerEvent('team-disconnected', updateTeam, 'use-team-disconnection-handler');
 
     return {
         teams,
