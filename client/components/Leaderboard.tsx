@@ -50,10 +50,10 @@ export default function Leaderboard({ showTimer = true }) {
     const { clock, isPaused } = useClock();
     const [ip] = useAtom(ipAtom);
     const [token] = useAtom(tokenAtom);
-    const [, connectWs] = useWebSocket();
+    const { establishWs } = useWebSocket();
     useEffect(() => {
-        if (ip) connectWs(ip, token);
-    }, [connectWs, ip, token]);
+        if (ip) establishWs(ip, token);
+    }, [establishWs, ip, token]);
     return (
         <div className="h-full">
             {showTimer && clock && (

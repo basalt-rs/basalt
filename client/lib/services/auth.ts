@@ -44,7 +44,7 @@ export const roleAtom = atom(async (get) => (await get(currentUserAtom))?.role);
 
 export const useLogin = () => {
     const [ip] = useAtom(ipAtom);
-    const [, connectWs, dropWs] = useWebSocket();
+    const { establishWs, dropWs } = useWebSocket();
     const setTokenAtom = useSetAtom(tokenAtom);
 
     const login = async (username: string, password: string): Promise<Role | null> => {
@@ -58,7 +58,7 @@ export const useLogin = () => {
         if (res.ok) {
             const { token, role } = await res.json();
             setTokenAtom(token);
-            if (ip) connectWs(ip, token);
+            if (ip) establishWs(ip, token);
             return role;
         } else {
             return null;

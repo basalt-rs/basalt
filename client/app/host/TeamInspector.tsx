@@ -1,5 +1,3 @@
-'use client';
-
 import { useAtom } from 'jotai';
 import {
     Select,
@@ -9,7 +7,12 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Wifi, WifiOff } from 'lucide-react';
-import { selectedQuestionAtom, selectedTeamAtom, selectedTeamIdxAtom, teamsAtom } from '@/lib/host-state';
+import {
+    selectedQuestionAtom,
+    teamsAtom,
+    selectedTeamAtom,
+    selectedTeamIdxAtom,
+} from '@/lib/host-state';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import TeamInfo from './TeamInfo';
 import { Button } from '@/components/ui/button';

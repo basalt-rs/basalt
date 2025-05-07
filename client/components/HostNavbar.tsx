@@ -8,29 +8,38 @@ import {
     NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { currentHostTabAtom } from '@/lib/host-state';
-import { toast } from '@/hooks/use-toast';
+import { Tooltip } from './util';
 import { useAtom } from 'jotai';
+import { ipAtom } from '@/lib/services/api';
+import { download } from '@/lib/tauri';
+import { isTauri } from '@tauri-apps/api/core';
+import Link from 'next/link';
+import { currentHostTabAtom } from '@/lib/host-state';
 
 export default function HostNavbar() {
     const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
+    const [ip] = useAtom(ipAtom);
+
+    const downloadPdf = (ip: string) => {
+        download(`${ip}/competition/packet`);
+    };
 
     return (
         <div className="flex w-full justify-between">
             <span>
-                <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => {
-                        toast({
-                            title: 'Coming Soon',
-                            description: 'This feature is coming soon!',
-                            variant: 'destructive',
-                        });
-                    }}
-                >
-                    <FileDown />
-                </Button>
+                <Tooltip tooltip="Download Packet">
+                    {isTauri() ? (
+                        <Button size="icon" variant="ghost" onClick={() => downloadPdf(ip!)}>
+                            <FileDown />
+                        </Button>
+                    ) : (
+                        <Button size="icon" variant="ghost" asChild>
+                            <Link href={`${ip}/competition/packet`} download>
+                                <FileDown />
+                            </Link>
+                        </Button>
+                    )}
+                </Tooltip>
             </span>
             <span>
                 <NavigationMenu>

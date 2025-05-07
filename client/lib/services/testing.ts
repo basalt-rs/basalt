@@ -3,9 +3,8 @@ import { atom, useAtom } from 'jotai';
 import { currQuestionIdxAtom, useSubmissionStates } from './questions';
 import { useWebSocket } from './ws';
 import { TestResults } from '../types';
-import { editorContentAtom } from '../competitor-state';
+import { editorContentAtom, selectedLanguageAtom } from '../competitor-state';
 
-const selectedLanguageAtom = atom<string>('java');
 const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
 const testResultsAtom = atom<
     (TestResults & { percent: number; submitKind: 'test' | 'submit' }) | null
@@ -13,7 +12,7 @@ const testResultsAtom = atom<
 export const useTesting = () => {
     const [loading, setLoading] = useAtom(testsLoadingAtom);
     const [testResults, setTestResults] = useAtom(testResultsAtom);
-    const [ws] = useWebSocket();
+    const { ws } = useWebSocket();
     const [editorContent] = useAtom(editorContentAtom);
     const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [selectedLanguage] = useAtom(selectedLanguageAtom);
@@ -23,7 +22,7 @@ export const useTesting = () => {
         setLoading('test');
         const { results, percent } = await ws.sendAndWait({
             kind: 'run-test',
-            language: selectedLanguage,
+            language: selectedLanguage?.toLowerCase() || 'java',
             problem: currentQuestionIdx,
             solution: editorContent,
         });
@@ -36,25 +35,29 @@ export const useTesting = () => {
         setLoading('submit');
         const res = await ws.sendAndWait({
             kind: 'submit',
-            language: selectedLanguage,
+            language: selectedLanguage?.toLowerCase() || 'java',
             problem: currentQuestionIdx,
             solution: editorContent,
         });
 
         if (res.kind === 'submit') {
             setTestResults({ ...res.results, percent: res.percent, submitKind: 'submit' });
-            const isPass =
-                res.results.kind === 'individual' &&
-                res.results.tests.every(([output]) => output.kind === 'pass');
-            if (isPass) {
+            if (res.percent >= 100) {
                 toast({
                     title: 'Submission Passed!',
                     variant: 'success',
                 });
             } else if (res.remainingAttempts !== null) {
                 toast({
-                    title: 'Submission Failed',
+                    title: 'Submission Failed!',
                     description: `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                    variant: 'destructive',
+                });
+            } else {
+                toast({
+                    title: 'Submission Failed!',
+                    description: `Pass rate: ${res.percent}%`,
+                    variant: 'destructive',
                 });
             }
             setCurrentState((s) => ({

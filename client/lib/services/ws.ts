@@ -216,15 +216,15 @@ export const basaltWSClientAtom = atom(new BasaltWSClient('ws'));
 export const useWebSocket = () => {
     const [ws] = useAtom(basaltWSClientAtom);
 
-    const establish = (ip: string, token: string | null) => {
-        if (!ws.isOpen) {
-            ws.establish(ip, token);
-        }
+    return {
+        ws,
+        establishWs: (ip: string, token: string | null) => {
+            if (!ws.isOpen) {
+                ws.establish(ip, token);
+            }
+        },
+        dropWs: () => {
+            ws.closeConnection();
+        },
     };
-
-    const drop = () => {
-        ws.closeConnection();
-    };
-
-    return [ws, establish, drop] as const;
 };

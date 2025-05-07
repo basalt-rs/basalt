@@ -16,9 +16,9 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useLogin } from '@/lib/services/auth';
+import { Editor } from './Settings';
 import { useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
-import { Editor } from './Settings';
 import { announcementsAtom } from '@/lib/services/announcement';
 import { Separator } from './ui/separator';
 import { Elapsed } from './Elapsed';
@@ -29,6 +29,10 @@ export default function UserMenu() {
     const { logout } = useLogin();
     const router = useRouter();
     const [settingsOpen, setOpen] = useState(false);
+    const handleLogout = () => {
+        logout();
+        router.replace('/');
+    };
 
     return (
         <>
@@ -60,7 +64,6 @@ export default function UserMenu() {
                         </div>
                     </PopoverContent>
                 </Popover>
-
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="outline">
@@ -91,7 +94,7 @@ export default function UserMenu() {
                                 <Settings /> Settings
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={logout}>
+                            <DropdownMenuItem onClick={handleLogout}>
                                 <LogOut />
                                 Log Out
                             </DropdownMenuItem>
