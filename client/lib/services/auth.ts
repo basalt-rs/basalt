@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import { toast } from '@/hooks';
 import { atom, useAtom, useSetAtom } from 'jotai';
+=======
+import { atom, useAtom } from 'jotai';
+>>>>>>> jack/sync-teams-2
 import { atomWithStorage, RESET } from 'jotai/utils';
 import { ipAtom, resetIp } from './api';
 import { basaltWSClientAtom, useWebSocket } from './ws';
@@ -46,6 +50,7 @@ export const useLogin = () => {
     const [ip] = useAtom(ipAtom);
     const { establishWs, dropWs } = useWebSocket();
     const setTokenAtom = useSetAtom(tokenAtom);
+    const [token, setToken] = useAtom(tokenAtom);
 
     const login = async (username: string, password: string): Promise<Role | null> => {
         const res = await fetch(`${ip}/auth/login`, {
@@ -65,9 +70,23 @@ export const useLogin = () => {
         }
     };
 
-    const logout = async () => {
-        setTokenAtom(RESET);
-        dropWs();
+    const logout = async (): Promise<void> => {
+        if (!token || !ip) {
+            console.error('Tried to logout missing session or IP');
+        }
+        const res = await fetch(`${ip}/auth/logout`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (res.ok) {
+            setToken(RESET);
+            dropWs();
+        } else {
+            console.error('Something went wrong logging out');
+            console.error(await res.text());
+        }
     };
 
     return { login, logout };
@@ -99,4 +118,6 @@ export const tryFetch = async <T>(
         console.error(await res.text());
         return null;
     }
+
+    return { login, logout };
 };
