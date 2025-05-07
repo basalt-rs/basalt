@@ -170,7 +170,9 @@ export default function Leaderboard({ showTimer = true }) {
                     <Timer isHost={false} isPaused={isPaused} />
                 </div>
             )}
-            <TeamRank />
+            <div className="max-h-[76vh] overflow-y-auto">
+                <TeamRank />
+            </div>
         </div>
     );
 }
