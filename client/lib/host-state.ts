@@ -58,6 +58,7 @@ export const useSubmissionHistory = () => {
         if (ip) {
             getHistory(ip, team, question, token).then((x) => {
                 setHistory(x);
+                console.log('hi', ip, x);
             });
         }
     }, [ip, team, question, token, setHistory]);

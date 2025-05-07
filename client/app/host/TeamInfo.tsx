@@ -134,14 +134,6 @@ export default function TeamInfo() {
                         )}
                     </span>
                 </div>
-                <div className="flex h-full w-full flex-col gap-4 text-lg">
-                    <span className="flex justify-between align-middle">
-                        <p>
-                            <strong>Points: </strong>
-                            {selectedTeam.score}
-                        </p>
-                    </span>
-                </div>
                 <div className="flex flex-grow flex-col">
                     <HistoryTitle />
                     {selectedQuestion === null ? (
@@ -150,16 +142,16 @@ export default function TeamInfo() {
                                 <Tooltip
                                     key={i}
                                     tooltip="This question has not been attempted"
-                                    disabled={selectedTeamSubmissions[i].state !== 'not-attempted'}
+                                    disabled={selectedTeamSubmissions[i]?.state !== 'not-attempted'}
                                 >
                                     <Card
                                         className={
-                                            selectedTeamSubmissions[i].state === 'not-attempted'
+                                            selectedTeamSubmissions[i]?.state === 'not-attempted'
                                                 ? 'cursor-not-allowed text-muted-foreground'
                                                 : 'cursor-pointer hover:bg-muted/20 hover:underline'
                                         }
                                         onClick={
-                                            selectedTeamSubmissions[i].state === 'not-attempted'
+                                            selectedTeamSubmissions[i]?.state === 'not-attempted'
                                                 ? () => {}
                                                 : () => setSelectedQuestion(i)
                                         }
@@ -169,7 +161,7 @@ export default function TeamInfo() {
                                                 {q.title}
                                                 <span className="flex w-72 flex-row justify-between gap-2">
                                                     <Status
-                                                        status={selectedTeamSubmissions[i].state}
+                                                        status={selectedTeamSubmissions[i]?.state}
                                                         showLabel
                                                     />
                                                     <ArrowRight />
