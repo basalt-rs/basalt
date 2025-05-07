@@ -220,7 +220,7 @@ export default function Competitor() {
     useAnnouncements();
 
     return (
-        <div className="h-screen">
+        <div className="h-screen overflow-hidden">
             <div>
                 <CompetitorNavbar />
             </div>
