@@ -1,22 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
-import {
-    editorContentAtom,
-    editorSettingsAtom,
-    selectedLanguageAtom,
-} from '@/lib/competitor-state';
-import 'ace-builds/esm-resolver';
+import { editorSettingsAtom } from '@/lib/competitor-state';
 import 'ace-builds/src-noconflict/theme-monokai';
+import('ace-builds/src-noconflict/mode-javascript');
+import 'ace-builds/src-noconflict/keybinding-vim';
+import 'ace-builds/src-noconflict/keybinding-emacs';
+import 'ace-builds/src-noconflict/keybinding-sublime';
 import 'ace-builds/src-noconflict/ext-language_tools';
-import { currQuestionAtom } from '@/lib/services/questions';
 
-export default function CodeEditor() {
-    const [editorContent, setEditorContent] = useAtom(editorContentAtom);
+export const CodeViewer = ({ code, className = '' }: { code: string; className?: string }) => {
     const [editorSettings] = useAtom(editorSettingsAtom);
-    const [languageValue] = useAtom(selectedLanguageAtom);
     const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
-    const [question] = useAtom(currQuestionAtom);
 
     useEffect(() => {
         (async () => {
@@ -26,25 +21,21 @@ export default function CodeEditor() {
             if (editorSettings.keybind !== 'ace') {
                 await import(`ace-builds/src-noconflict/keybinding-${editorSettings.keybind}`);
             }
-            if (languageValue) {
-                await import(
-                    `ace-builds/src-noconflict/mode-${question?.languages?.find((l) => l.name === languageValue)?.syntax || 'plaintext'}`
-                );
-            }
         })();
-    }, [editorSettings, languageValue, question]);
+    }, [editorSettings]);
 
     return (
         <AceEditor
-            mode={question?.languages?.find((l) => l.name === languageValue)?.syntax || 'plaintext'}
+            mode="javascript"
             theme={editorTheme}
             name="code-editor"
             editorProps={{ $blockScrolling: true }}
             width="100%"
             height="100%"
-            value={editorContent}
-            onChange={setEditorContent}
+            value={code}
+            className={className}
             setOptions={{
+                readOnly: true,
                 fontSize: editorSettings.fontSize,
                 tabSize: editorSettings.tabSize,
                 useSoftTabs: editorSettings.useSoftTabs,
@@ -59,4 +50,4 @@ export default function CodeEditor() {
             keyboardHandler={editorSettings.keybind}
         />
     );
-}
+};

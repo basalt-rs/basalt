@@ -9,7 +9,7 @@ const teamsListAtom = atom((get) => Object.values(get(teamsAtom)));
 const selectedTeamAtom = atom<TeamInfo | null>(null);
 export const useTeams = () => {
     const ip = useAtomValue(ipAtom);
-    const basaltWs = useWebSocket();
+    const { ws: basaltWs } = useWebSocket();
     const [teams, setTeams] = useAtom(teamsAtom);
     const teamsList = useAtomValue(teamsListAtom);
     const [selectedTeam, setSelectedTeam] = useAtom(selectedTeamAtom);

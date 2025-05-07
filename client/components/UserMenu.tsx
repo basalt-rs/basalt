@@ -65,7 +65,6 @@ export default function UserMenu() {
                         </div>
                     </PopoverContent>
                 </Popover>
-
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button size="icon" variant="outline">
