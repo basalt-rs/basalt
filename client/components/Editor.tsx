@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useAtom } from 'jotai';
-import {
-    editorContentAtom,
-    editorSettingsAtom,
-    selectedLanguageAtom,
-} from '@/lib/competitor-state';
+import { editorContentAtom, editorSettingsAtom, selectedLanguageAtom } from '@/lib/competitor-state';
 import 'ace-builds/esm-resolver';
 import 'ace-builds/src-noconflict/theme-monokai';
 import 'ace-builds/src-noconflict/ext-language_tools';
