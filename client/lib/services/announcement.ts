@@ -13,7 +13,7 @@ export const useAnnouncements = () => {
     const authToken = get(tokenAtom);
     const [ip] = useAtom(ipAtom);
     const setAnnouncements = useSetAtom(announcementsAtom);
-    const basaltWs = useWebSocket();
+    const { ws } = useWebSocket();
 
     useEffect(() => {
         const fetchAnnouncements = async () => {
@@ -40,7 +40,7 @@ export const useAnnouncements = () => {
         fetchAnnouncements();
     }, [ip, authToken, setAnnouncements]);
 
-    basaltWs.registerEvent(
+    ws.registerEvent(
         'new-announcement',
         (announcement) => {
             setAnnouncements((prev) => [...prev, announcement]);
