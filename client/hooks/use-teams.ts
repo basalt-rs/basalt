@@ -23,11 +23,10 @@ export const useTeams = () => {
         setSelectedTeam((prev) =>
             prev ? (prev.team === parsedTeam.team ? parsedTeam : prev) : prev
         );
-        setTeams((prev) => {
-            prev[parsedTeam.team] = parsedTeam;
-            // has to be new object so jotai actually knows it changed... (L)
-            return { ...prev };
-        });
+        setTeams((prev) => ({
+            ...prev,
+            [parsedTeam.team]: parsedTeam,
+        }));
     };
 
     const setSelectedTeamByName = (name: string) => {
