@@ -76,8 +76,7 @@ export const useLogin = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            if (res.ok) {
-            } else {
+            if (!res.ok) {
                 console.error('Something went wrong logging out');
                 console.error(await res.text());
             }
