@@ -13,13 +13,11 @@ import { ipAtom } from '@/lib/services/api';
 const trophyColor = (rank: number) => ['text-yellow-500', 'text-gray-500', 'text-amber-600'][rank];
 
 const TeamRank = () => {
-    const leadboardData = useLeaderboard();
-
-    console.log(leadboardData);
+    const leaderboard = useLeaderboard();
 
     return (
         <div className="flex flex-col items-center gap-4">
-            {leadboardData.map((player, index) => (
+            {leaderboard.map((player, index) => (
                 <Card
                     key={player.username}
                     className="flex w-1/2 min-w-[600px] flex-row p-6 text-xl shadow-md"
