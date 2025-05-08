@@ -1,6 +1,8 @@
 import { atom, useAtom } from 'jotai';
 import { TestResults, TestState } from '../types';
 import { Announcement } from '../types';
+import { toast, ToasterToast } from '@/hooks';
+import { relativeTime } from '../utils';
 
 type EVENT_MAPPING = {
     'game-paused': object;
@@ -93,25 +95,43 @@ class BasaltWSClient {
         this.isOpen = true;
         this.token = token;
         this.ip = ip;
+        this.retries = retries;
+
         this.ws = new WebSocket(
             `${this.ip}/${this.endpoint}`,
             this.token ? [this.token] : undefined
         );
+        let pendingToast: { id: ToasterToast['id']; dismiss: () => void; update: (toast: ToasterToast) => void } | null = null;
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
             this.isOpen = true;
-            this.retries = retries - 1;
+            if (this.retries > 2) {
+                pendingToast?.dismiss();
+                toast({
+                    title: 'Successfully reconnected to competition server.',
+                    variant: 'success',
+                });
+            }
+            this.retries = 0;
         };
         this.ws.onclose = () => {
             this.isOpen = false;
+            const EXP_BASE = 1.5;
             if (this.enabled) {
                 console.debug('disconnected to websocket backend');
+                if (this.retries > 2) {
+                    pendingToast?.dismiss();
+                    pendingToast = toast({
+                        title: `Unable to connect to competition server.  Retrying ${relativeTime(EXP_BASE**retries)}.`,
+                        variant: 'destructive',
+                    });
+                }
                 // retry connection with exponential backoff
                 setTimeout(
                     () => {
                         this.establish(ip, this.token, this.retries + 1);
                     },
-                    2 ** retries * 1000
+                    EXP_BASE ** retries * 1000
                 );
             }
         };
