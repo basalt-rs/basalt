@@ -9,12 +9,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Wifi, WifiOff } from 'lucide-react';
-import {
-    selectedQuestionAtom,
-    teamsAtom,
-    selectedTeamAtom,
-    selectedTeamIdxAtom,
-} from '@/lib/host-state';
+import { selectedQuestionAtom } from '@/lib/host-state';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import TeamInfo from './TeamInfo';
 import { Button } from '@/components/ui/button';

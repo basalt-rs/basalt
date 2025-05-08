@@ -19,7 +19,6 @@ import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
 import { ArrowRight, Loader, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
 import { useTeams } from '@/hooks/use-teams';
 
 const formatScore = (score: number): string => {
