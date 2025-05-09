@@ -50,8 +50,9 @@ export const useTesting = () => {
             } else {
                 toast({
                     title: `You code failed ${100 - res.percent}% of the tests.`,
-                    description: res.remainingAttempts !== null
-                        && `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                    description:
+                        res.remainingAttempts !== null &&
+                        `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
                     variant: 'destructive',
                 });
             }

@@ -145,16 +145,21 @@ export default function TeamInfo() {
                                 <Tooltip
                                     key={i}
                                     tooltip="This question has not been submitted"
-                                    disabled={selectedTeamSubmissions[i]?.state !== 'pass' && selectedTeamSubmissions[i]?.state !== 'fail'}
+                                    disabled={
+                                        selectedTeamSubmissions[i]?.state !== 'pass' &&
+                                        selectedTeamSubmissions[i]?.state !== 'fail'
+                                    }
                                 >
                                     <Card
                                         className={
-                                            selectedTeamSubmissions[i]?.state !== 'pass' && selectedTeamSubmissions[i]?.state !== 'fail'
+                                            selectedTeamSubmissions[i]?.state !== 'pass' &&
+                                            selectedTeamSubmissions[i]?.state !== 'fail'
                                                 ? 'cursor-not-allowed text-muted-foreground'
                                                 : 'cursor-pointer hover:bg-muted/20 hover:underline'
                                         }
                                         onClick={
-                                            selectedTeamSubmissions[i]?.state !== 'pass' && selectedTeamSubmissions[i]?.state !== 'fail'
+                                            selectedTeamSubmissions[i]?.state !== 'pass' &&
+                                            selectedTeamSubmissions[i]?.state !== 'fail'
                                                 ? () => {}
                                                 : () => setSelectedQuestion(i)
                                         }
