@@ -24,7 +24,7 @@ const TeamRank = () => {
                 >
                     <div className="flex w-1/3 flex-row items-center gap-2">
                         <b>{player.username}</b>
-                        {index + 1 < 3 && (
+                        {index < 3 && (
                             <span className={trophyColor(index)}>
                                 <Trophy fill="currentColor" size="1em" />
                             </span>
