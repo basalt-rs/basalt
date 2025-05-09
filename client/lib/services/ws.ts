@@ -3,6 +3,7 @@ import { TestResults, TestState } from '../types';
 import { Announcement } from '../types';
 import { toast, ToasterToast } from '@/hooks';
 import { relativeTime } from '../utils';
+import { TeamInfo } from './teams';
 
 type EVENT_MAPPING = {
     'game-paused': object;
@@ -15,6 +16,8 @@ type EVENT_MAPPING = {
         new_states: TestState[];
     };
     'new-announcement': Announcement;
+    'team-connected': TeamInfo;
+    'team-disconnected': TeamInfo;
 };
 
 type WebsocketSend =
@@ -67,6 +70,8 @@ class BasaltWSClient {
         'game-unpaused': [],
         'team-update': [],
         'new-announcement': [],
+        'team-connected': [],
+        'team-disconnected': [],
     };
     private onCloseTasks: (() => void)[] = [];
     private pendingTasks: {

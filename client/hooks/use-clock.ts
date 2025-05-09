@@ -48,7 +48,7 @@ export const useClock = () => {
                 return 1;
             }
 
-            const res = await getClock(ip);
+            const res = await getClock(ip, authToken);
             if (res === null) {
                 setClock({ isPaused: true, timeLeftInSeconds: 0 });
                 return 1;

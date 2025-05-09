@@ -1,5 +1,5 @@
 import { toast } from '@/hooks';
-import { atom, useAtom, useSetAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { atomWithStorage, RESET } from 'jotai/utils';
 import { ipAtom, resetIp } from './api';
 import { basaltWSClientAtom, useWebSocket } from './ws';
@@ -44,8 +44,8 @@ export const roleAtom = atom(async (get) => (await get(currentUserAtom))?.role);
 
 export const useLogin = () => {
     const [ip] = useAtom(ipAtom);
+    const [token, setToken] = useAtom(tokenAtom);
     const { establishWs, dropWs } = useWebSocket();
-    const setTokenAtom = useSetAtom(tokenAtom);
 
     const login = async (username: string, password: string): Promise<Role | null> => {
         const res = await fetch(`${ip}/auth/login`, {
@@ -57,7 +57,7 @@ export const useLogin = () => {
         });
         if (res.ok) {
             const { token, role } = await res.json();
-            setTokenAtom(token);
+            setToken(token);
             if (ip) establishWs(ip, token);
             return role;
         } else {
@@ -65,8 +65,25 @@ export const useLogin = () => {
         }
     };
 
-    const logout = async () => {
-        setTokenAtom(RESET);
+    const logout = async (): Promise<void> => {
+        if (!token || !ip) {
+            console.error('Tried to logout missing session or IP');
+        }
+        try {
+            const res = await fetch(`${ip}/auth/logout`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!res.ok) {
+                console.error('Something went wrong logging out');
+                console.error(await res.text());
+            }
+        } catch (_: unknown) {
+            console.error('Network error occurred');
+        }
+        setToken(RESET);
         dropWs();
     };
 
