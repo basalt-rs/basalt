@@ -8,7 +8,6 @@ import { Tooltip } from '@/components/util';
 import {
     getHistory,
     selectedQuestionAtom,
-    selectedTeamAtom,
     selectedTeamSubmissionsAtom,
     useSubmissionHistory,
 } from '@/lib/host-state';
@@ -33,10 +32,10 @@ const HistoryTitle = () => {
     const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
     const [history, setHistory] = useSubmissionHistory();
     const [loading, setLoading] = useState(false);
-    const [selectedTeam] = useAtom(selectedTeamAtom);
     const [token] = useAtom(tokenAtom);
     const [ip] = useAtom(ipAtom);
     const { ws } = useWebSocket();
+    const { selectedTeam } = useTeams();
 
     if (selectedQuestion === null || history === null) {
         return <h1 className="pb-4 text-2xl font-bold">Submission History</h1>;
@@ -145,17 +144,22 @@ export default function TeamInfo() {
                             {questions.map((q, i) => (
                                 <Tooltip
                                     key={i}
-                                    tooltip="This question has not been attempted"
-                                    disabled={selectedTeamSubmissions[i].state !== 'not-attempted'}
+                                    tooltip="This question has not been submitted"
+                                    disabled={
+                                        selectedTeamSubmissions[i]?.state !== 'pass' &&
+                                        selectedTeamSubmissions[i]?.state !== 'fail'
+                                    }
                                 >
                                     <Card
                                         className={
-                                            selectedTeamSubmissions[i].state === 'not-attempted'
+                                            selectedTeamSubmissions[i]?.state !== 'pass' &&
+                                            selectedTeamSubmissions[i]?.state !== 'fail'
                                                 ? 'cursor-not-allowed text-muted-foreground'
                                                 : 'cursor-pointer hover:bg-muted/20 hover:underline'
                                         }
                                         onClick={
-                                            selectedTeamSubmissions[i].state === 'not-attempted'
+                                            selectedTeamSubmissions[i]?.state !== 'pass' &&
+                                            selectedTeamSubmissions[i]?.state !== 'fail'
                                                 ? () => {}
                                                 : () => setSelectedQuestion(i)
                                         }
@@ -165,7 +169,7 @@ export default function TeamInfo() {
                                                 {q.title}
                                                 <span className="flex w-72 flex-row justify-between gap-2">
                                                     <Status
-                                                        status={selectedTeamSubmissions[i].state}
+                                                        status={selectedTeamSubmissions[i]?.state}
                                                         showLabel
                                                     />
                                                     <ArrowRight />

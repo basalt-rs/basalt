@@ -137,7 +137,12 @@ export const TestResults = () => {
         case 'individual': {
             return (
                 <>
-                    <Progress value={testResults.percent} />
+                    <Progress
+                        value={testResults.percent}
+                        color={
+                            testResults.submitKind === 'test' ? 'bg-in-progress/50' : 'bg-pass/50'
+                        }
+                    />
                     <Accordion type="single" collapsible>
                         {testResults.kind === 'individual'
                             ? testResults.tests?.map(([output, test], i) => (

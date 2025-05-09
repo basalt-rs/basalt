@@ -47,7 +47,7 @@ export default function TeamInspector() {
                     </SelectTrigger>
                     <SelectContent>
                         {teamsList.map((team, index) => (
-                            <SelectItem value={`${index}`} key={index}>
+                            <SelectItem value={team.team} key={index}>
                                 <div className="flex gap-1">
                                     {!team.disconnected &&
                                     (team.lastSeenMs

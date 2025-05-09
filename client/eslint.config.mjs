@@ -76,7 +76,7 @@ const eslintConfig = [
         },
     },
     {
-        ignores: ['**/*.config*', '.next', 'out'],
+        ignores: ['**/*.config*', '.next', 'out', 'src-tauri'],
     },
 ];
 
