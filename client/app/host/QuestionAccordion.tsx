@@ -38,7 +38,7 @@ export default function QuestionAccordion() {
                                                 ? 'Languages: '
                                                 : 'Language: '}
                                         </span>
-                                        {q.languages.join(', ')}
+                                        {q.languages.map((l) => l.name).join(', ')}
                                     </div>
                                 )}
                                 <div className="flex items-center gap-1">

@@ -1,4 +1,3 @@
-'use client';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { Button } from './ui/button';
@@ -32,7 +31,6 @@ export default function UserMenu() {
     const { logout } = useLogin();
     const router = useRouter();
     const [settingsOpen, setOpen] = useState(false);
-
     const handleLogout = () => {
         logout();
         router.replace('/');

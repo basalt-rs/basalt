@@ -56,6 +56,12 @@ export interface SubmissionHistory {
     success: boolean;
 }
 
+export interface LeaderboardEntry {
+    username: string;
+    score: number;
+    submissionStates: TestState[];
+}
+
 export interface Languages {
     name: string;
     syntax: string;
