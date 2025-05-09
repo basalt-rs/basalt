@@ -40,7 +40,6 @@ export const useLeaderboard = () => {
     ws.registerEvent(
         'team-update',
         (update) => {
-            console.log('update this sucker', setLeaderboard);
             setLeaderboard((leaderboard) => {
                 const temp = leaderboard.map((item) =>
                     item.username === update.team
