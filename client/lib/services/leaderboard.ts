@@ -13,7 +13,7 @@ export const useLeaderboard = () => {
     const { ws } = useWebSocket();
     const [leaderboard, setLeaderboard] = useAtom(leaderboardAtom);
 
-    const rankLeaderboard = (data: LeaderboardEntry[]) => {
+    const sortLeaderboard = (data: LeaderboardEntry[]) => {
         data.sort((a, b) => b.score - a.score);
     };
 
@@ -33,7 +33,7 @@ export const useLeaderboard = () => {
                 return;
             }
             const leaderboard: LeaderboardEntry[] = await res.json();
-            rankLeaderboard(leaderboard);
+            sortLeaderboard(leaderboard);
             setLeaderboard(leaderboard);
         })();
     }, [ip, setLeaderboard]);
@@ -50,7 +50,7 @@ export const useLeaderboard = () => {
                           }
                         : item
                 );
-                rankLeaderboard(temp);
+                sortLeaderboard(temp);
                 return temp;
             });
         },
