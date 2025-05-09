@@ -15,10 +15,10 @@ import {
 } from './ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { useLogin } from '@/lib/services/auth';
-import { Editor } from './Settings';
 import { useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
+import { useLogin } from '@/lib/services/auth';
+import { Editor } from './Settings';
 import { announcementsAtom } from '@/lib/services/announcement';
 import { Separator } from './ui/separator';
 import { Elapsed } from './Elapsed';
@@ -29,8 +29,8 @@ export default function UserMenu() {
     const { logout } = useLogin();
     const router = useRouter();
     const [settingsOpen, setOpen] = useState(false);
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         router.replace('/');
     };
 

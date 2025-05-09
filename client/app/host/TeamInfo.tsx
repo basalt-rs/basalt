@@ -19,6 +19,7 @@ import { useWebSocket } from '@/lib/services/ws';
 import { atom, useAtom } from 'jotai';
 import { ArrowRight, Loader, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
+import { useTeams } from '@/hooks/use-teams';
 
 const formatScore = (score: number): string => {
     const s = score % 1 ? score.toFixed(2) : score.toLocaleString();
@@ -112,9 +113,9 @@ const SubmissionHistory = () => {
 };
 
 export default function TeamInfo() {
+    const { selectedTeam } = useTeams();
     const [questions] = useAtom(allQuestionsAtom);
     const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
-    const [selectedTeam] = useAtom(selectedTeamAtom);
     const [selectedTeamSubmissions] = useAtom(selectedTeamSubmissionsAtom);
 
     return (
@@ -122,13 +123,16 @@ export default function TeamInfo() {
             <div className="flex h-full w-full flex-col gap-4 p-4">
                 <div className="flex items-center justify-between font-bold">
                     <div className="flex flex-col">
-                        <p className="text-2xl">{selectedTeam.name}</p>
+                        <p className="text-2xl">{selectedTeam.team}</p>
                         <p>
                             <strong>Points: </strong>
-                            {selectedTeam.points}
+                            {selectedTeam.score}
                         </p>
                     </div>
-                    {selectedTeam.status ? (
+                    {!selectedTeam.disconnected &&
+                    (selectedTeam.lastSeenMs
+                        ? Math.abs(Date.now() - selectedTeam.lastSeenMs) < 45 * 1000
+                        : false) ? (
                         <p className="text-2xl text-green-500">Connected</p>
                     ) : (
                         <p className="text-2xl text-gray-300 dark:text-gray-500">Disconnected</p>
