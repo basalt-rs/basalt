@@ -7,8 +7,17 @@ export interface ClockUpdateBody {
     isPaused: boolean;
 }
 
-export const getClock = async (ip: string): Promise<CurrentTime | null> => {
-    const res = await fetch(`${ip}/clock`);
+export const getClock = async (
+    ip: string,
+    authToken: string | null = null
+): Promise<CurrentTime | null> => {
+    const res = await fetch(`${ip}/clock`, {
+        headers: authToken
+            ? {
+                  Authorization: `Bearer ${authToken}`,
+              }
+            : {},
+    });
     if (res.ok) {
         return (await res.json()) as CurrentTime;
     } else return null;

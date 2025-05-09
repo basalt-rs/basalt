@@ -1,6 +1,6 @@
 'use client';
 import { Button } from './ui/button';
-import { Pause, Play } from 'lucide-react';
+import { Loader2, Pause, Play } from 'lucide-react';
 import { useAtom } from 'jotai';
 import { clockAtom } from '@/lib/host-state';
 
@@ -35,7 +35,12 @@ export default function Timer({ isHost = false, onPause, onPlay, isPaused }: Tim
     return (
         <div className="flex w-full flex-col items-center gap-1">
             <span className="flex items-center gap-2">
-                {isHost && (
+                {!clock && (
+                    <div>
+                        <Loader2 size={48} className="animate-spin" />
+                    </div>
+                )}
+                {clock && isHost && (
                     <div>
                         <Button
                             variant="ghost"
@@ -50,9 +55,11 @@ export default function Timer({ isHost = false, onPause, onPlay, isPaused }: Tim
                         </Button>
                     </div>
                 )}
-                <p className="my-2 text-[8vmin] font-thin">
-                    {formatTime(clock?.timeLeftInSeconds ?? 0)}
-                </p>
+                {clock && (
+                    <p className="my-2 text-[8vmin] font-thin">
+                        {formatTime(clock?.timeLeftInSeconds ?? 0)}
+                    </p>
+                )}
             </span>
         </div>
     );

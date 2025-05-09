@@ -31,8 +31,8 @@ export default function UserMenu() {
     const { logout } = useLogin();
     const router = useRouter();
     const [settingsOpen, setOpen] = useState(false);
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         router.replace('/');
     };
     const [currentUser] = useAtom(currentUserAtom);
