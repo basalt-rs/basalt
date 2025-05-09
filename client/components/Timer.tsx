@@ -56,7 +56,7 @@ export default function Timer({ isHost = false, onPause, onPlay, isPaused }: Tim
                     </div>
                 )}
                 {clock && (
-                    <p className="my-2 text-[8vmin] font-thin">
+                    <p className="my-2 text-6xl font-thin">
                         {formatTime(clock?.timeLeftInSeconds ?? 0)}
                     </p>
                 )}
