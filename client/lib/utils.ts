@@ -12,9 +12,13 @@ export const humanTime = (date: Date | string) => {
 };
 
 const RTF = new Intl.RelativeTimeFormat(undefined, { style: 'long' });
-export const relativeTime = (date: Date | string) => {
-    const date2 = typeof date === 'string' ? new Date(date) : date;
-    const elapsedSecs = (date2.valueOf() - Date.now()) / 1000;
+/**
+ * If `date` is a number, it is the elapsedSecons, if it is a date or a string,
+ * it will be treated as the start time
+ */
+export const relativeTime = (date: Date | string | number) => {
+    const elapsedSecs =
+        typeof date === 'number' ? date : (new Date(date).valueOf() - Date.now()) / 1000;
     if (Math.abs(elapsedSecs) < 60) {
         return '< 1 minute ago';
     }
