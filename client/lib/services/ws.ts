@@ -101,7 +101,11 @@ class BasaltWSClient {
             `${this.ip}/${this.endpoint}`,
             this.token ? [this.token] : undefined
         );
-        let pendingToast: { id: ToasterToast['id']; dismiss: () => void; update: (toast: ToasterToast) => void } | null = null;
+        let pendingToast: {
+            id: ToasterToast['id'];
+            dismiss: () => void;
+            update: (toast: ToasterToast) => void;
+        } | null = null;
         this.ws.onopen = () => {
             console.debug('connected to websocket backend');
             this.isOpen = true;
@@ -122,7 +126,7 @@ class BasaltWSClient {
                 if (this.retries > 2) {
                     pendingToast?.dismiss();
                     pendingToast = toast({
-                        title: `Unable to connect to competition server.  Retrying ${relativeTime(EXP_BASE**retries)}.`,
+                        title: `Unable to connect to competition server.  Retrying ${relativeTime(EXP_BASE ** retries)}.`,
                         variant: 'destructive',
                     });
                 }
