@@ -16,7 +16,7 @@ export const relativeTime = (date: Date | string) => {
     const date2 = typeof date === 'string' ? new Date(date) : date;
     const elapsedSecs = (date2.valueOf() - Date.now()) / 1000;
     if (Math.abs(elapsedSecs) < 60) {
-        return RTF.format(Math.round(elapsedSecs), 'second');
+        return '< 1 minute ago';
     }
     const elapsedMins = Math.trunc(elapsedSecs / 60);
     if (Math.abs(elapsedMins) < 60) {

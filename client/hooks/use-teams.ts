@@ -4,9 +4,9 @@ import { useWebSocket } from '@/lib/services/ws';
 import { useQuery } from '@tanstack/react-query';
 import { atom, useAtom, useAtomValue } from 'jotai';
 
-const teamsAtom = atom<Record<string, TeamInfo>>({});
-const teamsListAtom = atom((get) => Object.values(get(teamsAtom)));
-const selectedTeamAtom = atom<TeamInfo | null>(null);
+export const teamsAtom = atom<Record<string, TeamInfo>>({});
+export const teamsListAtom = atom((get) => Object.values(get(teamsAtom)));
+export const selectedTeamAtom = atom<TeamInfo | null>(null);
 export const useTeams = () => {
     const ip = useAtomValue(ipAtom);
     const { ws: basaltWs } = useWebSocket();

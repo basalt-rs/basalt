@@ -147,9 +147,8 @@ export default function Host() {
                             ))}
                     </div>
                 </div>
-                <Separator />
                 <div>
-                    <div className="flex h-80 flex-col justify-end px-2">
+                    <div className="flex h-72 flex-col justify-end px-2">
                         <AnnouncementForm />
                     </div>
                     <Separator className="mb-2.5" />

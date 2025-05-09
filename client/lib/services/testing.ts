@@ -47,16 +47,11 @@ export const useTesting = () => {
                     title: 'Submission Passed!',
                     variant: 'success',
                 });
-            } else if (res.remainingAttempts !== null) {
-                toast({
-                    title: 'Submission Failed!',
-                    description: `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
-                    variant: 'destructive',
-                });
             } else {
                 toast({
-                    title: 'Submission Failed!',
-                    description: `Pass rate: ${res.percent}%`,
+                    title: `You code failed ${100 - res.percent}% of the tests.`,
+                    description: res.remainingAttempts !== null
+                        && `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
                     variant: 'destructive',
                 });
             }
