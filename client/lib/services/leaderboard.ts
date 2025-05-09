@@ -36,7 +36,7 @@ export const useLeaderboard = () => {
             rankLeaderboard(leaderboard);
             setLeaderboard(leaderboard);
         })();
-    }, [ip, setLeaderboard, ws]);
+    }, [ip, setLeaderboard]);
     ws.registerEvent(
         'team-update',
         (update) => {
