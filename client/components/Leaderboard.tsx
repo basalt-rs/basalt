@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { tokenAtom } from '@/lib/services/auth';
 import { ipAtom } from '@/lib/services/api';
+import { ScrollArea } from './ui/scroll-area';
 
 const trophyColor = (rank: number) => ['text-yellow-500', 'text-gray-500', 'text-amber-600'][rank];
 
@@ -53,13 +54,15 @@ export default function Leaderboard({ showTimer = true }) {
         if (ip) establishWs(ip, token);
     }, [establishWs, ip, token]);
     return (
-        <div className="h-full">
+        <>
             {showTimer && clock && (
                 <div className="flex w-full justify-center pt-8">
                     <Timer isHost={false} isPaused={isPaused} />
                 </div>
             )}
-            <TeamRank />
-        </div>
+            <ScrollArea className="flex-grow overflow-y-auto pb-4">
+                <TeamRank />
+            </ScrollArea>
+        </>
     );
 }
