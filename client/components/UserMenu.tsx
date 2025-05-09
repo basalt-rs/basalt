@@ -6,6 +6,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuLabel,
     DropdownMenuPortal,
     DropdownMenuSeparator,
     DropdownMenuSub,
@@ -15,10 +16,11 @@ import {
 } from './ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
+import { currentUserAtom } from '@/lib/services/auth';
 import { useLogin } from '@/lib/services/auth';
 import { Editor } from './Settings';
+import { useRouter } from 'next/navigation';
 import { announcementsAtom } from '@/lib/services/announcement';
 import { Separator } from './ui/separator';
 import { Elapsed } from './Elapsed';
@@ -33,6 +35,7 @@ export default function UserMenu() {
         await logout();
         router.replace('/');
     };
+    const [currentUser] = useAtom(currentUserAtom);
 
     return (
         <>
@@ -72,6 +75,10 @@ export default function UserMenu() {
                     </DropdownMenuTrigger>
                     <DropdownMenuPortal>
                         <DropdownMenuContent>
+                            <DropdownMenuLabel className="flex items-center justify-center gap-1.5">
+                                <p className="uppercase">{currentUser?.username}</p>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
                             <DropdownMenuSub>
                                 <DropdownMenuSubTrigger>
                                     <SunMoon />

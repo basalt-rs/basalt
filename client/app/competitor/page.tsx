@@ -230,12 +230,12 @@ export default function Competitor() {
     useAnnouncements();
 
     return (
-        <div className="h-screen">
+        <div className="flex h-screen flex-grow flex-col">
             <div>
                 <CompetitorNavbar />
             </div>
             <WithPauseGuard isPaused={isPaused}>
-                <div className="flex h-[95vh]">
+                <div className="h-full">
                     <div className="flex-grow">
                         <ResizablePanelGroup direction="horizontal">
                             <ResizablePanel

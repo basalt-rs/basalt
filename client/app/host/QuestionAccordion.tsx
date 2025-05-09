@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { allQuestionsAtom } from '@/lib/services/questions';
 import { useAtom } from 'jotai';
 import { Markdown } from '@/components/Markdown';
+import { CodeBlock } from '@/components/util';
 
 export default function QuestionAccordion() {
     const [allQuestions] = useAtom(allQuestionsAtom);
@@ -69,16 +70,12 @@ export default function QuestionAccordion() {
                                                     {test.input && (
                                                         <div className="w-full">
                                                             <h2>Input</h2>
-                                                            <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-black dark:bg-slate-800 dark:text-white">
-                                                                {test.input}
-                                                            </pre>
+                                                            <CodeBlock text={test.input} />
                                                         </div>
                                                     )}
                                                     <div className="w-full">
                                                         <h2>Output</h2>
-                                                        <pre className="w-full rounded-sm bg-slate-800 px-4 py-2 font-mono text-black dark:bg-slate-800 dark:text-white">
-                                                            {test.output}
-                                                        </pre>
+                                                        <CodeBlock text={test.output} />
                                                     </div>
                                                 </span>
                                             </AccordionContent>
