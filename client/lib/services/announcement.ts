@@ -17,6 +17,7 @@ export const useAnnouncements = () => {
 
     useEffect(() => {
         const fetchAnnouncements = async () => {
+            if (!ip) return;
             try {
                 const res = await fetch(`${ip}/announcements`, {
                     method: 'GET',
