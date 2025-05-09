@@ -19,10 +19,10 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
 export default function TeamInspector() {
+    const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
     const [teamList] = useAtom(teamsAtom);
     const [selectedTeam] = useAtom(selectedTeamAtom);
     const [selectedTeamIdx, setSelectedTeamIdx] = useAtom(selectedTeamIdxAtom);
-    const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
 
     const back = () => {
         if (selectedQuestion !== null) {
