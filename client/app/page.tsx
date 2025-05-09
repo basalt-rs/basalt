@@ -44,6 +44,7 @@ const Login = () => {
     const router = useRouter();
     const [message, setMessage] = useState<string>('');
     const { login } = useLogin();
+    const [loading, setLoading] = useState(false);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(LoginFormSchema),
@@ -56,10 +57,12 @@ const Login = () => {
     const onSubmit = async () => {
         const { username, password } = form.getValues();
 
+        setLoading(true);
         try {
             const role = await login(username, password);
             if (role) {
                 router.replace(`/${role}`);
+                return; // don't reset loading state
             } else {
                 setMessage('Invalid username or password');
                 form.reset();
@@ -68,7 +71,9 @@ const Login = () => {
             setMessage('Invalid game code');
             form.reset();
         }
+        setLoading(false);
     };
+
     return (
         <>
             <CardContent className="flex flex-col gap-1">
@@ -107,8 +112,8 @@ const Login = () => {
 
                         <div className="flex w-full flex-row items-center justify-between">
                             <span className="items-center text-destructive">{message}</span>
-                            <Button>
-                                <ArrowRight />
+                            <Button disabled={loading}>
+                                {loading ? <Loader2 className="animate-spin" /> : <ArrowRight />}
                             </Button>
                         </div>
                     </form>
