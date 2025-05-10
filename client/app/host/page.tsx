@@ -36,7 +36,7 @@ export default function Host() {
     const [token] = useAtom(tokenAtom);
 
     useEffect(() => {
-        if (ip) establishWs(ip, token);
+        if (ip && token) establishWs(ip, token);
     }, [establishWs, ip, token]);
 
     useAnnouncements();
