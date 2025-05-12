@@ -132,13 +132,13 @@ const SingleResult = ({
 
 export const TestResults = () => {
     const { testResults } = useTesting();
-    if (testResults === null) return null;
+    if (!testResults?.kind) return null;
     switch (testResults.kind) {
         case 'individual': {
             return (
                 <>
                     <Progress
-                        value={testResults.percent}
+                        value={testResults.passed * 100 / (testResults.passed + testResults.failed)}
                         color={
                             testResults.submitKind === 'test' ? 'bg-in-progress/50' : 'bg-pass/50'
                         }

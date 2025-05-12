@@ -7,7 +7,7 @@ import { editorContentAtom, selectedLanguageAtom } from '../competitor-state';
 
 const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
 const testResultsAtom = atom<
-    (TestResults & { percent: number; submitKind: 'test' | 'submit' }) | null
+    (TestResults & { failed: number; passed: number; submitKind: 'test' | 'submit' }) | null
 >(null);
 export const useTesting = () => {
     const [loading, setLoading] = useAtom(testsLoadingAtom);
@@ -20,53 +20,66 @@ export const useTesting = () => {
 
     const runTests = async () => {
         setLoading('test');
-        const { results, percent } = await ws.sendAndWait({
-            kind: 'run-test',
-            language: selectedLanguage?.toLowerCase() || 'java',
-            problem: currentQuestionIdx,
-            solution: editorContent,
-        });
-
-        setTestResults({ ...results, percent, submitKind: 'test' });
+        try {
+            const { results, failed, passed } = await ws.sendAndWait({
+                kind: 'run-test',
+                language: selectedLanguage?.toLowerCase() || 'java',
+                problem: currentQuestionIdx,
+                solution: editorContent,
+            });
+            setTestResults({ ...results, failed, passed, submitKind: 'test' });
+        } catch (ex) {
+            console.error('Error running tests:', ex);
+            setTestResults(null);
+        }
         setLoading(null);
     };
 
     const submit = async () => {
         setLoading('submit');
-        const res = await ws.sendAndWait({
-            kind: 'submit',
-            language: selectedLanguage?.toLowerCase() || 'java',
-            problem: currentQuestionIdx,
-            solution: editorContent,
-        });
+        try {
+            const res = await ws.sendAndWait({
+                kind: 'submit',
+                language: selectedLanguage?.toLowerCase() || 'java',
+                problem: currentQuestionIdx,
+                solution: editorContent,
+            });
 
-        if (res.kind === 'submit') {
-            setTestResults({ ...res.results, percent: res.percent, submitKind: 'submit' });
-            if (res.percent >= 100) {
-                toast({
-                    title: 'Submission Passed!',
-                    variant: 'success',
-                });
+            if (res.kind === 'submit') {
+                const { passed, failed } = res;
+                setTestResults({ ...res.results, failed, passed, submitKind: 'submit' });
+                if (res.results.kind === 'individual') {
+                    if (passed >= failed) {
+                        toast({
+                            title: 'Submission Passed!',
+                            variant: 'success',
+                        });
+                    } else {
+                        toast({
+                            title: `Your solution passed ${passed} out of ${failed + passed} tests.`,
+                            description:
+                                res.remainingAttempts !== null &&
+                                `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                            variant: 'destructive',
+                        });
+                    }
+                }
+                setCurrentState((s) => ({
+                    ...s,
+                    remainingAttempts: res.remainingAttempts,
+                }));
             } else {
-                toast({
-                    title: `You code failed ${100 - res.percent}% of the tests.`,
-                    description:
-                        res.remainingAttempts !== null &&
-                        `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
-                    variant: 'destructive',
+                setTestResults({
+                    kind: 'other-error',
+                    message: res.message,
+                    failed: 0,
+                    passed: 0,
+                    submitKind: 'submit',
                 });
             }
-            setCurrentState((s) => ({
-                ...s,
-                remainingAttempts: res.remainingAttempts,
-            }));
-        } else {
-            setTestResults({
-                kind: 'other-error',
-                message: res.message,
-                percent: 0,
-                submitKind: 'submit',
-            });
+        } catch (ex) {
+            console.error('Error running submissions:', ex);
+            setTestResults(null);
         }
         setLoading(null);
     };
