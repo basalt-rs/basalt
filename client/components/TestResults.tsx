@@ -138,7 +138,9 @@ export const TestResults = () => {
             return (
                 <>
                     <Progress
-                        value={testResults.passed * 100 / (testResults.passed + testResults.failed)}
+                        value={
+                            (testResults.passed * 100) / (testResults.passed + testResults.failed)
+                        }
                         color={
                             testResults.submitKind === 'test' ? 'bg-in-progress/50' : 'bg-pass/50'
                         }
