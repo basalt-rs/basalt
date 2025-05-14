@@ -30,15 +30,17 @@ export const useClock = () => {
     };
 
     const decrementTimer = () => {
-        setClock((prev) => prev === undefined
+        setClock((prev) =>
+            prev === undefined
                 ? undefined
                 : prev.isPaused
                   ? prev
                   : {
-                      ...prev,
-                      isOver: prev.isOver || prev?.timeLeftInSeconds <= 1,
-                      timeLeftInSeconds: prev?.timeLeftInSeconds - 1,
-                  });
+                        ...prev,
+                        isOver: prev.isOver || prev?.timeLeftInSeconds <= 1,
+                        timeLeftInSeconds: prev?.timeLeftInSeconds - 1,
+                    }
+        );
     };
 
     useQuery({
@@ -68,7 +70,9 @@ export const useClock = () => {
     ws.registerEvent('game-paused', () => {
         stopTicking();
         setClock((prev) =>
-            prev ? { ...prev, isPaused: true, isOver: false } : { timeLeftInSeconds: 0, isPaused: true, isOver: false }
+            prev
+                ? { ...prev, isPaused: true, isOver: false }
+                : { timeLeftInSeconds: 0, isPaused: true, isOver: false }
         );
     });
 

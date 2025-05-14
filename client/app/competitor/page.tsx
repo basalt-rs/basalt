@@ -38,7 +38,14 @@ import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
 import * as Dialog from '@/components/ui/dialog';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 
 const EditorButtons = () => {
     const setEditorContent = useSetAtom(editorContentAtom);
@@ -244,11 +251,17 @@ const Summary = () => {
                     ))}
                 </TableBody>
             </Table>
-            <div className="text-center pt-2">
-                <p>Successful Solutions: {allStates?.filter(s => s.state === 'pass').length}</p>
-                <p>Failed Solutions: {allStates?.filter(s => s.state === 'fail').length}</p>
-                <p>Attempted Solutions: {allStates?.filter(s => s.state !== 'not-attempted').length}</p>
-                <p>Unattempted Solutions: {allStates?.filter(s => s.state === 'not-attempted').length}</p>
+            <div className="pt-2 text-center">
+                <p>Successful Solutions: {allStates?.filter((s) => s.state === 'pass').length}</p>
+                <p>Failed Solutions: {allStates?.filter((s) => s.state === 'fail').length}</p>
+                <p>
+                    Attempted Solutions:{' '}
+                    {allStates?.filter((s) => s.state !== 'not-attempted').length}
+                </p>
+                <p>
+                    Unattempted Solutions:{' '}
+                    {allStates?.filter((s) => s.state === 'not-attempted').length}
+                </p>
             </div>
         </div>
     );
@@ -278,9 +291,7 @@ export default function Competitor() {
                     <Summary />
                     <Dialog.DialogFooter>
                         <Button type="submit" asChild>
-                            <Link href="/leaderboard">
-                                Go To Leaderboard
-                            </Link>
+                            <Link href="/leaderboard">Go To Leaderboard</Link>
                         </Button>
                     </Dialog.DialogFooter>
                 </Dialog.DialogContent>
@@ -319,7 +330,10 @@ export default function Competitor() {
                                             </SelectContent>
                                         </Select>
                                         {currentQuestion && (
-                                            <QuestionDetails question={currentQuestion} status="pass" />
+                                            <QuestionDetails
+                                                question={currentQuestion}
+                                                status="pass"
+                                            />
                                         )}
                                     </ScrollArea>
                                     <div className="py-2.5">
