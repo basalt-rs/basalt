@@ -1,9 +1,10 @@
 import { toast } from '@/hooks';
 import { atom, useAtom } from 'jotai';
-import { currQuestionIdxAtom, useSubmissionStates } from './questions';
+import { allQuestionsAtom, currQuestionIdxAtom, useSubmissionStates } from './questions';
 import { useWebSocket } from './ws';
 import { TestResults } from '../types';
 import { editorContentAtom, selectedLanguageAtom } from '../competitor-state';
+import { ToastActionElement } from '@/components/ui/toast';
 
 const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
 const testResultsAtom = atom<
@@ -15,6 +16,7 @@ export const useTesting = () => {
     const { ws } = useWebSocket();
     const [editorContent] = useAtom(editorContentAtom);
     const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
+    const [allQuestions] = useAtom(allQuestionsAtom);
     const [selectedLanguage] = useAtom(selectedLanguageAtom);
     const { setCurrentState } = useSubmissionStates();
 
@@ -31,7 +33,7 @@ export const useTesting = () => {
         setLoading(null);
     };
 
-    const submit = async () => {
+    const submit = async (nextQuestion?: ToastActionElement) => {
         setLoading('submit');
         const res = await ws.sendAndWait({
             kind: 'submit',
@@ -46,6 +48,7 @@ export const useTesting = () => {
                 toast({
                     title: 'Submission Passed!',
                     variant: 'success',
+                    action: currentQuestionIdx < allQuestions.length - 1 ? nextQuestion : undefined,
                 });
             } else {
                 toast({
@@ -71,5 +74,11 @@ export const useTesting = () => {
         setLoading(null);
     };
 
-    return { loading, runTests, submit, testResults };
+    return {
+        loading,
+        runTests,
+        submit,
+        testResults,
+        clearTestResults: () => setTestResults(null),
+    };
 };
