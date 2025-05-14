@@ -162,13 +162,32 @@ const EditorButtons = () => {
 };
 
 const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
+    const { loading, testResults } = useTesting();
     switch (tab) {
         case 'text-editor':
             return (
-                <div className="flex h-full flex-col">
-                    <EditorButtons />
-                    <CodeEditor />
-                </div>
+
+                <ResizablePanelGroup direction="vertical" className="h-full">
+                    <ResizablePanel defaultSize={400} className="h-full">
+                        <div className="flex h-full flex-col">
+                            <EditorButtons />
+                            <CodeEditor />
+                        </div>
+                    </ResizablePanel>
+                    <ResizableHandle withHandle />
+                    {(loading || testResults) && (
+                        <ResizablePanel
+                            defaultSize={100}
+                            minSize={10}
+                            collapsible={true}
+                            collapsedSize={0}
+                            className="h-full">
+                            <ScrollArea className="h-full w-full">
+                                <TestResultsPanel />
+                            </ScrollArea>
+                        </ResizablePanel>
+                    )}
+                </ResizablePanelGroup>
             );
         case 'leaderboard':
             return (
@@ -201,7 +220,6 @@ export default function Competitor() {
     const { pause, unPause, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
-    const { loading, testResults } = useTesting();
 
     useAnnouncements();
 
@@ -256,24 +274,7 @@ export default function Competitor() {
                         </ResizablePanel>
                         <ResizableHandle withHandle />
                         <ResizablePanel className="">
-                            <ResizablePanelGroup direction="vertical" className="h-full">
-                                <ResizablePanel defaultSize={400} className="h-full">
-                                    <TabContent tab={tab} />
-                                </ResizablePanel>
-                                <ResizableHandle withHandle />
-                                {(loading || testResults) && (
-                                    <ResizablePanel
-                                        defaultSize={100}
-                                        minSize={10}
-                                        collapsible={true}
-                                        collapsedSize={0}
-                                        className="h-full">
-                                        <ScrollArea className="h-full w-full">
-                                            <TestResultsPanel />
-                                        </ScrollArea>
-                                    </ResizablePanel>
-                                )}
-                            </ResizablePanelGroup>
+                            <TabContent tab={tab} />
                         </ResizablePanel>
                     </ResizablePanelGroup>
                 </div>
