@@ -74,5 +74,11 @@ export const useTesting = () => {
         setLoading(null);
     };
 
-    return { loading, runTests, submit, testResults };
+    return {
+        loading,
+        runTests,
+        submit,
+        testResults,
+        clearTestResults: () => setTestResults(null),
+    };
 };

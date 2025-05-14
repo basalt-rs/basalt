@@ -1,5 +1,5 @@
 'use client';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
@@ -162,7 +162,17 @@ const EditorButtons = () => {
 };
 
 const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
-    const { loading, testResults } = useTesting();
+    const { loading, testResults, clearTestResults } = useTesting();
+    const [currQuestionIdx] = useAtom(currQuestionIdxAtom);
+    const prevIdx = useRef(currQuestionIdx);
+    
+    useEffect(() => {
+        if (prevIdx.current !== currQuestionIdx) {
+            clearTestResults();
+            prevIdx.current = currQuestionIdx;
+        }
+    }, [currQuestionIdx, clearTestResults]);
+
     switch (tab) {
         case 'text-editor':
             return (
