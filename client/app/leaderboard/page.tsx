@@ -37,11 +37,11 @@ export default function Page() {
     return (
         <div className="flex h-screen flex-col">
             <div className="m-2">
-                <Link href="/">
-                    <Button variant="ghost">
+                <Button variant="ghost" asChild>
+                    <Link href="/">
                         <ArrowLeft /> Back
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
             </div>
             <Leaderboard />
             <div className="mx-2 mb-2 mt-auto flex justify-end">
