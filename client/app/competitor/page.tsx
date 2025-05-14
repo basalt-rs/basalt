@@ -37,6 +37,7 @@ import { TestResults } from '@/components/TestResults';
 import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
+import { ToastAction } from '@radix-ui/react-toast';
 
 const EditorButtons = () => {
     const setEditorContent = useSetAtom(editorContentAtom);
@@ -46,6 +47,7 @@ const EditorButtons = () => {
     const { loading, runTests, submit } = useTesting();
     const { currentState } = useSubmissionStates();
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
+    const setCurrQuestionIdx = useSetAtom(currQuestionIdxAtom);
 
     const downloadPdf = (ip: string) => {
         download(`${ip}/competition/packet`);
@@ -64,6 +66,10 @@ const EditorButtons = () => {
         setEditorContent(content);
 
         event.target.value = '';
+    };
+
+    const submitSolution = () => {
+        submit(<ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx(n => n + 1)}>Next Question</ToastAction>);
     };
 
     return (
@@ -109,16 +115,14 @@ const EditorButtons = () => {
                     tooltip={
                         <div className="text-center">
                             <p>Submit Solution</p>
-                            {currentState && currentState.remainingAttempts !== null && (
-                                <p
-                                    className={
-                                        currentState.remainingAttempts === 0 ? 'text-fail' : ''
-                                    }
-                                >
-                                    {currentState.remainingAttempts}{' '}
-                                    {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'}{' '}
-                                    remaining
-                                </p>
+                            {currentState?.state === 'pass'
+                                ? <p>You&apos;ve already passed this question!</p>
+                                : currentState && currentState.remainingAttempts !== null && (
+                                    <p className={ currentState.remainingAttempts === 0 ? 'text-fail' : '' }>
+                                        {currentState.remainingAttempts}{' '}
+                                        {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'}{' '}
+                                        remaining
+                                    </p>
                             )}
                         </div>
                     }
@@ -126,8 +130,8 @@ const EditorButtons = () => {
                     <Button
                         size="icon"
                         variant="ghost"
-                        onClick={submit}
-                        disabled={!!loading || currentState?.remainingAttempts === 0}
+                        onClick={submitSolution}
+                        disabled={!!loading || currentState?.state === 'pass' || currentState?.remainingAttempts === 0}
                     >
                         {loading === 'submit' ? (
                             <Loader2 className="animate-spin text-pass" />
@@ -246,7 +250,7 @@ export default function Competitor() {
                             <ResizablePanelGroup direction="vertical" className="h-full">
                                 <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
                                     <Select
-                                        defaultValue={`${currQuestion}`}
+                                        value={`${currQuestion}`}
                                         onValueChange={(v) => setCurrQuestionIdx(+v)}
                                     >
                                         <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
