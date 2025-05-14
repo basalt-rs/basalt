@@ -7,6 +7,7 @@ import { useAtom } from 'jotai';
 import { useState, useRef, useEffect } from 'react';
 import { ipAtom } from '@/lib/services/api';
 import { tokenAtom } from '@/lib/services/auth';
+import { Separator } from '@/components/ui/separator';
 
 export default function AnnouncementForm() {
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -73,28 +74,31 @@ export default function AnnouncementForm() {
     }, [announcementList]);
 
     return (
-        <div className="py-2">
-            <div ref={containerRef} className="max-h-72 gap-2 space-y-1 overflow-y-auto py-2">
-                {announcementList.map((announcement, index) => (
-                    <div key={index} className="rounded-lg border p-2 px-3">
-                        <strong className="mr-2 text-sm">
-                            {new Date(announcement.time).toLocaleTimeString()}:
-                        </strong>
-                        <span>{announcement.message}</span>
-                    </div>
-                ))}
+        <>
+            <Separator />
+            <div className="px-2 pb-2">
+                <div ref={containerRef} className="max-h-72 gap-2 space-y-1 overflow-y-auto py-2">
+                    {announcementList.map((announcement, index) => (
+                        <div key={index} className="rounded-lg border p-2 px-3">
+                            <strong className="mr-2 text-sm">
+                                {new Date(announcement.time).toLocaleTimeString()}:
+                            </strong>
+                            <span>{announcement.message}</span>
+                        </div>
+                    ))}
+                </div>
+                <form onSubmit={handleSubmit} className="flex items-center gap-1">
+                    <Input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Announcement ..."
+                        className="h-fit w-full rounded-lg border-2 p-2"
+                    />
+                    <Button type="submit">
+                        <Send />
+                    </Button>
+                </form>
             </div>
-            <form onSubmit={handleSubmit} className="flex items-center gap-1">
-                <Input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Announcement ..."
-                    className="h-fit w-full rounded-lg border-2 p-2"
-                />
-                <Button type="submit">
-                    <Send />
-                </Button>
-            </form>
-        </div>
+        </>
     );
 }
