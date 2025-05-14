@@ -1,8 +1,8 @@
-import { QuestionResponse } from "@/lib/types";
-import { Markdown } from "./Markdown";
-import { Accordion, AccordionContent, AccordionTrigger } from "./ui/accordion";
-import { AccordionItem } from "@radix-ui/react-accordion";
-import { CodeBlock } from "./util";
+import { QuestionResponse } from '@/lib/types';
+import { Markdown } from './Markdown';
+import { Accordion, AccordionContent, AccordionTrigger } from './ui/accordion';
+import { AccordionItem } from '@radix-ui/react-accordion';
+import { CodeBlock } from './util';
 
 export const QuestionDetails = ({
     question: { title, description, tests },
@@ -19,9 +19,7 @@ export const QuestionDetails = ({
                     {tests.map((test, i) => (
                         <AccordionItem key={i} value={`test-${i}`}>
                             <AccordionTrigger>
-                                <h1 className="text-xl font-bold">
-                                    Test Case #{i + 1}
-                                </h1>
+                                <h1 className="text-xl font-bold">Test Case #{i + 1}</h1>
                             </AccordionTrigger>
                             <AccordionContent>
                                 <span className="flex w-full flex-row gap-2">
@@ -44,5 +42,3 @@ export const QuestionDetails = ({
         </div>
     );
 };
-
-

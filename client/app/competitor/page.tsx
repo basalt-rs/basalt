@@ -14,7 +14,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '@/components/Leaderboard';
 import CodeEditor from '@/components/Editor';
-import { QuestionResponse, TestState } from '@/lib/types';
 import {
     allQuestionsAtom,
     currQuestionAtom,
@@ -23,8 +22,7 @@ import {
 } from '@/lib/services/questions';
 import { ExtractAtomValue, useAtom, useSetAtom } from 'jotai';
 import { FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
-import { Markdown } from '@/components/Markdown';
-import { CodeBlock, Tooltip } from '@/components/util';
+import { Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
 import { currentTabAtom, editorContentAtom, selectedLanguageAtom } from '@/lib/competitor-state';
 import { WithPauseGuard } from '@/components/PauseGuard';
@@ -38,7 +36,6 @@ import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
 import { ToastAction } from '@radix-ui/react-toast';
-import QuestionAccordion from '../host/QuestionAccordion';
 import { QuestionDetails } from '@/components/QuestionDetails';
 
 const EditorButtons = () => {
@@ -71,7 +68,11 @@ const EditorButtons = () => {
     };
 
     const submitSolution = () => {
-        submit(<ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx(n => n + 1)}>Next Question</ToastAction>);
+        submit(
+            <ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx((n) => n + 1)}>
+                Next Question
+            </ToastAction>
+        );
     };
 
     return (
@@ -117,15 +118,24 @@ const EditorButtons = () => {
                     tooltip={
                         <div className="text-center">
                             <p>Submit Solution</p>
-                            {currentState?.state === 'pass'
-                                ? <p>You&apos;ve already passed this question!</p>
-                                : currentState && currentState.remainingAttempts !== null && (
-                                    <p className={currentState.remainingAttempts === 0 ? 'text-fail' : ''}>
+                            {currentState?.state === 'pass' ? (
+                                <p>You&apos;ve already passed this question!</p>
+                            ) : (
+                                currentState &&
+                                currentState.remainingAttempts !== null && (
+                                    <p
+                                        className={
+                                            currentState.remainingAttempts === 0 ? 'text-fail' : ''
+                                        }
+                                    >
                                         {currentState.remainingAttempts}{' '}
-                                        {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'}{' '}
+                                        {currentState.remainingAttempts === 1
+                                            ? 'attempt'
+                                            : 'attempts'}{' '}
                                         remaining
                                     </p>
-                                )}
+                                )
+                            )}
                         </div>
                     }
                 >
@@ -133,7 +143,11 @@ const EditorButtons = () => {
                         size="icon"
                         variant="ghost"
                         onClick={submitSolution}
-                        disabled={!!loading || currentState?.state === 'pass' || currentState?.remainingAttempts === 0}
+                        disabled={
+                            !!loading ||
+                            currentState?.state === 'pass' ||
+                            currentState?.remainingAttempts === 0
+                        }
                     >
                         {loading === 'submit' ? (
                             <Loader2 className="animate-spin text-pass" />
@@ -165,7 +179,7 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
     const { loading, testResults, clearTestResults } = useTesting();
     const [currQuestionIdx] = useAtom(currQuestionIdxAtom);
     const prevIdx = useRef(currQuestionIdx);
-    
+
     useEffect(() => {
         if (prevIdx.current !== currQuestionIdx) {
             clearTestResults();
@@ -176,7 +190,6 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
     switch (tab) {
         case 'text-editor':
             return (
-
                 <ResizablePanelGroup direction="vertical" className="h-full">
                     <ResizablePanel defaultSize={400} className="h-full">
                         <div className="flex h-full flex-col">
@@ -191,7 +204,8 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
                             minSize={10}
                             collapsible={true}
                             collapsedSize={0}
-                            className="h-full">
+                            className="h-full"
+                        >
                             <ScrollArea className="h-full w-full">
                                 <TestResultsPanel />
                             </ScrollArea>
