@@ -120,12 +120,12 @@ const EditorButtons = () => {
                             {currentState?.state === 'pass'
                                 ? <p>You&apos;ve already passed this question!</p>
                                 : currentState && currentState.remainingAttempts !== null && (
-                                    <p className={ currentState.remainingAttempts === 0 ? 'text-fail' : '' }>
+                                    <p className={currentState.remainingAttempts === 0 ? 'text-fail' : ''}>
                                         {currentState.remainingAttempts}{' '}
                                         {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'}{' '}
                                         remaining
                                     </p>
-                            )}
+                                )}
                         </div>
                     }
                 >
@@ -260,9 +260,14 @@ export default function Competitor() {
                                 <ResizablePanel defaultSize={400} className="h-full">
                                     <TabContent tab={tab} />
                                 </ResizablePanel>
-                                <ResizableHandle />
+                                <ResizableHandle withHandle />
                                 {(loading || testResults) && (
-                                    <ResizablePanel defaultSize={100} className="h-full">
+                                    <ResizablePanel
+                                        defaultSize={100}
+                                        minSize={10}
+                                        collapsible={true}
+                                        collapsedSize={0}
+                                        className="h-full">
                                         <ScrollArea className="h-full w-full">
                                             <TestResultsPanel />
                                         </ScrollArea>
