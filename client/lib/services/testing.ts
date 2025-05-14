@@ -55,7 +55,10 @@ export const useTesting = () => {
                         toast({
                             title: 'Submission Passed!',
                             variant: 'success',
-                            action: currentQuestionIdx < allQuestions.length - 1 ? nextQuestion : undefined,
+                            action:
+                                currentQuestionIdx < allQuestions.length - 1
+                                    ? nextQuestion
+                                    : undefined,
                         });
                     } else {
                         toast({
