@@ -6,11 +6,9 @@ import { ipOrGameCodeAtom } from '@/lib/services/api';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Page() {
-    const router = useRouter();
-
     const GameCodeModal = () => {
         const [openModal, setOpenModal] = useState(false);
         const [gameCode] = useAtom(ipOrGameCodeAtom);
@@ -18,8 +16,8 @@ export default function Page() {
         return (
             <>
                 <div>
-                    <Button variant="outline" onClick={() => setOpenModal((prev) => !prev)}>
-                        Game Code
+                    <Button variant="link" onClick={() => setOpenModal((prev) => !prev)}>
+                        <p className="text-xl font-bold">{gameCode}</p>
                     </Button>
                 </div>
                 {openModal && (
@@ -28,7 +26,7 @@ export default function Page() {
                             <DialogHeader>
                                 <DialogTitle>Game Code</DialogTitle>
                             </DialogHeader>
-                            {gameCode}
+                            <p className="text-4xl font-bold">{gameCode}</p>
                         </DialogContent>
                     </Dialog>
                 )}
@@ -39,9 +37,11 @@ export default function Page() {
     return (
         <div className="flex h-screen flex-col">
             <div className="m-2">
-                <Button variant="ghost" onClick={() => router.push('/')}>
-                    <ArrowLeft /> Back
-                </Button>
+                <Link href="/">
+                    <Button variant="ghost">
+                        <ArrowLeft /> Back
+                    </Button>
+                </Link>
             </div>
             <Leaderboard />
             <div className="mx-2 mb-2 mt-auto flex justify-end">
