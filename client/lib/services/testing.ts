@@ -51,7 +51,7 @@ export const useTesting = () => {
                 const { passed, failed } = res;
                 setTestResults({ ...res.results, failed, passed, submitKind: 'submit' });
                 if (res.results.kind === 'individual') {
-                    if (passed >= failed) {
+                    if (failed === 0) {
                         toast({
                             title: 'Submission Passed!',
                             variant: 'success',
