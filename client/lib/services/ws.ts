@@ -26,7 +26,7 @@ type WebsocketSend =
 
 interface WebsocketError {
     kind: 'error';
-    id?: number;
+    id: number | null;
     message: string;
 }
 
@@ -35,14 +35,16 @@ export interface WebsocketRes {
         kind: 'test-results';
         id: number;
         results: TestResults;
-        percent: number;
+        failed: number;
+        passed: number;
     };
     submit:
         | {
               kind: 'submit';
               id: number;
               results: TestResults;
-              percent: number;
+              failed: number;
+              passed: number;
               remainingAttempts: number | null;
           }
         | WebsocketError;
@@ -77,7 +79,7 @@ class BasaltWSClient {
     private pendingTasks: {
         id: number;
         resolve: (t: WebsocketRes[keyof WebsocketRes]) => void;
-        reject: () => void;
+        reject: (reason: string) => void;
     }[] = [];
     private nextId = 0;
 
@@ -161,6 +163,24 @@ class BasaltWSClient {
                             }
                         }
                         break;
+                    case 'error':
+                        {
+                            const { message, id } = msg;
+                            toast({
+                                title: 'WebSocket Error',
+                                description: message,
+                                variant: 'destructive',
+                            });
+                            if (id !== null) {
+                                for (let i = this.pendingTasks.length; i--; ) {
+                                    const { id, reject } = this.pendingTasks[i];
+                                    if (id === msg.id) {
+                                        reject(message);
+                                    }
+                                }
+                            }
+                        }
+                        break;
                     default:
                         {
                             if (Object.hasOwn(msg, 'id')) {
@@ -229,7 +249,7 @@ class BasaltWSClient {
     }
 
     private cleanup() {
-        this.pendingTasks.forEach(({ reject }) => reject());
+        this.pendingTasks.forEach(({ reject }) => reject('socket closed'));
         if (this.isOpen) {
             this.onCloseTasks.forEach((t) => t());
         }

@@ -1,5 +1,5 @@
 'use client';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Timer from '@/components/Timer';
 import CompetitorNavbar from '@/components/CompetitorNavbar';
@@ -14,7 +14,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Leaderboard from '@/components/Leaderboard';
 import CodeEditor from '@/components/Editor';
-import { QuestionResponse, TestState } from '@/lib/types';
 import {
     allQuestionsAtom,
     currQuestionAtom,
@@ -23,8 +22,7 @@ import {
 } from '@/lib/services/questions';
 import { ExtractAtomValue, useAtom, useSetAtom } from 'jotai';
 import { FileDown, FlaskConical, Loader2, SendHorizonal, Upload } from 'lucide-react';
-import { Markdown } from '@/components/Markdown';
-import { CodeBlock, Tooltip } from '@/components/util';
+import { Tooltip } from '@/components/util';
 import { Button } from '@/components/ui/button';
 import { currentTabAtom, editorContentAtom, selectedLanguageAtom } from '@/lib/competitor-state';
 import { WithPauseGuard } from '@/components/PauseGuard';
@@ -46,6 +44,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { ToastAction } from '@radix-ui/react-toast';
+import { QuestionDetails } from '@/components/QuestionDetails';
 
 const EditorButtons = () => {
     const setEditorContent = useSetAtom(editorContentAtom);
@@ -55,6 +55,7 @@ const EditorButtons = () => {
     const { loading, runTests, submit } = useTesting();
     const { currentState } = useSubmissionStates();
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
+    const setCurrQuestionIdx = useSetAtom(currQuestionIdxAtom);
 
     const downloadPdf = (ip: string) => {
         download(`${ip}/competition/packet`);
@@ -73,6 +74,14 @@ const EditorButtons = () => {
         setEditorContent(content);
 
         event.target.value = '';
+    };
+
+    const submitSolution = () => {
+        submit(
+            <ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx((n) => n + 1)}>
+                Next Question
+            </ToastAction>
+        );
     };
 
     return (
@@ -118,16 +127,23 @@ const EditorButtons = () => {
                     tooltip={
                         <div className="text-center">
                             <p>Submit Solution</p>
-                            {currentState && currentState.remainingAttempts !== null && (
-                                <p
-                                    className={
-                                        currentState.remainingAttempts === 0 ? 'text-fail' : ''
-                                    }
-                                >
-                                    {currentState.remainingAttempts}{' '}
-                                    {currentState.remainingAttempts === 1 ? 'attempt' : 'attempts'}{' '}
-                                    remaining
-                                </p>
+                            {currentState?.state === 'pass' ? (
+                                <p>You&apos;ve already passed this question!</p>
+                            ) : (
+                                currentState &&
+                                currentState.remainingAttempts !== null && (
+                                    <p
+                                        className={
+                                            currentState.remainingAttempts === 0 ? 'text-fail' : ''
+                                        }
+                                    >
+                                        {currentState.remainingAttempts}{' '}
+                                        {currentState.remainingAttempts === 1
+                                            ? 'attempt'
+                                            : 'attempts'}{' '}
+                                        remaining
+                                    </p>
+                                )
                             )}
                         </div>
                     }
@@ -135,8 +151,12 @@ const EditorButtons = () => {
                     <Button
                         size="icon"
                         variant="ghost"
-                        onClick={submit}
-                        disabled={!!loading || currentState?.remainingAttempts === 0}
+                        onClick={submitSolution}
+                        disabled={
+                            !!loading ||
+                            currentState?.state === 'pass' ||
+                            currentState?.remainingAttempts === 0
+                        }
                     >
                         {loading === 'submit' ? (
                             <Loader2 className="animate-spin text-pass" />
@@ -165,13 +185,42 @@ const EditorButtons = () => {
 };
 
 const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
+    const { loading, testResults, clearTestResults } = useTesting();
+    const [currQuestionIdx] = useAtom(currQuestionIdxAtom);
+    const prevIdx = useRef(currQuestionIdx);
+
+    useEffect(() => {
+        if (prevIdx.current !== currQuestionIdx) {
+            clearTestResults();
+            prevIdx.current = currQuestionIdx;
+        }
+    }, [currQuestionIdx, clearTestResults]);
+
     switch (tab) {
         case 'text-editor':
             return (
-                <div className="flex h-full flex-col">
-                    <EditorButtons />
-                    <CodeEditor />
-                </div>
+                <ResizablePanelGroup direction="vertical" className="h-full">
+                    <ResizablePanel defaultSize={400} className="h-full">
+                        <div className="flex h-full flex-col">
+                            <EditorButtons />
+                            <CodeEditor />
+                        </div>
+                    </ResizablePanel>
+                    <ResizableHandle withHandle />
+                    {(loading || testResults) && (
+                        <ResizablePanel
+                            defaultSize={100}
+                            minSize={10}
+                            collapsible={true}
+                            collapsedSize={0}
+                            className="h-full"
+                        >
+                            <ScrollArea className="h-full w-full">
+                                <TestResultsPanel />
+                            </ScrollArea>
+                        </ResizablePanel>
+                    )}
+                </ResizablePanelGroup>
             );
         case 'leaderboard':
             return (
@@ -193,36 +242,6 @@ const TestResultsPanel = () => {
             ) : (
                 <TestResults />
             )}
-        </div>
-    );
-};
-
-const QuestionDetails = ({
-    question: { title, description, tests },
-}: {
-    question: QuestionResponse;
-    status: TestState;
-}) => {
-    return (
-        <div className="flex flex-col items-center justify-center gap-2">
-            <h1 className="font-bold">{title}</h1>
-            <div>
-                <Markdown markdown={description || ''} />
-
-                <h1 className="mt-2 w-full text-center font-bold">Example</h1>
-                <div className="flex flex-col gap-2">
-                    {tests[0].input && (
-                        <div>
-                            <strong>Input</strong>
-                            <CodeBlock text={tests[0].input} />
-                        </div>
-                    )}
-                    <div>
-                        <strong>Output</strong>
-                        <CodeBlock text={tests[0].output} />
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };
@@ -274,7 +293,6 @@ export default function Competitor() {
     const { pause, unPause, clock, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
-    const { loading, testResults } = useTesting();
 
     useAnnouncements();
 
@@ -312,7 +330,7 @@ export default function Competitor() {
                                 <ResizablePanelGroup direction="vertical" className="h-full">
                                     <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
                                         <Select
-                                            defaultValue={`${currQuestion}`}
+                                            value={`${currQuestion}`}
                                             onValueChange={(v) => setCurrQuestionIdx(+v)}
                                         >
                                             <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
@@ -330,10 +348,7 @@ export default function Competitor() {
                                             </SelectContent>
                                         </Select>
                                         {currentQuestion && (
-                                            <QuestionDetails
-                                                question={currentQuestion}
-                                                status="pass"
-                                            />
+                                            <QuestionDetails question={currentQuestion} />
                                         )}
                                     </ScrollArea>
                                     <div className="py-2.5">
@@ -349,19 +364,7 @@ export default function Competitor() {
                             </ResizablePanel>
                             <ResizableHandle withHandle />
                             <ResizablePanel className="">
-                                <ResizablePanelGroup direction="vertical" className="h-full">
-                                    <ResizablePanel defaultSize={400} className="h-full">
-                                        <TabContent tab={tab} />
-                                    </ResizablePanel>
-                                    <ResizableHandle />
-                                    {(loading || testResults) && (
-                                        <ResizablePanel defaultSize={100} className="h-full">
-                                            <ScrollArea className="h-full w-full">
-                                                <TestResultsPanel />
-                                            </ScrollArea>
-                                        </ResizablePanel>
-                                    )}
-                                </ResizablePanelGroup>
+                                <TabContent tab={tab} />
                             </ResizablePanel>
                         </ResizablePanelGroup>
                     </div>
