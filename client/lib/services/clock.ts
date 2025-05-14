@@ -1,5 +1,6 @@
 export interface CurrentTime {
     isPaused: boolean;
+    isOver: boolean;
     timeLeftInSeconds: number;
 }
 

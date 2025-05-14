@@ -30,13 +30,15 @@ export const useClock = () => {
     };
 
     const decrementTimer = () => {
-        setClock((prev) =>
-            prev === undefined
+        setClock((prev) => prev === undefined
                 ? undefined
                 : prev.isPaused
                   ? prev
-                  : { ...prev, timeLeftInSeconds: prev?.timeLeftInSeconds - 1 }
-        );
+                  : {
+                      ...prev,
+                      isOver: prev.isOver || prev?.timeLeftInSeconds <= 1,
+                      timeLeftInSeconds: prev?.timeLeftInSeconds - 1,
+                  });
     };
 
     useQuery({
@@ -44,17 +46,18 @@ export const useClock = () => {
         queryFn: async () => {
             const ip = getDefaultStore().get(ipAtom);
             if (ip === null) {
-                setClock({ isPaused: true, timeLeftInSeconds: 0 });
+                setClock({ isPaused: true, isOver: false, timeLeftInSeconds: 0 });
                 return 1;
             }
 
             const res = await getClock(ip, authToken);
             if (res === null) {
-                setClock({ isPaused: true, timeLeftInSeconds: 0 });
+                setClock({ isPaused: true, isOver: false, timeLeftInSeconds: 0 });
                 return 1;
             }
 
             setClock(res);
+            if (res.timeLeftInSeconds === 0) res.isOver = true;
             if (!ticker && !res.isPaused) startTicking();
 
             return 0;
@@ -65,12 +68,12 @@ export const useClock = () => {
     ws.registerEvent('game-paused', () => {
         stopTicking();
         setClock((prev) =>
-            prev ? { ...prev, isPaused: true } : { timeLeftInSeconds: 0, isPaused: true }
+            prev ? { ...prev, isPaused: true, isOver: false } : { timeLeftInSeconds: 0, isPaused: true, isOver: false }
         );
     });
 
     ws.registerEvent('game-unpaused', (data) => {
-        setClock({ isPaused: false, ...data });
+        setClock({ isPaused: false, isOver: false, ...data });
         startTicking();
     });
 

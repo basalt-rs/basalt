@@ -37,6 +37,8 @@ import { TestResults } from '@/components/TestResults';
 import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
+import * as Dialog from '@/components/ui/dialog';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const EditorButtons = () => {
     const setEditorContent = useSetAtom(editorContentAtom);
@@ -218,11 +220,45 @@ const QuestionDetails = ({
     );
 };
 
+const Summary = () => {
+    const [questions] = useAtom(allQuestionsAtom);
+    const { allStates } = useSubmissionStates();
+
+    return (
+        <div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Question</TableHead>
+                        <TableHead>Status</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {questions.map((q, i) => (
+                        <TableRow key={i}>
+                            <TableCell>{q.title}</TableCell>
+                            <TableCell>
+                                <Status status={allStates?.[i].state} showLabel />
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+            <div className="text-center pt-2">
+                <p>Successful Solutions: {allStates?.filter(s => s.state === 'pass').length}</p>
+                <p>Failed Solutions: {allStates?.filter(s => s.state === 'fail').length}</p>
+                <p>Attempted Solutions: {allStates?.filter(s => s.state !== 'not-attempted').length}</p>
+                <p>Unattempted Solutions: {allStates?.filter(s => s.state === 'not-attempted').length}</p>
+            </div>
+        </div>
+    );
+};
+
 export default function Competitor() {
     const [currentQuestion] = useAtom(currQuestionAtom);
     const [allQuestions] = useAtom(allQuestionsAtom);
     const { allStates } = useSubmissionStates();
-    const { pause, unPause, isPaused } = useClock();
+    const { pause, unPause, clock, isPaused } = useClock();
     const [currQuestion, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
     const [tab] = useAtom(currentTabAtom);
     const { loading, testResults } = useTesting();
@@ -230,73 +266,93 @@ export default function Competitor() {
     useAnnouncements();
 
     return (
-        <div className="flex h-screen flex-col">
-            <CompetitorNavbar />
-            <WithPauseGuard isPaused={isPaused}>
-                <div className="h-full">
-                    <ResizablePanelGroup direction="horizontal">
-                        <ResizablePanel
-                            defaultSize={35}
-                            maxSize={55}
-                            collapsible={true}
-                            collapsedSize={0}
-                            minSize={10}
-                            className="border-black-300 h-full border-t"
-                        >
-                            <ResizablePanelGroup direction="vertical" className="h-full">
-                                <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
-                                    <Select
-                                        defaultValue={`${currQuestion}`}
-                                        onValueChange={(v) => setCurrQuestionIdx(+v)}
-                                    >
-                                        <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
-                                            <SelectValue placeholder="Select a Question..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {allQuestions.map((q, i) => (
-                                                <SelectItem key={i} value={`${i}`}>
-                                                    <div className="flex flex-row items-center gap-2">
-                                                        <Status status={allStates?.[i].state} />
-                                                        {q.title}
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {currentQuestion && (
-                                        <QuestionDetails question={currentQuestion} status="pass" />
-                                    )}
-                                </ScrollArea>
-                                <div className="py-2.5">
-                                    <Separator className="mb-2.5 mt-2.5" />
-                                    <Timer
-                                        isHost={false}
-                                        onPlay={unPause}
-                                        onPause={pause}
-                                        isPaused={isPaused}
-                                    />
-                                </div>
-                            </ResizablePanelGroup>
-                        </ResizablePanel>
-                        <ResizableHandle withHandle />
-                        <ResizablePanel className="">
-                            <ResizablePanelGroup direction="vertical" className="h-full">
-                                <ResizablePanel defaultSize={400} className="h-full">
-                                    <TabContent tab={tab} />
-                                </ResizablePanel>
-                                <ResizableHandle />
-                                {(loading || testResults) && (
-                                    <ResizablePanel defaultSize={100} className="h-full">
-                                        <ScrollArea className="h-full w-full">
-                                            <TestResultsPanel />
-                                        </ScrollArea>
+        <>
+            <Dialog.Dialog open={clock?.isOver}>
+                <Dialog.DialogContent hideClose>
+                    <Dialog.DialogHeader>
+                        <Dialog.DialogTitle>Competition Over</Dialog.DialogTitle>
+                        <Dialog.DialogDescription>
+                            Here&apos;s a summary of your performance
+                        </Dialog.DialogDescription>
+                    </Dialog.DialogHeader>
+                    <Summary />
+                    <Dialog.DialogFooter>
+                        <Button type="submit" asChild>
+                            <Link href="/leaderboard">
+                                Go To Leaderboard
+                            </Link>
+                        </Button>
+                    </Dialog.DialogFooter>
+                </Dialog.DialogContent>
+            </Dialog.Dialog>
+            <div className="flex h-screen flex-col">
+                <CompetitorNavbar />
+                <WithPauseGuard isPaused={isPaused}>
+                    <div className="h-full">
+                        <ResizablePanelGroup direction="horizontal">
+                            <ResizablePanel
+                                defaultSize={35}
+                                maxSize={55}
+                                collapsible={true}
+                                collapsedSize={0}
+                                minSize={10}
+                                className="border-black-300 h-full border-t"
+                            >
+                                <ResizablePanelGroup direction="vertical" className="h-full">
+                                    <ScrollArea className="flex flex-grow flex-col items-center justify-center p-4">
+                                        <Select
+                                            defaultValue={`${currQuestion}`}
+                                            onValueChange={(v) => setCurrQuestionIdx(+v)}
+                                        >
+                                            <SelectTrigger className="mx-auto my-2 w-1/2 max-w-56">
+                                                <SelectValue placeholder="Select a Question..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {allQuestions.map((q, i) => (
+                                                    <SelectItem key={i} value={`${i}`}>
+                                                        <div className="flex flex-row items-center gap-2">
+                                                            <Status status={allStates?.[i].state} />
+                                                            {q.title}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {currentQuestion && (
+                                            <QuestionDetails question={currentQuestion} status="pass" />
+                                        )}
+                                    </ScrollArea>
+                                    <div className="py-2.5">
+                                        <Separator className="mb-2.5 mt-2.5" />
+                                        <Timer
+                                            isHost={false}
+                                            onPlay={unPause}
+                                            onPause={pause}
+                                            isPaused={isPaused}
+                                        />
+                                    </div>
+                                </ResizablePanelGroup>
+                            </ResizablePanel>
+                            <ResizableHandle withHandle />
+                            <ResizablePanel className="">
+                                <ResizablePanelGroup direction="vertical" className="h-full">
+                                    <ResizablePanel defaultSize={400} className="h-full">
+                                        <TabContent tab={tab} />
                                     </ResizablePanel>
-                                )}
-                            </ResizablePanelGroup>
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
-                </div>
-            </WithPauseGuard>
-        </div>
+                                    <ResizableHandle />
+                                    {(loading || testResults) && (
+                                        <ResizablePanel defaultSize={100} className="h-full">
+                                            <ScrollArea className="h-full w-full">
+                                                <TestResultsPanel />
+                                            </ScrollArea>
+                                        </ResizablePanel>
+                                    )}
+                                </ResizablePanelGroup>
+                            </ResizablePanel>
+                        </ResizablePanelGroup>
+                    </div>
+                </WithPauseGuard>
+            </div>
+        </>
     );
 }
