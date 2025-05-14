@@ -65,8 +65,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v1.0.0-rc.1
-          releaseName: "Basalt v1.0.0-rc.1"
+          tagName: v1.0.0-rc.2
+          releaseName: "v1.0.0-rc.2"
           releaseBody: "See the assets to download this version and install."
           releaseDraft: false
           prerelease: true
