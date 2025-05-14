@@ -38,6 +38,8 @@ import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
 import { ToastAction } from '@radix-ui/react-toast';
+import QuestionAccordion from '../host/QuestionAccordion';
+import { QuestionDetails } from '@/components/QuestionDetails';
 
 const EditorButtons = () => {
     const setEditorContent = useSetAtom(editorContentAtom);
@@ -192,36 +194,6 @@ const TestResultsPanel = () => {
     );
 };
 
-const QuestionDetails = ({
-    question: { title, description, tests },
-}: {
-    question: QuestionResponse;
-    status: TestState;
-}) => {
-    return (
-        <div className="flex flex-col items-center justify-center gap-2">
-            <h1 className="font-bold">{title}</h1>
-            <div>
-                <Markdown markdown={description || ''} />
-
-                <h1 className="mt-2 w-full text-center font-bold">Example</h1>
-                <div className="flex flex-col gap-2">
-                    {tests[0].input && (
-                        <div>
-                            <strong>Input</strong>
-                            <CodeBlock text={tests[0].input} />
-                        </div>
-                    )}
-                    <div>
-                        <strong>Output</strong>
-                        <CodeBlock text={tests[0].output} />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 export default function Competitor() {
     const [currentQuestion] = useAtom(currQuestionAtom);
     const [allQuestions] = useAtom(allQuestionsAtom);
@@ -268,7 +240,7 @@ export default function Competitor() {
                                         </SelectContent>
                                     </Select>
                                     {currentQuestion && (
-                                        <QuestionDetails question={currentQuestion} status="pass" />
+                                        <QuestionDetails question={currentQuestion} />
                                     )}
                                 </ScrollArea>
                                 <div className="py-2.5">
