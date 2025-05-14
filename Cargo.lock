@@ -193,8 +193,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "basalt"
-version = "0.1.0"
+name = "basalt-desktop"
+version = "1.0.0-rc.1"
 dependencies = [
  "log",
  "serde",
