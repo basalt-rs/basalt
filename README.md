@@ -23,7 +23,7 @@ Depending on your OS, you may be missing packages. The error messages
 should be informative. If all goes well, an application window will
 then spawn.
 
-You can also access the web UI at `localhost:3000`.
+You can also access the web UI at `http://localhost:3000`.
 
 Next you'll need a server and a game code. For the game code, you'll
 need the Basalt CLI. Please consult
