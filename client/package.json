@@ -38,6 +38,7 @@
         "@types/diff": "^7.0.2",
         "ansi-to-html": "^0.7.2",
         "class-variance-authority": "^0.7.1",
+        "classnames": "^2.5.1",
         "clsx": "^2.1.1",
         "cmdk": "^1.0.4",
         "dialog": "^0.3.1",

@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Loader2, Pause, Play } from 'lucide-react';
 import { useAtom } from 'jotai';
 import { clockAtom } from '@/lib/host-state';
+import classNames from 'classnames';
 
 interface TimerProps {
     isHost?: boolean;
@@ -56,7 +57,11 @@ export default function Timer({ isHost = false, onPause, onPlay, isPaused }: Tim
                     </div>
                 )}
                 {clock && (
-                    <p className="my-2 text-6xl font-thin">
+                    <p
+                        className={classNames('my-2 text-6xl font-thin', {
+                            'text-fail': clock?.timeLeftInSeconds <= 300 && !clock?.isPaused,
+                        })}
+                    >
                         {formatTime(clock?.timeLeftInSeconds ?? 0)}
                     </p>
                 )}
