@@ -59,7 +59,10 @@ export default function Timer({ isHost = false, onPause, onPlay, isPaused }: Tim
                 {clock && (
                     <p
                         className={classNames('my-2 text-6xl font-thin', {
-                            'text-fail': clock?.timeLeftInSeconds <= 300 && !clock?.isPaused,
+                            'text-fail':
+                                clock?.timeLeftInSeconds <= 300 &&
+                                !clock?.isPaused &&
+                                !clock?.isOver,
                         })}
                     >
                         {formatTime(clock?.timeLeftInSeconds ?? 0)}
