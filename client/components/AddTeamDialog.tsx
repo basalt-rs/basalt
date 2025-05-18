@@ -1,15 +1,17 @@
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { z } from "zod"
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
-import { Plus } from "lucide-react";
-import { Checkbox } from "./ui/checkbox";
-import { Label } from "./ui/label";
-import { useState } from "react";
-import { useTeams } from "@/hooks/use-teams";
-import { toast } from "@/hooks";
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { z } from 'zod'
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
+import { Loader2, Plus, RefreshCw } from 'lucide-react';
+import { Checkbox } from './ui/checkbox';
+import { Label } from './ui/label';
+import { useState } from 'react';
+import { useTeams } from '@/hooks/use-teams';
+import { toast } from '@/hooks';
+import { Tooltip } from './util';
+import { faker } from '@faker-js/faker';
 
 const formSchema = z.object({
     username: z.string().min(4).max(50),
@@ -31,6 +33,7 @@ export const AddTeamDialog = ({ afterSubmit }: { afterSubmit: () => void }) => {
     });
 
     const submit = async (values: z.infer<typeof formSchema>) => {
+        setLoading(true);
         try {
             const team = await createTeam(values);
             if (team) {
@@ -48,6 +51,22 @@ export const AddTeamDialog = ({ afterSubmit }: { afterSubmit: () => void }) => {
                 form.setError('username', { message: 'A user with this name already exists' });
             }
         }
+        setLoading(false);
+    };
+
+    const titleCase = (s: string): string => s[0].toUpperCase() + s.slice(1).toLowerCase();
+
+    const randomiseUsername = () => {
+        const adj = faker.word.adjective();
+        const noun = faker.word.noun();
+        form.setValue('username', `${adj}-${noun}`);
+        form.setValue('displayName', `${titleCase(adj)} ${titleCase(noun)}`);
+    };
+
+    const randomisePassword = () => {
+        const adj = faker.word.adjective({ length: { min: 1, max: 5 } });
+        const noun = faker.word.noun({ length: { min: 1, max: 5 } });
+        form.setValue('password', `${adj}-${noun}`);
     };
 
     const filterUsername = (og: string): string => og
@@ -67,7 +86,14 @@ export const AddTeamDialog = ({ afterSubmit }: { afterSubmit: () => void }) => {
                             <FormItem>
                                 <FormLabel>Username</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Username" {...field} />
+                                    <div className="flex w-full items-center space-x-2">
+                                        <Input placeholder="Username" {...field} />
+                                        <Tooltip tooltip="Randomise Username and Display Name">
+                                            <Button type="button" variant="secondary" onClick={randomiseUsername}>
+                                                <RefreshCw />
+                                            </Button>
+                                        </Tooltip>
+                                    </div>
                                 </FormControl>
                                 <FormDescription>
                                     This is the name the user will use to log in.
@@ -99,7 +125,14 @@ export const AddTeamDialog = ({ afterSubmit }: { afterSubmit: () => void }) => {
                             <FormItem>
                                 <FormLabel>Password</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Password" {...field} />
+                                    <div className="flex w-full items-center space-x-2">
+                                        <Input placeholder="Password" {...field} />
+                                        <Tooltip tooltip="Randomise Password">
+                                            <Button type="button" variant="secondary" onClick={randomisePassword}>
+                                                <RefreshCw />
+                                            </Button>
+                                        </Tooltip>
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -108,11 +141,11 @@ export const AddTeamDialog = ({ afterSubmit }: { afterSubmit: () => void }) => {
                     <div className="w-full pt-4">
                         <div className="float-end flex space-x-4">
                             <div className="flex items-center space-x-2">
-                                <Checkbox id="more" checked={addMore} onCheckedChange={setAddMore} />
+                                <Checkbox id="more" checked={addMore} onCheckedChange={(v) => setAddMore(!!v)} />
                                 <Label htmlFor="more">Add More</Label>
                             </div>
-                            <Button type="submit">
-                                <Plus className="pr-0.5" /> Add Team
+                            <Button type="submit" disabled={loading}>
+                                {loading ? <Loader2 className="animate-spin" /> : <Plus />} Add Team
                             </Button>
                         </div>
                     </div>
