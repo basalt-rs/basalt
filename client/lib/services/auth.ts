@@ -6,7 +6,9 @@ import { basaltWSClientAtom, useWebSocket } from './ws';
 
 export type Role = 'competitor' | 'admin';
 export interface User {
+    id: string;
     username: string;
+    display_name: string | null;
     role: Role;
 }
 

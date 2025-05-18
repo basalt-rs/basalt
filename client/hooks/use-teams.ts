@@ -15,21 +15,21 @@ export const useTeams = () => {
     const [selectedTeam, setSelectedTeam] = useAtom(selectedTeamAtom);
 
     const updateTeams = (teams: TeamInfo[]) => {
-        setSelectedTeam((prev) => teams.find((t) => t.team === prev?.team) ?? null);
-        setTeams(teams.reduce((acc, t) => ({ ...acc, [t.team]: t }), {}));
+        setSelectedTeam((prev) => teams.find((t) => t.id === prev?.id) ?? null);
+        setTeams(teams.reduce((acc, t) => ({ ...acc, [t.id]: t }), {}));
     };
     const updateTeam = (rawTeam: RawTeamInfo) => {
         const parsedTeam = convertTeam(rawTeam);
         setSelectedTeam((prev) =>
-            prev ? (prev.team === parsedTeam.team ? parsedTeam : prev) : prev
+            prev ? (prev.id === parsedTeam.id ? parsedTeam : prev) : prev
         );
         setTeams((prev) => ({
             ...prev,
-            [parsedTeam.team]: parsedTeam,
+            [parsedTeam.id]: parsedTeam,
         }));
     };
 
-    const setSelectedTeamByName = (name: string) => {
+    const setSelectedTeamById = (name: string) => {
         const team = teams[name];
         setSelectedTeam((prev) => team ?? prev);
     };
@@ -62,6 +62,6 @@ export const useTeams = () => {
         isError,
         setSelectedTeam,
         selectedTeam,
-        setSelectedTeamByName,
+        setSelectedTeamById,
     };
 };

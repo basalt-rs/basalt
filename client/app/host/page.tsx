@@ -86,7 +86,7 @@ export default function Host() {
                     )}
                     <div className="flex max-h-[45vh] flex-col gap-1.5 space-y-1 overflow-y-auto overflow-x-hidden p-2.5">
                         {teamsList
-                            .sort((a, b) => b.score - a.score || a.team.localeCompare(b.team))
+                            .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
                             .map((team, index) => (
                                 <span
                                     className="flex w-full justify-between rounded border p-1.5"
@@ -102,7 +102,7 @@ export default function Host() {
                                             ) : (
                                                 <WifiOff className="text-gray-300 dark:text-gray-500" />
                                             )}
-                                            {team.team}
+                                            {team.name}
                                         </span>
                                     </p>
                                     <p>{team.score} pts</p>

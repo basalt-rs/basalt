@@ -1,16 +1,11 @@
 import { atom, useAtom } from 'jotai';
 import { CurrentTime } from './services/clock';
-import { QuestionSubmissionState, SubmissionHistory, Team } from './types';
+import { QuestionSubmissionState, SubmissionHistory } from './types';
 import { tokenAtom, tryFetch } from './services/auth';
 import { useEffect } from 'react';
 import { ipAtom } from './services/api';
 import { selectedTeamAtom } from '@/hooks/use-teams';
 import { TeamInfo } from './services/teams';
-
-export const teamsAtom = atom<Team[]>([
-    { name: 'team1', password: 'password1', points: 300, status: true },
-    { name: 'team2', password: 'password2', points: 126, status: true },
-]);
 
 export const currentHostTabAtom = atom<'questions' | 'teams'>('questions');
 
@@ -28,7 +23,7 @@ export const getHistory = async (
     }
 
     const submissionHistory = await tryFetch<SubmissionHistory[]>(
-        `${ip}/testing/submissions?username=${encodeURI(team.team)}&question_index=${question}`,
+        `${ip}/testing/submissions?user_id=${encodeURI(team.id)}&question_index=${question}`,
         token
     );
 
@@ -63,7 +58,7 @@ export const selectedTeamSubmissionsAtom = atom(async (get) => {
     if (team === null || token === null) return [];
 
     const submissions = await tryFetch<QuestionSubmissionState[]>(
-        `${ip}/testing/state?username=${encodeURI(team.team)}`,
+        `${ip}/testing/state?user_id=${encodeURI(team.id)}`,
         token
     );
 

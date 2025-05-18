@@ -42,9 +42,9 @@ export const useLeaderboard = () => {
         (update) => {
             setLeaderboard((leaderboard) => {
                 const temp = leaderboard.map((item) =>
-                    item.username === update.team
+                    item.user.id === update.id
                         ? {
-                              username: update.team,
+                              user: item.user,
                               score: update.new_score,
                               submissionStates: update.new_states,
                           }
