@@ -1,4 +1,5 @@
 import { ipAtom } from '@/lib/services/api';
+import { tokenAtom, tryFetch, User } from '@/lib/services/auth';
 import { convertTeam, getTeams, RawTeamInfo, TeamInfo } from '@/lib/services/teams';
 import { useWebSocket } from '@/lib/services/ws';
 import { useQuery } from '@tanstack/react-query';
@@ -9,6 +10,7 @@ export const teamsListAtom = atom((get) => Object.values(get(teamsAtom)));
 export const selectedTeamAtom = atom<TeamInfo | null>(null);
 export const useTeams = () => {
     const ip = useAtomValue(ipAtom);
+    const token = useAtomValue(tokenAtom);
     const { ws: basaltWs } = useWebSocket();
     const [teams, setTeams] = useAtom(teamsAtom);
     const teamsList = useAtomValue(teamsListAtom);
@@ -52,6 +54,21 @@ export const useTeams = () => {
         refetchInterval: 15 * 1000,
     });
 
+    const createTeam = async (newTeam: { username: string; displayName: string; password: string; }) => {
+        if (ip === null || token === null) {
+            throw new Error('No IP Set');
+        }
+
+        const team = await tryFetch<User>(`/teams`, ip, token, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(newTeam),
+        }, [409]);
+        return team;
+    };
+
     basaltWs.registerEvent('team-connected', updateTeam, 'use-team-connection-handler');
     basaltWs.registerEvent('team-disconnected', updateTeam, 'use-team-disconnection-handler');
 
@@ -63,5 +80,6 @@ export const useTeams = () => {
         setSelectedTeam,
         selectedTeam,
         setSelectedTeamById,
+        createTeam,
     };
 };
