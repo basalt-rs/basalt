@@ -8,7 +8,7 @@ export type Role = 'competitor' | 'admin';
 export interface User {
     id: string;
     username: string;
-    display_name: string | null;
+    displayName: string | null;
     role: Role;
 }
 
@@ -96,8 +96,8 @@ export const useLogin = () => {
 // if expectedErrors is provided, an error will be thrown with the status if it arrives
 export const tryFetch = async <T>(
     url: string | URL,
-    ip: string,
     token: string,
+    ip?: string,
     init?: Partial<RequestInit> & { item?: string },
     expectedErrors?: number[],
 ): Promise<T | null> => {

@@ -59,7 +59,7 @@ export const useTeams = () => {
             throw new Error('No IP Set');
         }
 
-        const team = await tryFetch<User>(`/teams`, ip, token, {
+        const team = await tryFetch<User>(`/teams`, token, ip, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
