@@ -6,186 +6,186 @@
 # - hack: check combinations of feature flags
 # - msrv: check that the msrv specified in the crate is correct
 permissions:
-  contents: read
+    contents: read
 # This configuration allows maintainers of this repo to create a branch and pull request based on
 # the new branch. Restricting the push trigger to the main branch ensures that the PR only gets
 # built once.
 on:
-  push:
-    branches: [main]
-  pull_request:
+    push:
+        branches: [main]
+    pull_request:
 # If new code is pushed to a PR branch, then cancel in progress workflows for that PR. Ensures that
 # we don't waste CI time, and returns results quicker https://github.com/jonhoo/rust-ci-conf/pull/5
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
 name: check
 jobs:
-  prettier:
-    runs-on: ubuntu-latest
-    name: prettier
-    strategy:
-      matrix:
-        node-version: [20.x]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: "client/package-lock.json"
-      - run: npm ci
-        working-directory: ./client
-      - name: prettier
-        run: "../.github/workflows/lint.sh"
-        working-directory: ./client
-  eslint:
-    runs-on: ubuntu-latest
-    name: eslint
-    strategy:
-      matrix:
-        node-version: [20.x]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: "client/package-lock.json"
-      - run: npm ci
-        working-directory: ./client
-      - name: eslint
-        run: node ../.github/workflows/eslint.mjs
-        working-directory: ./client
-  fmt:
-    runs-on: ubuntu-latest
-    name: stable / fmt
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Install stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-      - name: cargo fmt --check
-        run: cargo fmt --check
-  clippy:
-    runs-on: ubuntu-latest
-    name: ${{ matrix.toolchain }} / clippy
-    permissions:
-      contents: read
-      checks: write
-    strategy:
-      fail-fast: false
-      matrix:
-        # Get early warning of new lints which are regularly introduced in beta channels.
-        toolchain: [stable, beta]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Install ${{ matrix.toolchain }}
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.toolchain }}
-          components: clippy
-      - name: cargo clippy
-        uses: giraffate/clippy-action@v1
-        with:
-          reporter: "github-pr-check"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-  msrv:
-    # check that we can build using the minimal rust version that is specified by this crate
-    runs-on: ubuntu-latest
-    # we use a matrix here just because env can't be used in job names
-    # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
-    strategy:
-      matrix:
-        msrv: ["1.78"]
-    name: ubuntu / ${{ matrix.msrv }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: install dependencies (ubuntu only)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-      - name: Install ${{ matrix.msrv }}
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.msrv }}
-      - name: cargo +${{ matrix.msrv }} check
-        run: cargo check
-  build:
-    # run cargo test on mac and windows
-    name: build / ${{ matrix.platform }}
-    needs: [fmt, clippy, eslint, msrv, prettier]
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          #- platform: "macos-latest" # for Arm based macs (M1 and above).
-          #  target: "aarch64-apple-darwin"
-          #- platform: "macos-latest" # for Intel based macs.
-          #  target: "x86_64-apple-darwin"
-          - platform: "ubuntu-22.04"
-            target: "x86_64-unknown-linux-gnu"
-          #- platform: "windows-latest"
-          #  target: "x86_64-pc-windows-msvc"
+    prettier:
+        runs-on: ubuntu-latest
+        name: prettier
+        strategy:
+            matrix:
+                node-version: [20.x]
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  submodules: true
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "npm"
+                  cache-dependency-path: "client/package-lock.json"
+            - run: npm ci
+              working-directory: ./client
+            - name: prettier
+              run: "../.github/workflows/lint.sh"
+              working-directory: ./client
+    eslint:
+        runs-on: ubuntu-latest
+        name: eslint
+        strategy:
+            matrix:
+                node-version: [20.x]
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  submodules: true
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "npm"
+                  cache-dependency-path: "client/package-lock.json"
+            - run: npm ci
+              working-directory: ./client
+            - name: eslint
+              run: node ../.github/workflows/eslint.mjs
+              working-directory: ./client
+    fmt:
+        runs-on: ubuntu-latest
+        name: stable / fmt
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  submodules: true
+            - name: Install stable
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  components: rustfmt
+            - name: cargo fmt --check
+              run: cargo fmt --check
+    clippy:
+        runs-on: ubuntu-latest
+        name: ${{ matrix.toolchain }} / clippy
+        permissions:
+            contents: read
+            checks: write
+        strategy:
+            fail-fast: false
+            matrix:
+                # Get early warning of new lints which are regularly introduced in beta channels.
+                toolchain: [stable, beta]
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  submodules: true
+            - name: Install ${{ matrix.toolchain }}
+              uses: dtolnay/rust-toolchain@master
+              with:
+                  toolchain: ${{ matrix.toolchain }}
+                  components: clippy
+            - name: cargo clippy
+              uses: giraffate/clippy-action@v1
+              with:
+                  reporter: "github-pr-check"
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+    msrv:
+        # check that we can build using the minimal rust version that is specified by this crate
+        runs-on: ubuntu-latest
+        # we use a matrix here just because env can't be used in job names
+        # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
+        strategy:
+            matrix:
+                msrv: ["1.78"]
+        name: ubuntu / ${{ matrix.msrv }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  submodules: true
+            - name: install dependencies (ubuntu only)
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+            - name: Install ${{ matrix.msrv }}
+              uses: dtolnay/rust-toolchain@master
+              with:
+                  toolchain: ${{ matrix.msrv }}
+            - name: cargo +${{ matrix.msrv }} check
+              run: cargo check
+    build:
+        # run cargo test on mac and windows
+        name: build / ${{ matrix.platform }}
+        needs: [fmt, clippy, eslint, msrv, prettier]
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    #- platform: "macos-latest" # for Arm based macs (M1 and above).
+                    #  target: "aarch64-apple-darwin"
+                    #- platform: "macos-latest" # for Intel based macs.
+                    #  target: "x86_64-apple-darwin"
+                    - platform: "ubuntu-22.04"
+                      target: "x86_64-unknown-linux-gnu"
+                    #- platform: "windows-latest"
+                    #  target: "x86_64-pc-windows-msvc"
 
-    runs-on: ${{ matrix.platform }}
-    steps:
-      # if your project needs OpenSSL, uncomment this to fix Windows builds.
-      # it's commented out by default as the install command takes 5-10m.
-      # - run: echo "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
-      #   if: runner.os == 'Windows'
-      # - run: vcpkg install openssl:x64-windows-static-md
-      #   if: runner.os == 'Windows'
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
+        runs-on: ${{ matrix.platform }}
+        steps:
+            # if your project needs OpenSSL, uncomment this to fix Windows builds.
+            # it's commented out by default as the install command takes 5-10m.
+            # - run: echo "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
+            #   if: runner.os == 'Windows'
+            # - run: vcpkg install openssl:x64-windows-static-md
+            #   if: runner.os == 'Windows'
+            - uses: actions/checkout@v4
+              with:
+                  submodules: true
 
-      - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+            - name: install dependencies (ubuntu only)
+              if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: "npm" # Set this to npm, yarn or pnpm.
-          cache-dependency-path: "client/package-lock.json"
+            - name: setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: "npm" # Set this to npm, yarn or pnpm.
+                  cache-dependency-path: "client/package-lock.json"
 
-      - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable # Set this to dtolnay/rust-toolchain@nightly
-        with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+            - name: install Rust stable
+              uses: dtolnay/rust-toolchain@stable # Set this to dtolnay/rust-toolchain@nightly
+              with:
+                  # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+                  targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: "./client/src-tauri -> target"
+            - name: Rust cache
+              uses: swatinem/rust-cache@v2
+              with:
+                  workspaces: "./client/src-tauri -> target"
 
-      - name: install frontend dependencies
-        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
-        run: npm install # change this to npm or pnpm depending on which one you use.
-        working-directory: ./client
+            - name: install frontend dependencies
+              # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
+              run: npm install # change this to npm or pnpm depending on which one you use.
+              working-directory: ./client
 
-      # Skipped because of https://github.com/basalt-rs/basalt/issues/65
-      # - name: build frontend
-      #   run: npm run build
-      #   working-directory: ./client
+            # Skipped because of https://github.com/basalt-rs/basalt/issues/65
+            # - name: build frontend
+            #   run: npm run build
+            #   working-directory: ./client
 
-      - name: ensure app builds
-        run: cargo build --release
+            - name: ensure app builds
+              run: cargo check --release
