@@ -5,7 +5,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { useState } from "react";
 import { faker } from '@faker-js/faker';
 import { titleCase } from "@/lib/utils";
-import { Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { Tooltip } from "@/components/util";
 
 export const BulkTeamGen = () => {
@@ -66,9 +66,23 @@ export const BulkTeamGen = () => {
                                 <TableCaption>
                                     <div className="flex flex-row justify-between items-center">
                                         Page {currentTeamPage + 1} out of {totalPages}
-                                        <div className="flex space-x-2">
-                                            <Button variant="secondary" disabled={currentTeamPage === 0} onClick={() => setCurrentTeamPage(c => c - 1)}>Prev Page</Button>
-                                            <Button variant="secondary" disabled={currentTeamPage === totalPages - 1} onClick={() => setCurrentTeamPage(c => c + 1)}>Next Page</Button>
+                                        <div className="flex space-x-2 px-2">
+                                            <Button
+                                                variant="secondary"
+                                                size="icon"
+                                                disabled={currentTeamPage === 0}
+                                                onClick={() => setCurrentTeamPage(c => c - 1)}
+                                            >
+                                                <ChevronLeft />
+                                            </Button>
+                                            <Button
+                                                variant="secondary"
+                                                size="icon"
+                                                disabled={currentTeamPage === totalPages - 1}
+                                                onClick={() => setCurrentTeamPage(c => c + 1)}
+                                            >
+                                                <ChevronRight />
+                                            </Button>
                                         </div>
                                     </div>
                                 </TableCaption>
@@ -77,7 +91,7 @@ export const BulkTeamGen = () => {
                                         <TableHead className="w-1/4">Username</TableHead>
                                         <TableHead className="w-1/4">Display Name</TableHead>
                                         <TableHead className="w-1/4">Password</TableHead>
-                                        <TableHead className="w-1/6"/>
+                                        <TableHead className="w-1/6" />
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
