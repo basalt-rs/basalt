@@ -26,6 +26,7 @@ import AnnouncementForm from './AnnoucementForm';
 import { useAnnouncements } from '@/lib/services/announcement';
 import { useTeams } from '@/hooks/use-teams';
 import { TeamInfo } from '@/lib/services/teams';
+import Leaderboard from '@/components/Leaderboard';
 
 export default function Host() {
     const { teamsList, setSelectedTeam, isLoading } = useTeams();
@@ -167,13 +168,15 @@ export default function Host() {
 
                 <Separator />
 
-                {currentTab === 'questions' ? (
+                {currentTab === 'questions' && (
                     <ScrollArea className="w-full flex-grow pt-2">
                         <QuestionAccordion />
                     </ScrollArea>
-                ) : (
-                    <TeamInspector />
                 )}
+
+                {currentTab === 'teams' && <TeamInspector />}
+
+                {currentTab === 'leaderboard' && <Leaderboard />}
             </ResizablePanel>
         </ResizablePanelGroup>
     );
