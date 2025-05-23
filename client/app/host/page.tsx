@@ -26,6 +26,7 @@ import AnnouncementForm from './AnnoucementForm';
 import { useAnnouncements } from '@/lib/services/announcement';
 import { useTeams } from '@/hooks/use-teams';
 import { TeamInfo } from '@/lib/services/teams';
+import Leaderboard from '@/components/Leaderboard';
 
 export default function Host() {
     const { teamsList, setSelectedTeam, isLoading } = useTeams();
@@ -58,6 +59,27 @@ export default function Host() {
 
     const handleRemoveTeam = (_: TeamInfo) => {
         notYetImplemented();
+    };
+
+    const handleTabSwitch = () => {
+        switch (currentTab) {
+            case 'questions':
+                return (
+                    <ScrollArea className="w-full flex-grow pt-2">
+                        <QuestionAccordion />
+                    </ScrollArea>
+                );
+            case 'teams':
+                return <TeamInspector />;
+            case 'leaderboard':
+                return (
+                    <div className="p-4">
+                        <Leaderboard />
+                    </div>
+                );
+            default:
+                return 'unreachable';
+        }
     };
 
     return (
@@ -167,13 +189,7 @@ export default function Host() {
 
                 <Separator />
 
-                {currentTab === 'questions' ? (
-                    <ScrollArea className="w-full flex-grow pt-2">
-                        <QuestionAccordion />
-                    </ScrollArea>
-                ) : (
-                    <TeamInspector />
-                )}
+                {handleTabSwitch()}
             </ResizablePanel>
         </ResizablePanelGroup>
     );

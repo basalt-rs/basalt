@@ -224,7 +224,7 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
             );
         case 'leaderboard':
             return (
-                <ScrollArea className="h-full w-full border pt-4">
+                <ScrollArea className="h-full w-full border px-4 pt-4">
                     <Leaderboard showTimer={false} />
                 </ScrollArea>
             );
