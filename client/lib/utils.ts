@@ -29,3 +29,6 @@ export const relativeTime = (date: Date | string | number) => {
     const elapsedHours = Math.trunc(elapsedMins / 60);
     return RTF.format(elapsedHours, 'hour');
 };
+
+export const titleCase = (s: string): string => s[0].toUpperCase() + s.slice(1).toLowerCase();
+
