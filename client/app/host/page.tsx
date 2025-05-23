@@ -72,7 +72,11 @@ export default function Host() {
             case 'teams':
                 return <TeamInspector />;
             case 'leaderboard':
-                return <Leaderboard />;
+                return (
+                    <div className="p-4">
+                        <Leaderboard />
+                    </div>
+                );
             default:
                 return 'unreachable';
         }
