@@ -25,6 +25,8 @@ export const useTeams = () => {
         setSelectedTeam((prev) =>
             prev ? (prev.id === parsedTeam.id ? parsedTeam : prev) : prev
         );
+        console.log('updateTeam', parsedTeam);
+
         setTeams((prev) => ({
             ...prev,
             [parsedTeam.id]: parsedTeam,
@@ -71,6 +73,19 @@ export const useTeams = () => {
 
     basaltWs.registerEvent('team-connected', updateTeam, 'use-team-connection-handler');
     basaltWs.registerEvent('team-disconnected', updateTeam, 'use-team-disconnection-handler');
+    basaltWs.registerEvent('team-update', (user) => {
+        setTeams((prev) => (prev[user.id] ? prev : {
+            ...prev,
+            [user.id]: {
+                id: user.id,
+                name: user.name,
+                score: user.new_score,
+                checkedIn: false,
+                lastSeenMs: null,
+                disconnected: true,
+            },
+        }));
+    }, 'use-team-update-handler');
 
     return {
         teams,

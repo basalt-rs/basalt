@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
-import { Loader2, Plus, RefreshCw } from 'lucide-react';
+import { Loader2, Plus, RefreshCw, Users } from 'lucide-react';
 import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { useState } from 'react';
@@ -12,6 +12,8 @@ import { useTeams } from '@/hooks/use-teams';
 import { toast } from '@/hooks';
 import { Tooltip } from './util';
 import { faker } from '@faker-js/faker';
+import { DialogFooter } from './ui/dialog';
+import { titleCase } from '@/lib/utils';
 
 const formSchema = z.object({
     username: z.string().min(4).max(50),
@@ -19,7 +21,7 @@ const formSchema = z.object({
     password: z.string().min(4).max(50),
 })
 
-export const AddTeamDialog = ({ afterSubmit }: { afterSubmit: () => void }) => {
+export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: () => void; onBulkGenChange: (bulkGen: boolean) => void }) => {
     const { createTeam } = useTeams();
     const [addMore, setAddMore] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -53,8 +55,6 @@ export const AddTeamDialog = ({ afterSubmit }: { afterSubmit: () => void }) => {
         }
         setLoading(false);
     };
-
-    const titleCase = (s: string): string => s[0].toUpperCase() + s.slice(1).toLowerCase();
 
     const randomiseUsername = () => {
         const adj = faker.word.adjective();
@@ -138,17 +138,22 @@ export const AddTeamDialog = ({ afterSubmit }: { afterSubmit: () => void }) => {
                             </FormItem>
                         )}
                     />
-                    <div className="w-full pt-4">
-                        <div className="float-end flex space-x-4">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="more" checked={addMore} onCheckedChange={(v) => setAddMore(!!v)} />
-                                <Label htmlFor="more">Add More</Label>
-                            </div>
-                            <Button type="submit" disabled={loading}>
-                                {loading ? <Loader2 className="animate-spin" /> : <Plus />} Add Team
+                    <DialogFooter className="pt-4">
+                        <div className="w-full flex justify-between">
+                            <Button variant="outline" type="button" onClick={() => onBulkGenChange(true)}>
+                                <Users /> Bulk Generate
                             </Button>
+                            <div className="flex space-x-4">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox id="more" checked={addMore} onCheckedChange={(v) => setAddMore(!!v)} />
+                                    <Label htmlFor="more">Add More</Label>
+                                </div>
+                                <Button type="submit" disabled={loading}>
+                                    {loading ? <Loader2 className="animate-spin" /> : <Plus />} Add Team
+                                </Button>
+                            </div>
                         </div>
-                    </div>
+                    </DialogFooter>
                 </form>
             </Form>
         </div >

@@ -28,6 +28,7 @@ import { useAnnouncements } from '@/lib/services/announcement';
 import { useTeams } from '@/hooks/use-teams';
 import { TeamInfo } from '@/lib/services/teams';
 import { AddTeamDialog } from '@/components/AddTeamDialog';
+import { BulkTeamGen } from './bulk-team-gen';
 
 export default function Host() {
     const { teamsList, setSelectedTeam, isLoading } = useTeams();
@@ -37,6 +38,7 @@ export default function Host() {
     const [ip] = useAtom(ipAtom);
     const [token] = useAtom(tokenAtom);
     const [showAddTeam, setShowAddTeam] = useState(false);
+    const [bulkGen, setBulkGen] = useState(false);
 
     useEffect(() => {
         if (ip && token) establishWs(ip, token);
@@ -73,8 +75,10 @@ export default function Host() {
                                 <Plus />
                             </Dialog.DialogTrigger>
                             <Dialog.DialogContent>
-                                <Dialog.DialogTitle>Add Team</Dialog.DialogTitle>
-                                <AddTeamDialog afterSubmit={() => setShowAddTeam(false)} />
+                                <Dialog.DialogHeader>
+                                    <Dialog.DialogTitle>Add { bulkGen ? 'Teams' : 'Team' }</Dialog.DialogTitle>
+                                </Dialog.DialogHeader>
+                                <AddTeamDialog afterSubmit={() => setShowAddTeam(false)} onBulkGenChange={() => setCurrentTab('gen')} />
                             </Dialog.DialogContent>
                         </Dialog.Dialog>
                         <p className="text-2xl uppercase">Teams</p>
@@ -182,9 +186,11 @@ export default function Host() {
                     <ScrollArea className="w-full flex-grow pt-2">
                         <QuestionAccordion />
                     </ScrollArea>
-                ) : (
+                ) : currentTab === 'teams' ? (
                     <TeamInspector />
-                )}
+                ) : currentTab === 'gen' ? (
+                    <BulkTeamGen />
+                ) : 'Not Found'}
             </ResizablePanel>
         </ResizablePanelGroup>
     );
