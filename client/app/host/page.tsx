@@ -61,6 +61,23 @@ export default function Host() {
         notYetImplemented();
     };
 
+    const handleTabSwitch = () => {
+        switch (currentTab) {
+            case 'questions':
+                return (
+                    <ScrollArea className="w-full flex-grow pt-2">
+                        <QuestionAccordion />
+                    </ScrollArea>
+                );
+            case 'teams':
+                return <TeamInspector />;
+            case 'leaderboard':
+                return <Leaderboard />;
+            default:
+                return 'unreachable';
+        }
+    };
+
     return (
         <ResizablePanelGroup direction="horizontal" className="flex h-screen flex-grow">
             <ResizablePanel className="flex flex-col justify-between" defaultSize={30} maxSize={50}>
@@ -168,15 +185,7 @@ export default function Host() {
 
                 <Separator />
 
-                {currentTab === 'questions' && (
-                    <ScrollArea className="w-full flex-grow pt-2">
-                        <QuestionAccordion />
-                    </ScrollArea>
-                )}
-
-                {currentTab === 'teams' && <TeamInspector />}
-
-                {currentTab === 'leaderboard' && <Leaderboard />}
+                {handleTabSwitch()}
             </ResizablePanel>
         </ResizablePanelGroup>
     );
