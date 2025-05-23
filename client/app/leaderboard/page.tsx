@@ -37,7 +37,11 @@ export default function Page() {
     return (
         <div className="flex h-screen flex-col">
             <div className="m-2">
-                <Button variant="ghost" asChild>
+                <Button
+                    variant="ghost"
+                    asChild
+                    className="opacity-0 transition-opacity duration-100 hover:opacity-100"
+                >
                     <Link href="/">
                         <ArrowLeft /> Back
                     </Link>
