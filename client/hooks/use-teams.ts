@@ -5,6 +5,12 @@ import { useWebSocket } from '@/lib/services/ws';
 import { useQuery } from '@tanstack/react-query';
 import { atom, useAtom, useAtomValue } from 'jotai';
 
+export interface CreateTeam {
+    username: string;
+    displayName: string;
+    password: string;
+}
+
 export const teamsAtom = atom<Record<string, TeamInfo>>({});
 export const teamsListAtom = atom((get) => Object.values(get(teamsAtom)));
 export const selectedTeamAtom = atom<TeamInfo | null>(null);
@@ -56,7 +62,7 @@ export const useTeams = () => {
         refetchInterval: 15 * 1000,
     });
 
-    const createTeam = async (newTeam: { username: string; displayName: string; password: string; }) => {
+    const createTeam = async (newTeam: CreateTeam | CreateTeam[]) => {
         if (ip === null || token === null) {
             throw new Error('No IP Set');
         }
@@ -73,18 +79,22 @@ export const useTeams = () => {
 
     basaltWs.registerEvent('team-connected', updateTeam, 'use-team-connection-handler');
     basaltWs.registerEvent('team-disconnected', updateTeam, 'use-team-disconnection-handler');
-    basaltWs.registerEvent('team-update', (user) => {
-        setTeams((prev) => (prev[user.id] ? prev : {
-            ...prev,
-            [user.id]: {
-                id: user.id,
-                name: user.name,
-                score: user.new_score,
-                checkedIn: false,
-                lastSeenMs: null,
-                disconnected: true,
-            },
-        }));
+    basaltWs.registerEvent('team-update', (users) => {
+        setTeams(({ ...next }) => {
+            for (const user of users) {
+                if (!next[user.id]) {
+                    next[user.id] = {
+                        id: user.id,
+                        name: user.name,
+                        score: user.newScore,
+                        checkedIn: false,
+                        lastSeenMs: null,
+                        disconnected: true,
+                    }
+                }
+            }
+            return next;
+        });
     }, 'use-team-update-handler');
 
     return {

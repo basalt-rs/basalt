@@ -5,13 +5,17 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { useState } from "react";
 import { faker } from '@faker-js/faker';
 import { titleCase } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { Tooltip } from "@/components/util";
+import { CreateTeam, useTeams } from "@/hooks/use-teams";
+import { toast } from "@/hooks/use-toast";
 
 export const BulkTeamGen = () => {
     const [toGenerate, setToGenerate] = useState(1);
-    const [teams, setTeams] = useState<{ username: string; displayName: string; password: string }[]>([]);
+    const [teams, setTeams] = useState<(CreateTeam & { conflict: boolean })[]>([]);
+    const { createTeam } = useTeams();
     const [currentTeamPage, setCurrentTeamPage] = useState(0);
+    const [loadingCreate, setLoadingCreate] = useState(false);
 
     const generate = () => {
         setTeams(old => [...old, ...Array.from({ length: Math.max(0, Math.min(100 - old.length, toGenerate)) }, randomTeam)]);
@@ -28,6 +32,7 @@ export const BulkTeamGen = () => {
             username: `${adj}-${noun}`,
             displayName: `${titleCase(adj)} ${titleCase(noun)}`,
             password: `${pwdAdj}-${pwdNoun}`,
+            conflict: false,
         }
     };
 
@@ -40,6 +45,27 @@ export const BulkTeamGen = () => {
     };
 
     const add = async () => {
+        setLoadingCreate(true);
+        try {
+            await createTeam(teams);
+        } catch(ex) {
+            const x = ex as { status: number; body: string[]; };
+            if (x.status === 409) {
+                setTeams(([...next]) => {
+                    for (const conflict of x.body) {
+                        const match = next.find(n => n.username === conflict);
+                        if (match)
+                            match.conflict = true;
+                    }
+                    return next;
+                });
+            }
+            toast({
+                title: `${x.body.length} ${x.body.length === 1 ? 'name' : 'names'} conflicted with already existing teams.`,
+                variant: 'destructive',
+            });
+        }
+        setLoadingCreate(false);
         console.log(teams);
     };
 
@@ -96,7 +122,7 @@ export const BulkTeamGen = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {teams.slice(currentTeamPage * 10, (currentTeamPage + 1) * 10).map((team, i) => (
-                                        <TableRow key={i}>
+                                        <TableRow key={team.username} className={team.conflict ? 'text-fail' : ''}>
                                             <TableCell>{team.username}</TableCell>
                                             <TableCell>{team.displayName}</TableCell>
                                             <TableCell>{team.password}</TableCell>
@@ -112,9 +138,9 @@ export const BulkTeamGen = () => {
                                     ))}
                                 </TableBody>
                             </Table>
-                            <Button onClick={add}>
+                            <Button onClick={add} disabled={loadingCreate}>
                                 <span className="flex gap-2">
-                                    <Plus /> Add Teams
+                                    { loadingCreate ? <Loader2 className="animate-spin" /> : <Plus /> } Add Teams
                                 </span>
                             </Button>
                         </div>

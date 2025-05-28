@@ -13,10 +13,10 @@ type EVENT_MAPPING = {
     'team-update': {
         id: string;
         name: string;
-        display_name: string;
-        new_score: number;
-        new_states: TestState[];
-    };
+        displayName: string;
+        newScore: number;
+        newStates: TestState[];
+    }[];
     'team-rename': {
         id: string;
         name: string,

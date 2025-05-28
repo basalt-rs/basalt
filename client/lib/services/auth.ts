@@ -114,7 +114,7 @@ export const tryFetch = async <T>(
     if (res.ok) {
         return await res.json();
     } else if (expectedErrors?.includes(res.status)) {
-        throw res.status;
+        throw { status: res.status, body: await res.json() };
     } else {
         toast({
             title: 'Error Loading',

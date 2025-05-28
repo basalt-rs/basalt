@@ -39,17 +39,24 @@ export const useLeaderboard = () => {
     }, [ip, setLeaderboard]);
     ws.registerEvent(
         'team-update',
-        (update) => {
+        (users) => {
             setLeaderboard((leaderboard) => {
-                const temp = leaderboard.map((item) =>
-                    item.user.id === update.id
-                        ? {
-                              user: item.user,
-                              score: update.new_score,
-                              submissionStates: update.new_states,
-                          }
-                        : item
-                );
+                const temp = leaderboard.map((item) => {
+                    const user = users.find(x => x.id === item.user.id);
+                    if (user) {
+                        return {
+                            user: {
+                                ...item.user,
+                                displayName: user.displayName,
+                                username: user.name,
+                            },
+                            score: user.newScore,
+                            submissionStates: user.newStates,
+                        };
+                    } else {
+                        return item;
+                    }
+                });
                 sortLeaderboard(temp);
                 return temp;
             });

@@ -38,7 +38,6 @@ export default function Host() {
     const [ip] = useAtom(ipAtom);
     const [token] = useAtom(tokenAtom);
     const [showAddTeam, setShowAddTeam] = useState(false);
-    const [bulkGen, setBulkGen] = useState(false);
 
     useEffect(() => {
         if (ip && token) establishWs(ip, token);
@@ -76,7 +75,7 @@ export default function Host() {
                             </Dialog.DialogTrigger>
                             <Dialog.DialogContent>
                                 <Dialog.DialogHeader>
-                                    <Dialog.DialogTitle>Add { bulkGen ? 'Teams' : 'Team' }</Dialog.DialogTitle>
+                                    <Dialog.DialogTitle>Add Team</Dialog.DialogTitle>
                                 </Dialog.DialogHeader>
                                 <AddTeamDialog afterSubmit={() => setShowAddTeam(false)} onBulkGenChange={() => setCurrentTab('gen')} />
                             </Dialog.DialogContent>

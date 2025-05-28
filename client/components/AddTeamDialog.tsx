@@ -49,7 +49,8 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
                 });
             }
         } catch (ex) {
-            if (ex === 409) {
+            const x = ex as { status: number; body: string[]; };
+            if (x.status === 409) {
                 form.setError('username', { message: 'A user with this name already exists' });
             }
         }
