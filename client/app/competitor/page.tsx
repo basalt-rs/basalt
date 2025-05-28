@@ -57,7 +57,7 @@ const EditorButtons = () => {
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
     const setCurrQuestionIdx = useSetAtom(currQuestionIdxAtom);
 
-     // Defaults to first language if no language selected
+    // Defaults to first language if no language selected
     useEffect(() => {
         if (currQuestion?.languages?.length) {
             setSelectedLanguage((prev) => prev ?? currQuestion?.languages?.[0]?.name);
