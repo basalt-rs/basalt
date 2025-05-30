@@ -57,6 +57,13 @@ const EditorButtons = () => {
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
     const setCurrQuestionIdx = useSetAtom(currQuestionIdxAtom);
 
+    // Defaults to first language if no language selected
+    useEffect(() => {
+        if (currQuestion?.languages?.length) {
+            setSelectedLanguage((prev) => prev ?? currQuestion?.languages?.[0]?.name);
+        }
+    }, [currQuestion, setSelectedLanguage]);
+
     const downloadPdf = (ip: string) => {
         download(`${ip}/competition/packet`);
     };
