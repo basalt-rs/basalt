@@ -1,6 +1,6 @@
 # Maintainer: Your Name <youremail@domain.com>
 pkgname=basalt-desktop-git
-pkgver=r80.24a7392
+pkgver=1.0.0
 pkgrel=1
 pkgdesc="Basalt Desktop, git version"
 arch=('x86_64' 'aarch64')
@@ -13,16 +13,19 @@ provides=("${pkgname%-git}")
 conflicts=("${pkgname%-git}" 'basalt-desktop')
 replaces=('basalt-desktop' 'basalt-desktop-bin')
 backup=() # used for any config file which this program does not have to my knowledge
-source=('basalt-desktop::git+https://github.com/basalt-rs/basalt')
+source=("basalt-desktop::git+${url}")
 sha256sums=('SKIP')
 
+#NOTE: Replace with your whatever versioning system you like
+
+#cd "$srcdir/basalt-desktop"
+#(
+# set -o pipefail
+# git describe --long --abbrev=7 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
+#   printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+#)
 pkgver() {
-  cd "$srcdir/basalt-desktop"
-  (
-    set -o pipefail
-    git describe --long --abbrev=7 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
-      printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
-  )
+  printf 1.0.0
 }
 
 prepare() {
@@ -37,5 +40,5 @@ build() {
 }
 
 package() {
-  cp -a basalt-desktop/client/src-tauri/target/release/bundle/deb/Basalt\ Desktop_${pkgver}_*/data/* "${pkgdir}"
+  cp -a basalt-desktop/target/release/bundle/deb/Basalt\ Desktop_${pkgver}_*/data/* "${pkgdir}"
 }
