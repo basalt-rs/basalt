@@ -39,22 +39,51 @@ export const useLeaderboard = () => {
     }, [ip, setLeaderboard]);
     ws.registerEvent(
         'team-update',
-        (update) => {
+        (users) => {
+            setLeaderboard((leaderboard) => {
+                const temp = leaderboard.map((item) => {
+                    const user = users.find(x => x.id === item.user.id);
+                    if (user) {
+                        return {
+                            user: {
+                                ...item.user,
+                                displayName: user.displayName,
+                                username: user.name,
+                            },
+                            score: user.newScore,
+                            submissionStates: user.newStates,
+                        };
+                    } else {
+                        return item;
+                    }
+                });
+                sortLeaderboard(temp);
+                return temp;
+            });
+        },
+        'team updates'
+    );
+    ws.registerEvent(
+        'team-rename',
+        (rename) => {
             setLeaderboard((leaderboard) => {
                 const temp = leaderboard.map((item) =>
-                    item.username === update.team
+                    item.user.id === rename.id
                         ? {
-                              username: update.team,
-                              score: update.new_score,
-                              submissionStates: update.new_states,
-                          }
+                            ...item,
+                            user: {
+                                ...item.user,
+                                username: rename.name,
+                                displayName: rename.display_name,
+                            },
+                        }
                         : item
                 );
                 sortLeaderboard(temp);
                 return temp;
             });
         },
-        'team updates'
+        'use-leaderboard-team-rename'
     );
 
     return leaderboard;

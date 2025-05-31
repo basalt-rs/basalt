@@ -1,3 +1,5 @@
+import { User } from "./services/auth";
+
 export type TestState = 'pass' | 'fail' | 'in-progress' | 'not-attempted';
 
 export interface Test {
@@ -38,13 +40,6 @@ export interface QuestionSubmissionState {
     remainingAttempts: number | null;
 }
 
-export interface Team {
-    name: string;
-    points: number;
-    status: boolean;
-    password: string; // TODO: this should be removed
-}
-
 export interface SubmissionHistory {
     id: string;
     submitter: string;
@@ -57,7 +52,7 @@ export interface SubmissionHistory {
 }
 
 export interface LeaderboardEntry {
-    username: string;
+    user: User;
     score: number;
     submissionStates: TestState[];
 }

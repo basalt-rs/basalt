@@ -1,35 +1,45 @@
 import { ipAtom } from '@/lib/services/api';
+import { tokenAtom, tryFetch, User } from '@/lib/services/auth';
 import { convertTeam, getTeams, RawTeamInfo, TeamInfo } from '@/lib/services/teams';
 import { useWebSocket } from '@/lib/services/ws';
 import { useQuery } from '@tanstack/react-query';
 import { atom, useAtom, useAtomValue } from 'jotai';
+
+export interface CreateTeam {
+    username: string;
+    displayName: string;
+    password: string;
+}
 
 export const teamsAtom = atom<Record<string, TeamInfo>>({});
 export const teamsListAtom = atom((get) => Object.values(get(teamsAtom)));
 export const selectedTeamAtom = atom<TeamInfo | null>(null);
 export const useTeams = () => {
     const ip = useAtomValue(ipAtom);
+    const token = useAtomValue(tokenAtom);
     const { ws: basaltWs } = useWebSocket();
     const [teams, setTeams] = useAtom(teamsAtom);
     const teamsList = useAtomValue(teamsListAtom);
     const [selectedTeam, setSelectedTeam] = useAtom(selectedTeamAtom);
 
     const updateTeams = (teams: TeamInfo[]) => {
-        setSelectedTeam((prev) => teams.find((t) => t.team === prev?.team) ?? null);
-        setTeams(teams.reduce((acc, t) => ({ ...acc, [t.team]: t }), {}));
+        setSelectedTeam((prev) => teams.find((t) => t.id === prev?.id) ?? null);
+        setTeams(teams.reduce((acc, t) => ({ ...acc, [t.id]: t }), {}));
     };
     const updateTeam = (rawTeam: RawTeamInfo) => {
         const parsedTeam = convertTeam(rawTeam);
         setSelectedTeam((prev) =>
-            prev ? (prev.team === parsedTeam.team ? parsedTeam : prev) : prev
+            prev ? (prev.id === parsedTeam.id ? parsedTeam : prev) : prev
         );
+        console.log('updateTeam', parsedTeam);
+
         setTeams((prev) => ({
             ...prev,
-            [parsedTeam.team]: parsedTeam,
+            [parsedTeam.id]: parsedTeam,
         }));
     };
 
-    const setSelectedTeamByName = (name: string) => {
+    const setSelectedTeamById = (name: string) => {
         const team = teams[name];
         setSelectedTeam((prev) => team ?? prev);
     };
@@ -52,8 +62,68 @@ export const useTeams = () => {
         refetchInterval: 15 * 1000,
     });
 
+    const createTeam = async (newTeam: CreateTeam | CreateTeam[]) => {
+        if (ip === null || token === null) {
+            throw new Error('No IP Set');
+        }
+
+        const team = await tryFetch<User>(`/teams`, token, ip, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(newTeam),
+        }, [409]);
+        return team;
+    };
+
+    const renameTeam = async (id: string, patch: { username: string | null; displayName: null | 'reset' | { set: string }}) => {
+        if (ip === null || token === null) {
+            throw new Error('No IP Set');
+        }
+
+        const team = await tryFetch<User>(`/teams/${id}`, token, ip, {
+            method: 'PATCH',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(patch),
+        }, [409]);
+        return team;
+    };
+
     basaltWs.registerEvent('team-connected', updateTeam, 'use-team-connection-handler');
     basaltWs.registerEvent('team-disconnected', updateTeam, 'use-team-disconnection-handler');
+    basaltWs.registerEvent('team-update', (users) => {
+        setTeams(({ ...next }) => {
+            for (const user of users) {
+                if (!next[user.id]) {
+                    next[user.id] = {
+                        id: user.id,
+                        name: user.name,
+                        displayName: user.displayName,
+                        score: user.newScore,
+                        checkedIn: false,
+                        lastSeenMs: null,
+                        disconnected: true,
+                    }
+                }
+            }
+            return next;
+        });
+    }, 'use-team-update-handler');
+    basaltWs.registerEvent('team-rename', (rename) => {
+        setTeams(({ ...next }) => {
+            if (next[rename.id]) {
+                next[rename.id] = {
+                    ...next[rename.id],
+                    name: rename.name,
+                    displayName: rename.display_name,
+                }
+            }
+            return next;
+        });
+    }, 'use-team-rename-handler');
 
     return {
         teams,
@@ -62,6 +132,8 @@ export const useTeams = () => {
         isError,
         setSelectedTeam,
         selectedTeam,
-        setSelectedTeamByName,
+        setSelectedTeamById,
+        renameTeam,
+        createTeam,
     };
 };
