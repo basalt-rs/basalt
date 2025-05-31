@@ -4,46 +4,50 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
-import { Loader2, Plus, RefreshCw, Users } from 'lucide-react';
-import { Checkbox } from './ui/checkbox';
-import { Label } from './ui/label';
+import { Check, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTeams } from '@/hooks/use-teams';
 import { toast } from '@/hooks';
 import { Tooltip } from './util';
 import { DialogFooter } from './ui/dialog';
+import { randomName } from '@/lib/utils';
+import { TeamInfo } from '@/lib/services/teams';
 
 const formSchema = z.object({
     username: z.string().min(4).max(50),
-    displayName: z.string().min(4).max(50),
-    password: z.string().min(4).max(50),
+    displayName: z.string().min(4).max(50).optional(),
 })
 
-export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: () => void; onBulkGenChange: (bulkGen: boolean) => void }) => {
-    const { createTeam } = useTeams();
-    const [addMore, setAddMore] = useState(false);
+export const EditTeamDialog = ({ afterSubmit, team }: { afterSubmit: () => void; team: TeamInfo | null }) => {
+    const { renameTeam } = useTeams();
     const [loading, setLoading] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            username: '',
-            displayName: '',
-            password: '',
+            username: team?.name,
+            displayName: team?.displayName || '',
         },
     });
 
+    if (team === null) return null;
+
     const submit = async (values: z.infer<typeof formSchema>) => {
+        console.log(values);
         setLoading(true);
         try {
-            const team = await createTeam(values);
-            if (team) {
-                if (addMore) {
-                    form.reset();
-                } else {
-                    afterSubmit();
-                }
+            const patch = {
+                username: team.name === values.username ? null : values.username,
+                displayName: team.displayName === values.displayName
+                    ? null
+                    : values.displayName
+                        ? { set: values.displayName }
+                        : 'reset' as const,
+            };
+            const res = await renameTeam(team.id, patch);
+            if (res) {
+                afterSubmit();
                 toast({
-                    title: 'User successfully added',
+                    title: 'User successfully updated',
                 });
             }
         } catch (ex) {
@@ -57,11 +61,9 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
 
     const randomiseUsername = () => {
         const { username, displayName } = randomName();
-        form.setValue('username', username);
-        form.setValue('displayName', displayName);
+        form.setValue('username', username, { shouldDirty: true, shouldTouch: true });
+        form.setValue('displayName', displayName, { shouldDirty: true, shouldTouch: true });
     };
-
-    const randomisePassword = () => form.setValue('password', randomPassword());
 
     const filterUsername = (og: string): string => og
         .toLowerCase()
@@ -75,7 +77,7 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
                     <FormField
                         control={form.control}
                         name="username"
-                        rules={{ onChange: (e) => { form.setValue('username', filterUsername(e.target.value)) } }}
+                        rules={{ onChange: (e) => { form.setValue('username', filterUsername(e.target.value), { shouldDirty: true, shouldTouch: true }) } }}
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Username</FormLabel>
@@ -103,49 +105,28 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
                             <FormItem>
                                 <FormLabel>Display Name</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Display Name" {...field} />
+                                    <div className="flex w-full items-center space-x-2">
+                                        <Input placeholder="Display Name" {...field} />
+                                        <Tooltip tooltip="Remove Display Name">
+                                            <Button type="button" variant="secondary" onClick={() => form.setValue('displayName', '', { shouldDirty: true, shouldTouch: true })}>
+                                                <Trash2 />
+                                            </Button>
+                                        </Tooltip>
+                                    </div>
                                 </FormControl>
                                 <FormDescription>
-                                    This is the name that will be shown on the leaderboard.
+                                    <span className="block">This is the name that will be shown on the leaderboard.</span>
+                                    <em>{team.displayName && !field.value && 'Display name will be reset.'}</em>
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Password</FormLabel>
-                                <FormControl>
-                                    <div className="flex w-full items-center space-x-2">
-                                        <Input placeholder="Password" {...field} />
-                                        <Tooltip tooltip="Randomise Password">
-                                            <Button type="button" variant="secondary" onClick={randomisePassword}>
-                                                <RefreshCw />
-                                            </Button>
-                                        </Tooltip>
-                                    </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                     <DialogFooter className="pt-4">
-                        <div className="w-full flex justify-between">
-                            <Button variant="outline" type="button" onClick={() => onBulkGenChange(true)}>
-                                <Users /> Bulk Generate
+                        <div className="w-full flex justify-end">
+                            <Button type="submit" disabled={loading || !form.formState.isDirty}>
+                                {loading ? <Loader2 className="animate-spin" /> : <Check />} Update Team
                             </Button>
-                            <div className="flex space-x-4">
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox id="more" checked={addMore} onCheckedChange={(v) => setAddMore(!!v)} />
-                                    <Label htmlFor="more">Add More</Label>
-                                </div>
-                                <Button type="submit" disabled={loading}>
-                                    {loading ? <Loader2 className="animate-spin" /> : <Plus />} Add Team
-                                </Button>
-                            </div>
                         </div>
                     </DialogFooter>
                 </form>

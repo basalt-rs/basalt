@@ -63,6 +63,28 @@ export const useLeaderboard = () => {
         },
         'team updates'
     );
+    ws.registerEvent(
+        'team-rename',
+        (rename) => {
+            setLeaderboard((leaderboard) => {
+                const temp = leaderboard.map((item) =>
+                    item.user.id === rename.id
+                        ? {
+                            ...item,
+                            user: {
+                                ...item.user,
+                                username: rename.name,
+                                displayName: rename.display_name,
+                            },
+                        }
+                        : item
+                );
+                sortLeaderboard(temp);
+                return temp;
+            });
+        },
+        'use-leaderboard-team-rename'
+    );
 
     return leaderboard;
 };

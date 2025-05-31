@@ -3,8 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState } from "react";
-import { faker } from '@faker-js/faker';
-import { titleCase } from "@/lib/utils";
+import { randomName, randomPassword } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { Tooltip } from "@/components/util";
 import { CreateTeam, useTeams } from "@/hooks/use-teams";
@@ -22,16 +21,12 @@ export const BulkTeamGen = () => {
     };
 
     const randomTeam = () => {
-        const adj = faker.word.adjective();
-        const noun = faker.word.noun();
-
-        const pwdAdj = faker.word.adjective({ length: { min: 1, max: 5 } });
-        const pwdNoun = faker.word.noun({ length: { min: 1, max: 5 } });
+        const { username, displayName } = randomName();
 
         return {
-            username: `${adj}-${noun}`,
-            displayName: `${titleCase(adj)} ${titleCase(noun)}`,
-            password: `${pwdAdj}-${pwdNoun}`,
+            username,
+            displayName,
+            password: randomPassword(),
             conflict: false,
         }
     };

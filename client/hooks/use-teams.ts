@@ -77,6 +77,21 @@ export const useTeams = () => {
         return team;
     };
 
+    const renameTeam = async (id: string, patch: { username: string | null; displayName: null | 'reset' | { set: string }}) => {
+        if (ip === null || token === null) {
+            throw new Error('No IP Set');
+        }
+
+        const team = await tryFetch<User>(`/teams/${id}`, token, ip, {
+            method: 'PATCH',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(patch),
+        }, [409]);
+        return team;
+    };
+
     basaltWs.registerEvent('team-connected', updateTeam, 'use-team-connection-handler');
     basaltWs.registerEvent('team-disconnected', updateTeam, 'use-team-disconnection-handler');
     basaltWs.registerEvent('team-update', (users) => {
@@ -86,6 +101,7 @@ export const useTeams = () => {
                     next[user.id] = {
                         id: user.id,
                         name: user.name,
+                        displayName: user.displayName,
                         score: user.newScore,
                         checkedIn: false,
                         lastSeenMs: null,
@@ -96,6 +112,18 @@ export const useTeams = () => {
             return next;
         });
     }, 'use-team-update-handler');
+    basaltWs.registerEvent('team-rename', (rename) => {
+        setTeams(({ ...next }) => {
+            if (next[rename.id]) {
+                next[rename.id] = {
+                    ...next[rename.id],
+                    name: rename.name,
+                    displayName: rename.display_name,
+                }
+            }
+            return next;
+        });
+    }, 'use-team-rename-handler');
 
     return {
         teams,
@@ -105,6 +133,7 @@ export const useTeams = () => {
         setSelectedTeam,
         selectedTeam,
         setSelectedTeamById,
+        renameTeam,
         createTeam,
     };
 };
