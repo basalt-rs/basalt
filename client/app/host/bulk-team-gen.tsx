@@ -48,7 +48,7 @@ export const BulkTeamGen = () => {
         setLoadingCreate(true);
         try {
             await createTeam(teams);
-        } catch(ex) {
+        } catch (ex) {
             const x = ex as { status: number; body: string[]; };
             if (x.status === 409) {
                 setTeams(([...next]) => {
@@ -91,7 +91,7 @@ export const BulkTeamGen = () => {
                             <Table>
                                 <TableCaption>
                                     <div className="flex flex-row justify-between items-center">
-                                        Page {currentTeamPage + 1} out of {totalPages}
+                                        Page {currentTeamPage + 1} of {totalPages}
                                         <div className="flex space-x-2 px-2">
                                             <Button
                                                 variant="secondary"
@@ -127,12 +127,16 @@ export const BulkTeamGen = () => {
                                             <TableCell>{team.displayName}</TableCell>
                                             <TableCell>{team.password}</TableCell>
                                             <TableCell className="text-right space-x-2">
-                                                <Button type="button" variant="secondary" size="icon" onClick={() => regenTeam(i + currentTeamPage * 10)}>
-                                                    <RefreshCw />
-                                                </Button>
-                                                <Button type="button" variant="secondary" size="icon" onClick={() => removeTeam(i + currentTeamPage * 10)}>
-                                                    <Trash2 />
-                                                </Button>
+                                                <Tooltip tooltip="Regenerate User">
+                                                    <Button type="button" variant="secondary" size="icon" onClick={() => regenTeam(i + currentTeamPage * 10)}>
+                                                        <RefreshCw />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip tooltip="Remove User">
+                                                    <Button type="button" variant="secondary" size="icon" onClick={() => removeTeam(i + currentTeamPage * 10)}>
+                                                        <Trash2 />
+                                                    </Button>
+                                                </Tooltip>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -140,7 +144,7 @@ export const BulkTeamGen = () => {
                             </Table>
                             <Button onClick={add} disabled={loadingCreate}>
                                 <span className="flex gap-2">
-                                    { loadingCreate ? <Loader2 className="animate-spin" /> : <Plus /> } Add Teams
+                                    {loadingCreate ? <Loader2 className="animate-spin" /> : <Plus />} Add Teams
                                 </span>
                             </Button>
                         </div>
