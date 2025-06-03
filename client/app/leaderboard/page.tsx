@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import LeaderboardMenu from './LeaderboardMenu';
 
 export default function Page() {
     const GameCodeModal = () => {
@@ -36,12 +37,17 @@ export default function Page() {
 
     return (
         <div className="flex h-screen flex-col">
-            <div className="m-2">
-                <Button variant="ghost" asChild>
+            <div className="m-2 flex justify-between">
+                <Button
+                    variant="ghost"
+                    asChild
+                    className="opacity-0 transition-opacity duration-100 hover:opacity-100"
+                >
                     <Link href="/">
                         <ArrowLeft /> Back
                     </Link>
                 </Button>
+                <LeaderboardMenu />
             </div>
             <Leaderboard />
             <div className="mx-2 mb-2 mt-auto flex justify-end">
