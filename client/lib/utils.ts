@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -28,4 +29,21 @@ export const relativeTime = (date: Date | string | number) => {
     }
     const elapsedHours = Math.trunc(elapsedMins / 60);
     return RTF.format(elapsedHours, 'hour');
+};
+
+export const titleCase = (s: string): string => s[0].toUpperCase() + s.slice(1).toLowerCase();
+
+export const randomName = () => {
+    const adj = faker.word.adjective();
+    const noun = faker.word.noun();
+    return {
+        username: `${adj}-${noun}`,
+        displayName: `${titleCase(adj)} ${titleCase(noun)}`,
+    };
+};
+
+export const randomPassword = () => {
+    const adj = faker.word.adjective({ length: { min: 1, max: 5 } });
+    const noun = faker.word.noun({ length: { min: 1, max: 5 } });
+    return `${adj}-${noun}`;
 };
