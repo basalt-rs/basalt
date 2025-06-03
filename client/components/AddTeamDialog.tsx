@@ -12,6 +12,7 @@ import { useTeams } from '@/hooks/use-teams';
 import { toast } from '@/hooks';
 import { Tooltip } from './util';
 import { DialogFooter } from './ui/dialog';
+import { randomName, randomPassword } from '@/lib/utils';
 
 const formSchema = z.object({
     username: z.string().min(4).max(50),
