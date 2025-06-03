@@ -1,13 +1,21 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useState } from "react";
-import { randomName, randomPassword } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { Tooltip } from "@/components/util";
-import { CreateTeam, useTeams } from "@/hooks/use-teams";
-import { toast } from "@/hooks/use-toast";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { useState } from 'react';
+import { randomName, randomPassword } from '@/lib/utils';
+import { ChevronLeft, ChevronRight, Loader2, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Tooltip } from '@/components/util';
+import { CreateTeam, useTeams } from '@/hooks/use-teams';
+import { toast } from '@/hooks/use-toast';
 
 export const BulkTeamGen = () => {
     const [toGenerate, setToGenerate] = useState(1);
@@ -17,7 +25,13 @@ export const BulkTeamGen = () => {
     const [loadingCreate, setLoadingCreate] = useState(false);
 
     const generate = () => {
-        setTeams(old => [...old, ...Array.from({ length: Math.max(0, Math.min(100 - old.length, toGenerate)) }, randomTeam)]);
+        setTeams((old) => [
+            ...old,
+            ...Array.from(
+                { length: Math.max(0, Math.min(100 - old.length, toGenerate)) },
+                randomTeam
+            ),
+        ]);
     };
 
     const randomTeam = () => {
@@ -28,15 +42,15 @@ export const BulkTeamGen = () => {
             displayName,
             password: randomPassword(),
             conflict: false,
-        }
+        };
     };
 
     const regenTeam = (index: number) => {
-        setTeams(old => old.map((t, i) => i === index ? randomTeam() : t));
+        setTeams((old) => old.map((t, i) => (i === index ? randomTeam() : t)));
     };
 
     const removeTeam = (index: number) => {
-        setTeams(old => old.filter((_, i) => i !== index));
+        setTeams((old) => old.filter((_, i) => i !== index));
     };
 
     const add = async () => {
@@ -44,13 +58,12 @@ export const BulkTeamGen = () => {
         try {
             await createTeam(teams);
         } catch (ex) {
-            const x = ex as { status: number; body: string[]; };
+            const x = ex as { status: number; body: string[] };
             if (x.status === 409) {
                 setTeams(([...next]) => {
                     for (const conflict of x.body) {
-                        const match = next.find(n => n.username === conflict);
-                        if (match)
-                            match.conflict = true;
+                        const match = next.find((n) => n.username === conflict);
+                        if (match) match.conflict = true;
                     }
                     return next;
                 });
@@ -69,82 +82,116 @@ export const BulkTeamGen = () => {
     return (
         <div className="p-2">
             <h1 className="text-2xl">Generate Teams</h1>
-            <div className="w-full flex flex-col items-center space-y-4">
+            <div className="flex w-full flex-col items-center space-y-4">
                 <div className="w-1/3">
                     <Label htmlFor="num-teams">Number of teams to generate</Label>
-                    <div className="flex flex-row w-full space-x-2">
-                        <Input id="num-teams" type="number" min={1} max={100} value={toGenerate} onChange={s => setToGenerate(+s.target.value)} />
-                        <Tooltip tooltip="Up to 100 teams may be added at a time" disabled={teams.length < 100}>
-                            <Button variant="secondary" onClick={generate} disabled={teams.length >= 100}>Generate</Button>
+                    <div className="flex w-full flex-row space-x-2">
+                        <Input
+                            id="num-teams"
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={toGenerate}
+                            onChange={(s) => setToGenerate(+s.target.value)}
+                        />
+                        <Tooltip
+                            tooltip="Up to 100 teams may be added at a time"
+                            disabled={teams.length < 100}
+                        >
+                            <Button
+                                variant="secondary"
+                                onClick={generate}
+                                disabled={teams.length >= 100}
+                            >
+                                Generate
+                            </Button>
                         </Tooltip>
                     </div>
                 </div>
 
-                {teams.length !== 0 &&
-                    (
-                        <div className="w-5/6 mx-auto flex flex-col space-y-4">
-                            <Table>
-                                <TableCaption>
-                                    <div className="flex flex-row justify-between items-center">
-                                        Page {currentTeamPage + 1} of {totalPages}
-                                        <div className="flex space-x-2 px-2">
-                                            <Button
-                                                variant="secondary"
-                                                size="icon"
-                                                disabled={currentTeamPage === 0}
-                                                onClick={() => setCurrentTeamPage(c => c - 1)}
-                                            >
-                                                <ChevronLeft />
-                                            </Button>
-                                            <Button
-                                                variant="secondary"
-                                                size="icon"
-                                                disabled={currentTeamPage === totalPages - 1}
-                                                onClick={() => setCurrentTeamPage(c => c + 1)}
-                                            >
-                                                <ChevronRight />
-                                            </Button>
-                                        </div>
+                {teams.length !== 0 && (
+                    <div className="mx-auto flex w-5/6 flex-col space-y-4">
+                        <Table>
+                            <TableCaption>
+                                <div className="flex flex-row items-center justify-between">
+                                    Page {currentTeamPage + 1} of {totalPages}
+                                    <div className="flex space-x-2 px-2">
+                                        <Button
+                                            variant="secondary"
+                                            size="icon"
+                                            disabled={currentTeamPage === 0}
+                                            onClick={() => setCurrentTeamPage((c) => c - 1)}
+                                        >
+                                            <ChevronLeft />
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            size="icon"
+                                            disabled={currentTeamPage === totalPages - 1}
+                                            onClick={() => setCurrentTeamPage((c) => c + 1)}
+                                        >
+                                            <ChevronRight />
+                                        </Button>
                                     </div>
-                                </TableCaption>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-1/4">Username</TableHead>
-                                        <TableHead className="w-1/4">Display Name</TableHead>
-                                        <TableHead className="w-1/4">Password</TableHead>
-                                        <TableHead className="w-1/6" />
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {teams.slice(currentTeamPage * 10, (currentTeamPage + 1) * 10).map((team, i) => (
-                                        <TableRow key={team.username} className={team.conflict ? 'text-fail' : ''}>
+                                </div>
+                            </TableCaption>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-1/4">Username</TableHead>
+                                    <TableHead className="w-1/4">Display Name</TableHead>
+                                    <TableHead className="w-1/4">Password</TableHead>
+                                    <TableHead className="w-1/6" />
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {teams
+                                    .slice(currentTeamPage * 10, (currentTeamPage + 1) * 10)
+                                    .map((team, i) => (
+                                        <TableRow
+                                            key={team.username}
+                                            className={team.conflict ? 'text-fail' : ''}
+                                        >
                                             <TableCell>{team.username}</TableCell>
                                             <TableCell>{team.displayName}</TableCell>
                                             <TableCell>{team.password}</TableCell>
-                                            <TableCell className="text-right space-x-2">
+                                            <TableCell className="space-x-2 text-right">
                                                 <Tooltip tooltip="Regenerate User">
-                                                    <Button type="button" variant="secondary" size="icon" onClick={() => regenTeam(i + currentTeamPage * 10)}>
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            regenTeam(i + currentTeamPage * 10)
+                                                        }
+                                                    >
                                                         <RefreshCw />
                                                     </Button>
                                                 </Tooltip>
                                                 <Tooltip tooltip="Remove User">
-                                                    <Button type="button" variant="secondary" size="icon" onClick={() => removeTeam(i + currentTeamPage * 10)}>
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            removeTeam(i + currentTeamPage * 10)
+                                                        }
+                                                    >
                                                         <Trash2 />
                                                     </Button>
                                                 </Tooltip>
                                             </TableCell>
                                         </TableRow>
                                     ))}
-                                </TableBody>
-                            </Table>
-                            <Button onClick={add} disabled={loadingCreate}>
-                                <span className="flex gap-2">
-                                    {loadingCreate ? <Loader2 className="animate-spin" /> : <Plus />} Add Teams
-                                </span>
-                            </Button>
-                        </div>
-                    )
-                }
+                            </TableBody>
+                        </Table>
+                        <Button onClick={add} disabled={loadingCreate}>
+                            <span className="flex gap-2">
+                                {loadingCreate ? <Loader2 className="animate-spin" /> : <Plus />}{' '}
+                                Add Teams
+                            </span>
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );

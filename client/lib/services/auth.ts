@@ -92,14 +92,13 @@ export const useLogin = () => {
     return { login, logout };
 };
 
-
 // if expectedErrors is provided, an error will be thrown with the status if it arrives
 export const tryFetch = async <T>(
     url: string | URL,
     token: string,
     ip?: string,
     init?: Partial<RequestInit> & { item?: string },
-    expectedErrors?: number[],
+    expectedErrors?: number[]
 ): Promise<T | null> => {
     const innitBruv = { ...init };
     if (token) {

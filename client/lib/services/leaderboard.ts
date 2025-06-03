@@ -42,7 +42,7 @@ export const useLeaderboard = () => {
         (users) => {
             setLeaderboard((leaderboard) => {
                 const temp = leaderboard.map((item) => {
-                    const user = users.find(x => x.id === item.user.id);
+                    const user = users.find((x) => x.id === item.user.id);
                     if (user) {
                         return {
                             user: {
@@ -70,13 +70,13 @@ export const useLeaderboard = () => {
                 const temp = leaderboard.map((item) =>
                     item.user.id === rename.id
                         ? {
-                            ...item,
-                            user: {
-                                ...item.user,
-                                username: rename.name,
-                                displayName: rename.display_name,
-                            },
-                        }
+                              ...item,
+                              user: {
+                                  ...item.user,
+                                  username: rename.name,
+                                  displayName: rename.display_name,
+                              },
+                          }
                         : item
                 );
                 sortLeaderboard(temp);

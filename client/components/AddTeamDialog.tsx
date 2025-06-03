@@ -1,9 +1,17 @@
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { z } from 'zod'
+import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from './ui/form';
 import { Loader2, Plus, RefreshCw, Users } from 'lucide-react';
 import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
@@ -18,9 +26,15 @@ const formSchema = z.object({
     username: z.string().min(4).max(50),
     displayName: z.string().min(4).max(50),
     password: z.string().min(4).max(50),
-})
+});
 
-export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: () => void; onBulkGenChange: (bulkGen: boolean) => void }) => {
+export const AddTeamDialog = ({
+    afterSubmit,
+    onBulkGenChange,
+}: {
+    afterSubmit: () => void;
+    onBulkGenChange: (bulkGen: boolean) => void;
+}) => {
     const { createTeam } = useTeams();
     const [addMore, setAddMore] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -48,7 +62,7 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
                 });
             }
         } catch (ex) {
-            const x = ex as { status: number; body: string[]; };
+            const x = ex as { status: number; body: string[] };
             if (x.status === 409) {
                 form.setError('username', { message: 'A user with this name already exists' });
             }
@@ -64,10 +78,11 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
 
     const randomisePassword = () => form.setValue('password', randomPassword());
 
-    const filterUsername = (og: string): string => og
-        .toLowerCase()
-        .replace(/_? +$/, '_')
-        .replace(/[^a-z0-9_-]/g, '');
+    const filterUsername = (og: string): string =>
+        og
+            .toLowerCase()
+            .replace(/_? +$/, '_')
+            .replace(/[^a-z0-9_-]/g, '');
 
     return (
         <div>
@@ -76,7 +91,11 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
                     <FormField
                         control={form.control}
                         name="username"
-                        rules={{ onChange: (e) => { form.setValue('username', filterUsername(e.target.value)) } }}
+                        rules={{
+                            onChange: (e) => {
+                                form.setValue('username', filterUsername(e.target.value));
+                            },
+                        }}
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Username</FormLabel>
@@ -84,7 +103,11 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
                                     <div className="flex w-full items-center space-x-2">
                                         <Input placeholder="Username" {...field} />
                                         <Tooltip tooltip="Randomise Username and Display Name">
-                                            <Button type="button" variant="secondary" onClick={randomiseUsername}>
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                onClick={randomiseUsername}
+                                            >
                                                 <RefreshCw />
                                             </Button>
                                         </Tooltip>
@@ -123,7 +146,11 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
                                     <div className="flex w-full items-center space-x-2">
                                         <Input placeholder="Password" {...field} />
                                         <Tooltip tooltip="Randomise Password">
-                                            <Button type="button" variant="secondary" onClick={randomisePassword}>
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                onClick={randomisePassword}
+                                            >
                                                 <RefreshCw />
                                             </Button>
                                         </Tooltip>
@@ -134,23 +161,32 @@ export const AddTeamDialog = ({ afterSubmit, onBulkGenChange }: { afterSubmit: (
                         )}
                     />
                     <DialogFooter className="pt-4">
-                        <div className="w-full flex justify-between">
-                            <Button variant="outline" type="button" onClick={() => onBulkGenChange(true)}>
+                        <div className="flex w-full justify-between">
+                            <Button
+                                variant="outline"
+                                type="button"
+                                onClick={() => onBulkGenChange(true)}
+                            >
                                 <Users /> Bulk Generate
                             </Button>
                             <div className="flex space-x-4">
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox id="more" checked={addMore} onCheckedChange={(v) => setAddMore(!!v)} />
+                                    <Checkbox
+                                        id="more"
+                                        checked={addMore}
+                                        onCheckedChange={(v) => setAddMore(!!v)}
+                                    />
                                     <Label htmlFor="more">Add More</Label>
                                 </div>
                                 <Button type="submit" disabled={loading}>
-                                    {loading ? <Loader2 className="animate-spin" /> : <Plus />} Add Team
+                                    {loading ? <Loader2 className="animate-spin" /> : <Plus />} Add
+                                    Team
                                 </Button>
                             </div>
                         </div>
                     </DialogFooter>
                 </form>
             </Form>
-        </div >
+        </div>
     );
 };

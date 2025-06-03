@@ -1,4 +1,4 @@
-import { User } from "./services/auth";
+import { User } from './services/auth';
 
 export type TestState = 'pass' | 'fail' | 'in-progress' | 'not-attempted';
 

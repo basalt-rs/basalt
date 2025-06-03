@@ -28,9 +28,7 @@ export const useTeams = () => {
     };
     const updateTeam = (rawTeam: RawTeamInfo) => {
         const parsedTeam = convertTeam(rawTeam);
-        setSelectedTeam((prev) =>
-            prev ? (prev.id === parsedTeam.id ? parsedTeam : prev) : prev
-        );
+        setSelectedTeam((prev) => (prev ? (prev.id === parsedTeam.id ? parsedTeam : prev) : prev));
         console.log('updateTeam', parsedTeam);
 
         setTeams((prev) => ({
@@ -67,63 +65,86 @@ export const useTeams = () => {
             throw new Error('No IP Set');
         }
 
-        const team = await tryFetch<User>(`/teams`, token, ip, {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json'
+        const team = await tryFetch<User>(
+            `/teams`,
+            token,
+            ip,
+            {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                },
+                body: JSON.stringify(newTeam),
             },
-            body: JSON.stringify(newTeam),
-        }, [409]);
+            [409]
+        );
         return team;
     };
 
-    const renameTeam = async (id: string, patch: { username: string | null; displayName: null | 'reset' | { set: string }}) => {
+    const renameTeam = async (
+        id: string,
+        patch: { username: string | null; displayName: null | 'reset' | { set: string } }
+    ) => {
         if (ip === null || token === null) {
             throw new Error('No IP Set');
         }
 
-        const team = await tryFetch<User>(`/teams/${id}`, token, ip, {
-            method: 'PATCH',
-            headers: {
-                'content-type': 'application/json'
+        const team = await tryFetch<User>(
+            `/teams/${id}`,
+            token,
+            ip,
+            {
+                method: 'PATCH',
+                headers: {
+                    'content-type': 'application/json',
+                },
+                body: JSON.stringify(patch),
             },
-            body: JSON.stringify(patch),
-        }, [409]);
+            [409]
+        );
         return team;
     };
 
     basaltWs.registerEvent('team-connected', updateTeam, 'use-team-connection-handler');
     basaltWs.registerEvent('team-disconnected', updateTeam, 'use-team-disconnection-handler');
-    basaltWs.registerEvent('team-update', (users) => {
-        setTeams(({ ...next }) => {
-            for (const user of users) {
-                if (!next[user.id]) {
-                    next[user.id] = {
-                        id: user.id,
-                        name: user.name,
-                        displayName: user.displayName,
-                        score: user.newScore,
-                        checkedIn: false,
-                        lastSeenMs: null,
-                        disconnected: true,
+    basaltWs.registerEvent(
+        'team-update',
+        (users) => {
+            setTeams(({ ...next }) => {
+                for (const user of users) {
+                    if (!next[user.id]) {
+                        next[user.id] = {
+                            id: user.id,
+                            name: user.name,
+                            displayName: user.displayName,
+                            score: user.newScore,
+                            checkedIn: false,
+                            lastSeenMs: null,
+                            disconnected: true,
+                        };
                     }
                 }
-            }
-            return next;
-        });
-    }, 'use-team-update-handler');
-    basaltWs.registerEvent('team-rename', (rename) => {
-        setTeams(({ ...next }) => {
-            if (next[rename.id]) {
-                next[rename.id] = {
-                    ...next[rename.id],
-                    name: rename.name,
-                    displayName: rename.display_name,
+                return next;
+            });
+        },
+        'use-team-update-handler'
+    );
+    basaltWs.registerEvent(
+        'team-rename',
+        (rename) => {
+            setTeams(({ ...next }) => {
+                if (next[rename.id]) {
+                    next[rename.id] = {
+                        ...next[rename.id],
+                        name: rename.name,
+                        displayName: rename.display_name,
+                    };
                 }
-            }
-            return next;
-        });
-    }, 'use-team-rename-handler');
+                return next;
+            });
+        },
+        'use-team-rename-handler'
+    );
 
     return {
         teams,

@@ -38,12 +38,12 @@ export const randomName = () => {
     const noun = faker.word.noun();
     return {
         username: `${adj}-${noun}`,
-        displayName: `${titleCase(adj)} ${titleCase(noun)}`
+        displayName: `${titleCase(adj)} ${titleCase(noun)}`,
     };
-}
+};
 
 export const randomPassword = () => {
     const adj = faker.word.adjective({ length: { min: 1, max: 5 } });
     const noun = faker.word.noun({ length: { min: 1, max: 5 } });
     return `${adj}-${noun}`;
-}
+};

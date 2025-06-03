@@ -9,7 +9,10 @@ import { TeamInfo } from './services/teams';
 import { atomWithStorage } from 'jotai/utils';
 
 // TODO: this should not be in storage
-export const currentHostTabAtom = atomWithStorage<'questions' | 'teams' | 'gen'>('host-tab', 'questions');
+export const currentHostTabAtom = atomWithStorage<'questions' | 'teams' | 'gen'>(
+    'host-tab',
+    'questions'
+);
 
 export const clockAtom = atom<CurrentTime | undefined>();
 export const selectedQuestionAtom = atom<number | null>(null);

@@ -74,12 +74,15 @@ export default function Host() {
                         <Dialog.DialogHeader>
                             <Dialog.DialogTitle>Edit Team</Dialog.DialogTitle>
                         </Dialog.DialogHeader>
-                        <EditTeamDialog afterSubmit={() => setEditingTeam(null)} team={editingTeam} />
+                        <EditTeamDialog
+                            afterSubmit={() => setEditingTeam(null)}
+                            team={editingTeam}
+                        />
                     </Dialog.DialogContent>
                 </Dialog.Dialog>
 
                 <div>
-                    <div className="flex h-fit items-center justify-between py-2 px-5">
+                    <div className="flex h-fit items-center justify-between px-5 py-2">
                         <Dialog.Dialog open={showAddTeam} onOpenChange={setShowAddTeam}>
                             <Dialog.DialogTrigger>
                                 <Plus />
@@ -88,7 +91,13 @@ export default function Host() {
                                 <Dialog.DialogHeader>
                                     <Dialog.DialogTitle>Add Team</Dialog.DialogTitle>
                                 </Dialog.DialogHeader>
-                                <AddTeamDialog afterSubmit={() => setShowAddTeam(false)} onBulkGenChange={() => { setCurrentTab('gen'); setShowAddTeam(false); }} />
+                                <AddTeamDialog
+                                    afterSubmit={() => setShowAddTeam(false)}
+                                    onBulkGenChange={() => {
+                                        setCurrentTab('gen');
+                                        setShowAddTeam(false);
+                                    }}
+                                />
                             </Dialog.DialogContent>
                         </Dialog.Dialog>
                         <p className="text-2xl uppercase">Teams</p>
@@ -120,9 +129,9 @@ export default function Host() {
                                     <p className="w-1/2 truncate">
                                         <span className="flex gap-1">
                                             {!team.disconnected &&
-                                                (team.lastSeenMs
-                                                    ? Math.abs(Date.now() - team.lastSeenMs) < 45 * 1000
-                                                    : false) ? (
+                                            (team.lastSeenMs
+                                                ? Math.abs(Date.now() - team.lastSeenMs) < 45 * 1000
+                                                : false) ? (
                                                 <Wifi className="text-green-500" />
                                             ) : (
                                                 <WifiOff className="text-gray-300 dark:text-gray-500" />
@@ -131,44 +140,43 @@ export default function Host() {
                                         </span>
                                     </p>
                                     <p>{team.score} pts</p>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger className="pr-0.5">
-                                                <Ellipsis />
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                                {!team.disconnected &&
-                                                    (team.lastSeenMs
-                                                        ? Math.abs(Date.now() - team.lastSeenMs) < 45 * 1000
-                                                        : false) ? (
-                                                    <>
-                                                        <DropdownMenuItem
-                                                            onClick={() => {
-                                                                setSelectedTeam(team);
-                                                                setCurrentTab('teams');
-                                                            }}
-                                                        >
-                                                            <User /> View
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem
-                                                            onClick={() => handleDisconnectTeam(team)}
-                                                        >
-                                                            <UserX /> Kick
-                                                        </DropdownMenuItem>
-                                                    </>
-                                                ) : (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger className="pr-0.5">
+                                            <Ellipsis />
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            {!team.disconnected &&
+                                            (team.lastSeenMs
+                                                ? Math.abs(Date.now() - team.lastSeenMs) < 45 * 1000
+                                                : false) ? (
+                                                <>
                                                     <DropdownMenuItem
-                                                        onClick={() => handleRemoveTeam(team)}
+                                                        onClick={() => {
+                                                            setSelectedTeam(team);
+                                                            setCurrentTab('teams');
+                                                        }}
                                                     >
-                                                        <Trash2 /> Delete
+                                                        <User /> View
                                                     </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem onClick={() => setEditingTeam(team)}>
-                                                    <Pencil /> Edit
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleDisconnectTeam(team)}
+                                                    >
+                                                        <UserX /> Kick
+                                                    </DropdownMenuItem>
+                                                </>
+                                            ) : (
+                                                <DropdownMenuItem
+                                                    onClick={() => handleRemoveTeam(team)}
+                                                >
+                                                    <Trash2 /> Delete
                                                 </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-
+                                            )}
+                                            <DropdownMenuItem onClick={() => setEditingTeam(team)}>
+                                                <Pencil /> Edit
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </span>
                             ))}
                     </div>
@@ -201,8 +209,10 @@ export default function Host() {
                     <TeamInspector />
                 ) : currentTab === 'gen' ? (
                     <BulkTeamGen />
-                ) : 'Not Found'}
+                ) : (
+                    'Not Found'
+                )}
             </ResizablePanel>
-        </ResizablePanelGroup >
+        </ResizablePanelGroup>
     );
 }

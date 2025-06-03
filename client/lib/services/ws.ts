@@ -19,8 +19,8 @@ type EVENT_MAPPING = {
     }[];
     'team-rename': {
         id: string;
-        name: string,
-        display_name: string | null,
+        name: string;
+        display_name: string | null;
     };
     'new-announcement': Announcement;
     'team-connected': TeamInfo;
