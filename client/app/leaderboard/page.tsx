@@ -38,15 +38,13 @@ export default function Page() {
     return (
         <div className="flex h-screen flex-col">
             <div className="m-2 flex justify-between">
-                <Button
-                    variant="ghost"
-                    asChild
-                    className="opacity-0 transition-opacity duration-100 hover:opacity-100"
-                >
-                    <Link href="/">
-                        <ArrowLeft /> Back
-                    </Link>
-                </Button>
+                <div className="duration-250 relative -m-16 p-16 opacity-0 transition-opacity hover:opacity-100">
+                    <Button variant="ghost" asChild className="font-bold">
+                        <Link href="/">
+                            <ArrowLeft /> Back
+                        </Link>
+                    </Button>
+                </div>
                 <LeaderboardMenu />
             </div>
             <Leaderboard />

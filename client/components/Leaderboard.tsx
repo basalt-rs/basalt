@@ -17,7 +17,7 @@ const TeamRank = () => {
     const leaderboard = useLeaderboard();
 
     return (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 pb-4">
             {leaderboard.map((player, index) => (
                 <Card
                     key={player.username}
@@ -45,10 +45,10 @@ const TeamRank = () => {
     );
 };
 
-type LeaderboardProps = {
+interface LeaderboardProps {
     showTimer?: boolean;
     className?: string;
-};
+}
 
 export default function Leaderboard({ showTimer = true, className = '' }: LeaderboardProps) {
     const { clock, isPaused } = useClock();
