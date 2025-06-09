@@ -12,7 +12,7 @@ export const teamsAtom = atom<Team[]>([
     { name: 'team2', password: 'password2', points: 126, status: true },
 ]);
 
-export const currentHostTabAtom = atom<'questions' | 'teams'>('questions');
+export const currentHostTabAtom = atom<'questions' | 'teams' | 'leaderboard'>('questions');
 
 export const clockAtom = atom<CurrentTime | undefined>();
 export const selectedQuestionAtom = atom<number | null>(null);

@@ -1,8 +1,7 @@
 'use client';
-import QuestionAccordion from './QuestionAccordion';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import {
     DropdownMenu,
@@ -14,9 +13,7 @@ import {
 import { Ellipsis, Loader2, Wifi, WifiOff } from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { currentHostTabAtom } from '@/lib/host-state';
-import TeamInspector from './TeamInspector';
 import { useClock } from '@/hooks/use-clock';
 import { useWebSocket } from '@/lib/services/ws';
 import { useEffect } from 'react';
@@ -26,10 +23,11 @@ import AnnouncementForm from './AnnoucementForm';
 import { useAnnouncements } from '@/lib/services/announcement';
 import { useTeams } from '@/hooks/use-teams';
 import { TeamInfo } from '@/lib/services/teams';
+import HostPanel from './HostPanel';
 
 export default function Host() {
     const { teamsList, setSelectedTeam, isLoading } = useTeams();
-    const [currentTab, setCurrentTab] = useAtom(currentHostTabAtom);
+    const setCurrentTab = useSetAtom(currentHostTabAtom);
     const { isPaused, pause, unPause } = useClock();
     const { establishWs } = useWebSocket();
     const [ip] = useAtom(ipAtom);
@@ -167,13 +165,7 @@ export default function Host() {
 
                 <Separator />
 
-                {currentTab === 'questions' ? (
-                    <ScrollArea className="w-full flex-grow pt-2">
-                        <QuestionAccordion />
-                    </ScrollArea>
-                ) : (
-                    <TeamInspector />
-                )}
+                <HostPanel />
             </ResizablePanel>
         </ResizablePanelGroup>
     );
