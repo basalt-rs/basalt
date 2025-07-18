@@ -76,7 +76,7 @@ export const useSubmissionStates = () => {
     }, [ip, token, setStates]);
 
     ws.registerEvent('team-update', (users) => {
-        for (const user of users) {
+        for (const user of users.teams) {
             if (currentUser?.username === user.id) {
                 setStates((states) => {
                     if (!states) return states;

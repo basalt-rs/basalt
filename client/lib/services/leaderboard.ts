@@ -14,7 +14,7 @@ export const useLeaderboard = () => {
     const [leaderboard, setLeaderboard] = useAtom(leaderboardAtom);
 
     const sortLeaderboard = (data: LeaderboardEntry[]) => {
-        data.sort((a, b) => b.score - a.score);
+        data.sort((a, b) => b.score - a.score || a.user.username.localeCompare(b.user.username));
     };
 
     useEffect(() => {
@@ -40,25 +40,34 @@ export const useLeaderboard = () => {
     ws.registerEvent(
         'team-update',
         (users) => {
-            setLeaderboard((leaderboard) => {
-                const temp = leaderboard.map((item) => {
-                    const user = users.find((x) => x.id === item.user.id);
-                    if (user) {
-                        return {
+            setLeaderboard(([...leaderboard]) => {
+                for (const user of users.teams) {
+                    const existingIdx = leaderboard.findIndex(l => l.user.id === user.id);
+                    if (existingIdx === -1) {
+                        leaderboard.push({
                             user: {
-                                ...item.user,
+                                id: user.id,
+                                displayName: user.displayName,
+                                username: user.name,
+                                role: 'competitor',
+                            },
+                            score: user.newScore,
+                            submissionStates: user.newStates,
+                        });
+                    } else {
+                        leaderboard[existingIdx] = {
+                            user: {
+                                ...leaderboard[existingIdx].user,
                                 displayName: user.displayName,
                                 username: user.name,
                             },
                             score: user.newScore,
                             submissionStates: user.newStates,
                         };
-                    } else {
-                        return item;
                     }
-                });
-                sortLeaderboard(temp);
-                return temp;
+                }
+                sortLeaderboard(leaderboard);
+                return leaderboard;
             });
         },
         'team updates'

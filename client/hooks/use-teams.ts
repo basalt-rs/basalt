@@ -29,7 +29,6 @@ export const useTeams = () => {
     const updateTeam = (rawTeam: RawTeamInfo) => {
         const parsedTeam = convertTeam(rawTeam);
         setSelectedTeam((prev) => (prev ? (prev.id === parsedTeam.id ? parsedTeam : prev) : prev));
-        console.log('updateTeam', parsedTeam);
 
         setTeams((prev) => ({
             ...prev,
@@ -111,13 +110,13 @@ export const useTeams = () => {
         'team-update',
         (users) => {
             setTeams(({ ...next }) => {
-                for (const user of users) {
-                    if (!next[user.id]) {
-                        next[user.id] = {
-                            id: user.id,
-                            name: user.name,
-                            displayName: user.displayName,
-                            score: user.newScore,
+                for (const team of users.teams) {
+                    if (!next[team.id]) {
+                        next[team.id] = {
+                            id: team.id,
+                            name: team.name,
+                            displayName: team.displayName,
+                            score: team.newScore,
                             checkedIn: false,
                             lastSeenMs: null,
                             disconnected: true,
