@@ -42,7 +42,7 @@ export const useLeaderboard = () => {
         (users) => {
             setLeaderboard(([...leaderboard]) => {
                 for (const user of users.teams) {
-                    const existingIdx = leaderboard.findIndex(l => l.user.id === user.id);
+                    const existingIdx = leaderboard.findIndex((l) => l.user.id === user.id);
                     if (existingIdx === -1) {
                         leaderboard.push({
                             user: {

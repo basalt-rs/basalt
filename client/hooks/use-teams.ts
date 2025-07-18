@@ -104,6 +104,27 @@ export const useTeams = () => {
         return team;
     };
 
+    const changeTeamPassword = async (id: string, password: string) => {
+        if (ip === null || token === null) {
+            throw new Error('No IP Set');
+        }
+
+        const team = await tryFetch<User>(
+            `/teams/${id}`,
+            token,
+            ip,
+            {
+                method: 'PATCH',
+                headers: {
+                    'content-type': 'application/json',
+                },
+                body: JSON.stringify({ password }),
+            },
+            [409]
+        );
+        return team;
+    };
+
     basaltWs.registerEvent('team-connected', updateTeam, 'use-team-connection-handler');
     basaltWs.registerEvent('team-disconnected', updateTeam, 'use-team-disconnection-handler');
     basaltWs.registerEvent(
@@ -154,6 +175,7 @@ export const useTeams = () => {
         selectedTeam,
         setSelectedTeamById,
         renameTeam,
+        changeTeamPassword,
         createTeam,
     };
 };

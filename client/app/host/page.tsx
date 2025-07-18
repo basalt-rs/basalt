@@ -12,7 +12,18 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import * as Dialog from '@/components/ui/dialog';
-import { Ellipsis, Loader2, Pencil, Plus, Trash2, User, UserX, Wifi, WifiOff } from 'lucide-react';
+import {
+    Ellipsis,
+    Loader2,
+    Pencil,
+    Plus,
+    SquareAsterisk,
+    Trash2,
+    User,
+    UserX,
+    Wifi,
+    WifiOff,
+} from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -30,6 +41,7 @@ import { TeamInfo } from '@/lib/services/teams';
 import { AddTeamDialog } from '@/components/AddTeamDialog';
 import { BulkTeamGen } from './bulk-team-gen';
 import { EditTeamDialog } from '@/components/EditTeamDialog';
+import { ChangeTeamPasswordDialog } from '@/components/ChangeTeamPasswordDialog';
 
 export default function Host() {
     const { teamsList, setSelectedTeam, isLoading } = useTeams();
@@ -40,6 +52,7 @@ export default function Host() {
     const [token] = useAtom(tokenAtom);
     const [showAddTeam, setShowAddTeam] = useState(false);
     const [editingTeam, setEditingTeam] = useState<TeamInfo | null>(null);
+    const [changingTeamPassword, setChangingTeamPassword] = useState<TeamInfo | null>(null);
 
     useEffect(() => {
         if (ip && token) establishWs(ip, token);
@@ -77,6 +90,21 @@ export default function Host() {
                         <EditTeamDialog
                             afterSubmit={() => setEditingTeam(null)}
                             team={editingTeam}
+                        />
+                    </Dialog.DialogContent>
+                </Dialog.Dialog>
+
+                <Dialog.Dialog
+                    open={!!changingTeamPassword}
+                    onOpenChange={() => setChangingTeamPassword(null)}
+                >
+                    <Dialog.DialogContent>
+                        <Dialog.DialogHeader>
+                            <Dialog.DialogTitle>Change Team Password</Dialog.DialogTitle>
+                        </Dialog.DialogHeader>
+                        <ChangeTeamPasswordDialog
+                            afterSubmit={() => setChangingTeamPassword(null)}
+                            team={changingTeamPassword}
                         />
                     </Dialog.DialogContent>
                 </Dialog.Dialog>
@@ -174,6 +202,11 @@ export default function Host() {
                                             )}
                                             <DropdownMenuItem onClick={() => setEditingTeam(team)}>
                                                 <Pencil /> Edit
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                onClick={() => setChangingTeamPassword(team)}
+                                            >
+                                                <SquareAsterisk /> Change Password
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
