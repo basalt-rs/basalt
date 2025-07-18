@@ -75,17 +75,19 @@ export const useSubmissionStates = () => {
         })();
     }, [ip, token, setStates]);
 
-    ws.registerEvent('team-update', (x) => {
-        if (currentUser?.username === x.team) {
-            setStates((states) => {
-                if (!states) return states;
+    ws.registerEvent('team-update', (users) => {
+        for (const user of users.teams) {
+            if (currentUser?.username === user.id) {
+                setStates((states) => {
+                    if (!states) return states;
 
-                const newStates: typeof states = [];
-                x.new_states.forEach((state, i) => {
-                    newStates[i] = { ...states[i], state };
+                    const newStates: typeof states = [];
+                    user.newStates.forEach((state, i) => {
+                        newStates[i] = { ...states[i], state };
+                    });
+                    return newStates;
                 });
-                return newStates;
-            });
+            }
         }
     });
 

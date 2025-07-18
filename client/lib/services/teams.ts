@@ -1,5 +1,7 @@
 export type RawTeamInfo = {
-    team: string;
+    id: string;
+    name: string;
+    displayName: string | null;
     score: number;
     checkedIn: boolean;
     lastSeen?: string | null;
@@ -7,7 +9,9 @@ export type RawTeamInfo = {
 };
 
 export type TeamInfo = {
-    team: string;
+    id: string;
+    name: string;
+    displayName: string | null;
     score: number;
     checkedIn: boolean;
     lastSeenMs?: number | null;

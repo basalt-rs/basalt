@@ -6,7 +6,9 @@ import { basaltWSClientAtom, useWebSocket } from './ws';
 
 export type Role = 'competitor' | 'admin';
 export interface User {
+    id: string;
     username: string;
+    displayName: string | null;
     role: Role;
 }
 
@@ -90,27 +92,32 @@ export const useLogin = () => {
     return { login, logout };
 };
 
+// if expectedErrors is provided, an error will be thrown with the status if it arrives
 export const tryFetch = async <T>(
     url: string | URL,
     token: string,
-    init?: Partial<RequestInit>
+    ip?: string,
+    init?: Partial<RequestInit> & { item?: string },
+    expectedErrors?: number[]
 ): Promise<T | null> => {
-    const innitBruv: RequestInit = {
-        headers: {
+    const innitBruv = { ...init };
+    if (token) {
+        innitBruv.headers = {
+            ...innitBruv.headers,
             Authorization: `Bearer ${token}`,
-            ...(init?.headers ?? {}),
-        },
-        ...(init ?? {}),
-    };
+        };
+    }
 
-    const res = await fetch(url, innitBruv);
-
+    const urlStr = url.toString();
+    const res = await fetch(urlStr.startsWith('http') ? url : `${ip}${url}`, innitBruv);
     if (res.ok) {
         return await res.json();
+    } else if (expectedErrors?.includes(res.status)) {
+        throw { status: res.status, body: await res.json() };
     } else {
         toast({
             title: 'Error Loading',
-            description: 'There was an error while attempting to fetch a resource.',
+            description: `There was an error while attempting to fetch ${innitBruv.item || 'a resource'}.`,
             variant: 'destructive',
         });
         console.error(await res.text());

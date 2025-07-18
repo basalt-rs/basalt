@@ -14,7 +14,7 @@ export const useLeaderboard = () => {
     const [leaderboard, setLeaderboard] = useAtom(leaderboardAtom);
 
     const sortLeaderboard = (data: LeaderboardEntry[]) => {
-        data.sort((a, b) => b.score - a.score);
+        data.sort((a, b) => b.score - a.score || a.user.username.localeCompare(b.user.username));
     };
 
     useEffect(() => {
@@ -39,14 +39,52 @@ export const useLeaderboard = () => {
     }, [ip, setLeaderboard]);
     ws.registerEvent(
         'team-update',
-        (update) => {
+        (users) => {
+            setLeaderboard(([...leaderboard]) => {
+                for (const user of users.teams) {
+                    const existingIdx = leaderboard.findIndex((l) => l.user.id === user.id);
+                    if (existingIdx === -1) {
+                        leaderboard.push({
+                            user: {
+                                id: user.id,
+                                displayName: user.displayName,
+                                username: user.name,
+                                role: 'competitor',
+                            },
+                            score: user.newScore,
+                            submissionStates: user.newStates,
+                        });
+                    } else {
+                        leaderboard[existingIdx] = {
+                            user: {
+                                ...leaderboard[existingIdx].user,
+                                displayName: user.displayName,
+                                username: user.name,
+                            },
+                            score: user.newScore,
+                            submissionStates: user.newStates,
+                        };
+                    }
+                }
+                sortLeaderboard(leaderboard);
+                return leaderboard;
+            });
+        },
+        'team updates'
+    );
+    ws.registerEvent(
+        'team-rename',
+        (rename) => {
             setLeaderboard((leaderboard) => {
                 const temp = leaderboard.map((item) =>
-                    item.username === update.team
+                    item.user.id === rename.id
                         ? {
-                              username: update.team,
-                              score: update.new_score,
-                              submissionStates: update.new_states,
+                              ...item,
+                              user: {
+                                  ...item.user,
+                                  username: rename.name,
+                                  displayName: rename.display_name,
+                              },
                           }
                         : item
                 );
@@ -54,7 +92,7 @@ export const useLeaderboard = () => {
                 return temp;
             });
         },
-        'team updates'
+        'use-leaderboard-team-rename'
     );
 
     return leaderboard;

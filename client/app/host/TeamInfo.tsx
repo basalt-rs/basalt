@@ -122,7 +122,7 @@ export default function TeamInfo() {
             <div className="flex h-full w-full flex-col gap-4 p-4">
                 <div className="flex items-center justify-between font-bold">
                     <div className="flex flex-col">
-                        <p className="text-2xl">{selectedTeam.team}</p>
+                        <p className="text-2xl">{selectedTeam.name}</p>
                         <p>
                             <strong>Points: </strong>
                             {selectedTeam.score}

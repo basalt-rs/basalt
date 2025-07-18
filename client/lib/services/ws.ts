@@ -11,9 +11,18 @@ type EVENT_MAPPING = {
         timeLeftInSeconds: number;
     };
     'team-update': {
-        team: string;
-        new_score: number;
-        new_states: TestState[];
+        teams: {
+            id: string;
+            name: string;
+            displayName: string;
+            newScore: number;
+            newStates: TestState[];
+        }[];
+    };
+    'team-rename': {
+        id: string;
+        name: string;
+        display_name: string | null;
     };
     'new-announcement': Announcement;
     'team-connected': TeamInfo;
@@ -71,6 +80,7 @@ class BasaltWSClient {
         'game-paused': [],
         'game-unpaused': [],
         'team-update': [],
+        'team-rename': [],
         'new-announcement': [],
         'team-connected': [],
         'team-disconnected': [],
