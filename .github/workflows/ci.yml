@@ -189,3 +189,29 @@ jobs:
 
             - name: ensure app builds
               run: cargo check --release
+    push-containers:
+        runs-on: blacksmith-4vcpu-ubuntu-2404
+        needs: [eslint]
+        permissions:
+            contents: read
+            packages: write
+        steps:
+            - uses: actions/checkout@v4
+            - name: Setup Docker Builder
+              uses: useblacksmith/setup-docker-builder@v1
+            - name: Log in to GHCR
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build and push Docker image
+              # uses: docker/build-push-action@v6
+              uses: useblacksmith/build-push-action@v2
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: true
+                  # tags: ${{ join(matrix.tags, ',') }}
+                  tags: ghcr.io/${{ github.repository_owner }}/basalt-web:dev-pr-${{ github.event.pull_request.number }}
