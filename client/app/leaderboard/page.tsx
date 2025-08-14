@@ -37,18 +37,20 @@ export default function Page() {
 
     return (
         <div className="flex h-screen flex-col">
-            <div className="m-2 flex justify-between">
-                <div className="duration-250 relative -m-16 p-16 opacity-0 transition-opacity hover:opacity-100">
+            <div className="relative m-2 flex">
+                <div className="duration-250 absolute left-0 top-0 opacity-0 transition-opacity hover:opacity-100">
                     <Button variant="ghost" asChild className="font-bold">
                         <Link href="/">
                             <ArrowLeft /> Back
                         </Link>
                     </Button>
                 </div>
-                <LeaderboardMenu />
+                <div className="pr-2 pt-2">
+                    <LeaderboardMenu />
+                </div>
             </div>
             <Leaderboard />
-            <div className="mx-2 mb-2 mt-auto flex justify-end">
+            <div className="absolute bottom-0 right-0 pb-2 pr-2">
                 <GameCodeModal />
             </div>
         </div>

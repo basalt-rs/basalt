@@ -18,7 +18,7 @@ export default function LeaderboardMenu() {
 
     return (
         <div
-            className={`duration-250 relative -m-16 p-16 transition-opacity ${
+            className={`duration-250 absolute right-0 top-0 pb-4 pl-4 pr-1 pt-1 transition-opacity ${
                 isMenuOpen ? 'opacity-100' : 'opacity-0 hover:opacity-100'
             }`}
         >
