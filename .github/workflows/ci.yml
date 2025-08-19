@@ -213,5 +213,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          # tags: ${{ join(matrix.tags, ',') }}
           tags: ghcr.io/${{ github.repository_owner }}/basalt-web:dev-pr-${{ github.event.pull_request.number }}
