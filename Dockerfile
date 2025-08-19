@@ -2,7 +2,7 @@ FROM node:22 AS web-compilation
 
 COPY . .
 
-WORKDIR /basalt/client
+WORKDIR /client
 RUN npm ci
 RUN npm run build
 
