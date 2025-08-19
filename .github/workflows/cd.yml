@@ -118,11 +118,18 @@ jobs:
         id: tags
         run: |
           VERSION="${{ needs.get-version.outputs.version }}"
-          # Extract tags from the matrix
+          # Normalize version (strip leading v)
+          CLEAN_VERSION="${VERSION#v}"
+
           TAGS_JSON=$(jq -nc --argjson tags "$(jq -c '.tags' <<< '${{ toJson(matrix) }}')" '$tags')
-          # Replace placeholder and join with commas
-          TAGS=$(echo "$TAGS_JSON" | jq -r '.[]' | sed "s/__VERSION__/$VERSION/g" | paste -sd "," -)
-          # Set output
+          TAGS=$(echo "$TAGS_JSON" | jq -r '.[]' | sed "s/__VERSION__/$CLEAN_VERSION/g")
+
+          # If version contains a prerelease identifier, drop :latest
+          if [[ "$CLEAN_VERSION" =~ -(rc|alpha|beta) ]]; then
+            TAGS=$(echo "$TAGS" | grep -v ':latest' || true)
+          fi
+
+          TAGS=$(echo "$TAGS" | paste -sd "," -)
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
       - name: Setup Docker Builder
         uses: useblacksmith/setup-docker-builder@v1
