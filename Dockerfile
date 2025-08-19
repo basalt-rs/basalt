@@ -8,4 +8,4 @@ RUN npm run build
 
 FROM scratch
 WORKDIR /web
-COPY --from=web-compilation /basalt/client/out .
+COPY --from=web-compilation /client/out .
