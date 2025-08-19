@@ -1,11 +1,11 @@
-FROM node:22 as web-compilation
+FROM node:22 AS web-compilation
 
-RUN git clone https://github.com/basalt-rs/basalt /basalt
+COPY . .
 
 WORKDIR /basalt/client
 RUN npm ci
 RUN npm run build
 
-FROM scratch as base-basalt-web
+FROM scratch
 WORKDIR /web
 COPY --from=web-compilation /basalt/client/out .
