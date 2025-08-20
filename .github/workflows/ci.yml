@@ -130,7 +130,7 @@ jobs:
         run: cargo check --release
   push-containers:
     runs-on: blacksmith-4vcpu-ubuntu-2404
-    needs: [eslint]
+    needs: [eslint, build]
     permissions:
       contents: read
       packages: write
