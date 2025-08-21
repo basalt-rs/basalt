@@ -17,7 +17,7 @@ const TeamRank = () => {
     const leaderboard = useLeaderboard();
 
     return (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 pb-4">
             {leaderboard.map((player, index) => (
                 <Card
                     key={player.user.id}
@@ -45,7 +45,12 @@ const TeamRank = () => {
     );
 };
 
-export default function Leaderboard({ showTimer = true }) {
+interface LeaderboardProps {
+    showTimer?: boolean;
+    className?: string;
+}
+
+export default function Leaderboard({ showTimer = true, className = '' }: LeaderboardProps) {
     const { clock, isPaused } = useClock();
     const [ip] = useAtom(ipAtom);
     const [token] = useAtom(tokenAtom);
@@ -54,7 +59,7 @@ export default function Leaderboard({ showTimer = true }) {
         if (ip) establishWs(ip, token);
     }, [establishWs, ip, token]);
     return (
-        <>
+        <div className={className}>
             {showTimer && clock && (
                 <div className="flex w-full justify-center pt-8">
                     <Timer isHost={false} isPaused={isPaused} />
@@ -63,6 +68,6 @@ export default function Leaderboard({ showTimer = true }) {
             <ScrollArea className="flex-grow overflow-y-auto pb-4">
                 <TeamRank />
             </ScrollArea>
-        </>
+        </div>
     );
 }
