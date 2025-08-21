@@ -59,6 +59,12 @@ export default function HostNavbar() {
                                     >
                                         Teams
                                     </TabsTrigger>
+                                    <TabsTrigger
+                                        value="leaderboard"
+                                        onClick={() => setCurrentTab('leaderboard')}
+                                    >
+                                        Leaderboard
+                                    </TabsTrigger>
                                 </TabsList>
                             </Tabs>
                         </NavigationMenuItem>
