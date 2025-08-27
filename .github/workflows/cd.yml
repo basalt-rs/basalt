@@ -9,7 +9,19 @@ on:
       - "v[0-9]+.[0-9]+.[0-9]+.?*"
 
 jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract.outputs.version }}
+    steps:
+      - name: Extract version from ref
+        id: extract
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
   publish-tauri:
+    needs: [get-version]
     permissions:
       contents: write
     strategy:
@@ -24,10 +36,28 @@ jobs:
             args: ""
           - platform: "windows-latest"
             args: ""
-
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Get release info for tag
+        id: release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const tag = context.ref.replace("refs/tags/", "");
+              const release = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag,
+              });
+              core.setOutput("draft", release.data.draft);
+              core.setOutput("prerelease", release.data.prerelease);
+            } catch (e) {
+              // No release exists for this tag
+              core.setOutput("draft", false);
+              core.setOutput("prerelease", false);
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
@@ -53,9 +83,6 @@ jobs:
         with:
           workspaces: "./src-tauri -> target"
 
-      - name: install tauri cli
-        run: cargo install tauri-cli --version "^2.0.0" --locked
-
       - name: install frontend dependencies
         # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
         run: npm install # change this to npm or pnpm depending on which one you use.
@@ -65,9 +92,60 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v1.0.0-rc.2
-          releaseName: "v1.0.0-rc.2"
-          releaseBody: "See the assets to download this version and install."
-          releaseDraft: false
-          prerelease: true
+          tagName: ${{ needs.get-version.outputs.version }}
+          releaseDraft: ${{ steps.release.outputs.draft }}
+          prerelease: ${{ steps.release.outputs.prerelease }}
           args: ${{ matrix.args }}
+
+  push-containers:
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    needs: [get-version]
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - dockerfile: Dockerfile
+            tags:
+              - ghcr.io/${{ github.repository_owner }}/basalt-web:latest
+              - ghcr.io/${{ github.repository_owner }}/basalt-web:__VERSION__
+    env:
+      VERSION: ${{ needs.get-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace version in tags
+        id: tags
+        run: |
+          VERSION="${{ needs.get-version.outputs.version }}"
+          # Normalize version (strip leading v)
+          CLEAN_VERSION="${VERSION#v}"
+
+          TAGS_JSON=$(jq -nc --argjson tags "$(jq -c '.tags' <<< '${{ toJson(matrix) }}')" '$tags')
+          TAGS=$(echo "$TAGS_JSON" | jq -r '.[]' | sed "s/__VERSION__/$CLEAN_VERSION/g")
+
+          # If version contains a prerelease identifier, drop :latest
+          if [[ "$CLEAN_VERSION" =~ -(rc|alpha|beta) ]]; then
+            TAGS=$(echo "$TAGS" | grep -v ':latest' || true)
+          fi
+
+          TAGS=$(echo "$TAGS" | paste -sd "," -)
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+      - name: Setup Docker Builder
+        uses: useblacksmith/setup-docker-builder@v1
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        # Using Blacksmith to take advantage of persistence of Docker caching
+        uses: useblacksmith/build-push-action@v2
+        with:
+          context: .
+          file: ./containers/${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}

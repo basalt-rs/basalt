@@ -2,6 +2,12 @@
 
 Application for managing and competing in programming competitions
 
+> [!NOTE]
+> ***MacOS Users***: If opening Basalt Desktop gives you "Basalt Desktop.app is damaged and cannot be opened", MacOS is lying to you and you may just need to run `sudo xattr -rd com.apple.quarantine /Applications/Basalt\ Desktop.app`. Alternatively, you can open the **Privacy & Security** settings pane and scroll down to the **Security** section to remove the quarantine.
+>
+> ***Windows Users***: Defender may think Basalt Desktop is a virus. This just happens sometimes, and if SmartScreen blocks it from running, click "More Info" and "Run Anyways". Feel free to scan Basalt Desktop with [Virustotal](https://www.virustotal.com/gui/home/upload)!
+
+
 ## Development
 
 - Node: 20.17.0
