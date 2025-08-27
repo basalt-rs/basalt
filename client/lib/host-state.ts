@@ -6,14 +6,8 @@ import { useEffect } from 'react';
 import { ipAtom } from './services/api';
 import { selectedTeamAtom } from '@/hooks/use-teams';
 import { TeamInfo } from './services/teams';
-import { atomWithStorage } from 'jotai/utils';
 
-// TODO: this should not be in storage
-export const currentHostTabAtom = atomWithStorage<'questions' | 'teams' | 'gen' | 'leaderboard'>(
-    'host-tab',
-    'questions'
-);
-
+export const currentHostTabAtom = atom<'questions' | 'teams' | 'gen' | 'leaderboard'>('questions');
 export const clockAtom = atom<CurrentTime | undefined>();
 export const selectedQuestionAtom = atom<number | null>(null);
 

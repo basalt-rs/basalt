@@ -28,13 +28,13 @@ const formSchema = z.object({
     password: z.string().min(4).max(50),
 });
 
-export const AddTeamDialog = ({
+export default function AddTeamDialog({
     afterSubmit,
     onBulkGenChange,
 }: {
     afterSubmit: () => void;
     onBulkGenChange: (bulkGen: boolean) => void;
-}) => {
+}) {
     const { createTeam } = useTeams();
     const [addMore, setAddMore] = useState(false);
     const [loading, setLoading] = useState(false);

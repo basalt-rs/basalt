@@ -4,7 +4,7 @@ import { useAtom } from 'jotai';
 import QuestionAccordion from './QuestionAccordion';
 import TeamInspector from './TeamInspector';
 import Leaderboard from '@/components/Leaderboard';
-import { BulkTeamGen } from './bulk-team-gen';
+import BulkTeamGen from './BulkTeamGen';
 
 export default function HostPanel() {
     const [currentTab] = useAtom(currentHostTabAtom);

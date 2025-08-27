@@ -17,7 +17,7 @@ import { Tooltip } from '@/components/util';
 import { CreateTeam, useTeams } from '@/hooks/use-teams';
 import { toast } from '@/hooks/use-toast';
 
-export const BulkTeamGen = () => {
+export default function BulkTeamGen() {
     const [toGenerate, setToGenerate] = useState(1);
     const [teams, setTeams] = useState<(CreateTeam & { conflict: boolean })[]>([]);
     const { createTeam } = useTeams();
@@ -195,4 +195,4 @@ export const BulkTeamGen = () => {
             </div>
         </div>
     );
-};
+}

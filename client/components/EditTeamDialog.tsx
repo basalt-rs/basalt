@@ -26,13 +26,13 @@ const formSchema = z.object({
     displayName: z.string().min(4).max(50).optional(),
 });
 
-export const EditTeamDialog = ({
+export default function EditTeamDialog({
     afterSubmit,
     team,
 }: {
     afterSubmit: () => void;
     team: TeamInfo | null;
-}) => {
+}) {
     const { renameTeam } = useTeams();
     const [loading, setLoading] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
@@ -176,4 +176,4 @@ export const EditTeamDialog = ({
             </Form>
         </div>
     );
-};
+}

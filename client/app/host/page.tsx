@@ -35,9 +35,9 @@ import AnnouncementForm from './AnnoucementForm';
 import { useAnnouncements } from '@/lib/services/announcement';
 import { useTeams } from '@/hooks/use-teams';
 import { TeamInfo } from '@/lib/services/teams';
-import { AddTeamDialog } from '@/components/AddTeamDialog';
-import { EditTeamDialog } from '@/components/EditTeamDialog';
-import { ChangeTeamPasswordDialog } from '@/components/ChangeTeamPasswordDialog';
+import AddTeamDialog from '@/components/AddTeamDialog';
+import EditTeamDialog from '@/components/EditTeamDialog';
+import ChangeTeamPasswordDialog from '@/components/ChangeTeamPasswordDialog';
 import HostPanel from './HostPanel';
 
 export default function Host() {

@@ -29,13 +29,13 @@ const formSchema = z
         path: ['passwordConfirm'],
     });
 
-export const ChangeTeamPasswordDialog = ({
+export default function ChangeTeamPasswordDialog({
     afterSubmit,
     team,
 }: {
     afterSubmit: () => void;
     team: TeamInfo | null;
-}) => {
+}) {
     const { changeTeamPassword } = useTeams();
     const [loading, setLoading] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
