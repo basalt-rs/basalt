@@ -115,4 +115,4 @@ export default function ChangeTeamPasswordDialog({
             </Form>
         </div>
     );
-};
+}
