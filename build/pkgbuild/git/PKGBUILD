@@ -1,0 +1,44 @@
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=basalt-desktop-git
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Basalt Desktop, git version"
+arch=('x86_64' 'aarch64')
+url="https://github.com/basalt-rs/basalt"
+license=('GPL3')
+groups=()                                                                                                                                 #Maybe a basalt package group int he future?
+depends=('cargo-tauri' 'cairo' 'desktop-file-utils' 'gdk-pixbuf2' 'glib2' 'gtk3' 'hicolor-icon-theme' 'libsoup' 'pango' 'webkit2gtk-4.1') #source https://v2.tauri.app/distribute/aur/
+makedepends=('git' 'openssl' 'appmenu-gtk-module' 'libappindicator-gtk3' 'librsvg' 'cargo' 'pnpm' 'nodejs')                               #source https://v2.tauri.app/distribute/aur/
+provides=("${pkgname%-git}")
+conflicts=("${pkgname%-git}" 'basalt-desktop')
+replaces=('basalt-desktop' 'basalt-desktop-bin')
+backup=() # used for any config file which this program does not have to my knowledge
+source=("basalt-desktop::git+${url}")
+sha256sums=('SKIP')
+
+#NOTE: Replace with your whatever versioning system you like
+
+#cd "$srcdir/basalt-desktop"
+#(
+# set -o pipefail
+# git describe --long --abbrev=7 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
+#   printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+#)
+pkgver() {
+  printf 1.0.0
+}
+
+prepare() {
+  cd "$srcdir/basalt-desktop/client"
+  pnpm install
+}
+
+build() {
+  cd "$srcdir/basalt-desktop/client"
+  cargo-tauri build -b deb
+
+}
+
+package() {
+  cp -a basalt-desktop/target/release/bundle/deb/Basalt\ Desktop_${pkgver}_*/data/* "${pkgdir}"
+}
