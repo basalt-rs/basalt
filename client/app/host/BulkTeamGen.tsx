@@ -81,7 +81,6 @@ export default function BulkTeamGen() {
 
     return (
         <div className="p-2">
-            <h1 className="text-2xl">Generate Teams</h1>
             <div className="flex w-full flex-col items-center space-y-4">
                 <div className="w-1/3">
                     <Label htmlFor="num-teams">Number of teams to generate</Label>
@@ -103,10 +102,13 @@ export default function BulkTeamGen() {
                                 onClick={generate}
                                 disabled={teams.length >= 100}
                             >
-                                Generate
+                                Generate {teams.length !== 0 && 'More'} Teams
                             </Button>
                         </Tooltip>
                     </div>
+                    <p className="w-full pl-1 pt-1 text-[0.8rem] text-muted-foreground">
+                        Teams will not be added to the competition until you press Submit
+                    </p>
                 </div>
 
                 {teams.length !== 0 && (
@@ -184,14 +186,26 @@ export default function BulkTeamGen() {
                                     ))}
                             </TableBody>
                         </Table>
-                        <Button onClick={add} disabled={loadingCreate}>
-                            <span className="flex gap-2">
-                                {loadingCreate ? <Loader2 className="animate-spin" /> : <Plus />}{' '}
-                                Add Teams
-                            </span>
-                        </Button>
                     </div>
                 )}
+
+                <div className="mx-auto flex w-1/3 flex-col space-y-4">
+                    <Tooltip
+                        tooltip="You must generate a team before submitting"
+                        disabled={teams.length !== 0}
+                    >
+                        <Button
+                            onClick={add}
+                            disabled={loadingCreate || teams.length === 0}
+                            className="w-full"
+                        >
+                            <span className="flex gap-2">
+                                {loadingCreate ? <Loader2 className="animate-spin" /> : <Plus />}{' '}
+                                Submit
+                            </span>
+                        </Button>
+                    </Tooltip>
+                </div>
             </div>
         </div>
     );

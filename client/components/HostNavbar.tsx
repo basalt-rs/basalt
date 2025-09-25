@@ -59,9 +59,6 @@ export default function HostNavbar() {
                                     >
                                         Teams
                                     </TabsTrigger>
-                                    <TabsTrigger value="gen" onClick={() => setCurrentTab('gen')}>
-                                        Generate Teams
-                                    </TabsTrigger>
                                     <TabsTrigger
                                         value="leaderboard"
                                         onClick={() => setCurrentTab('leaderboard')}
