@@ -1,0 +1,54 @@
+name: Cleanup PR Images
+
+on:
+    pull_request:
+        types:
+            - closed # runs on merge or close
+
+jobs:
+    cleanup:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+            - name: Delete GHCR images for PR
+              run: |
+                  PR_TAG_PREFIX="dev-pr-${{ github.event.pull_request.number }}"
+                  PACKAGE_NAME="basalt-web"
+                  REPO_OWNER="${{ github.repository_owner }}"
+
+                  echo "Fetching all versions of $PACKAGE_NAME..."
+
+                  # Fetch all versions from GHCR (first 100)
+                  VERSIONS=$(curl -s \
+                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                    -H "Accept: application/vnd.github+json" \
+                    "https://api.github.com/orgs/$REPO_OWNER/packages/container/$PACKAGE_NAME/versions?per_page=100")
+
+                  # Loop through each version
+                  echo "$VERSIONS" | jq -c '.[]' | while read -r version; do
+                    VERSION_ID=$(echo "$version" | jq -r '.id')
+                    TAGS=$(echo "$version" | jq -r '.metadata.container.tags[]?')
+
+                    # Delete if any tag starts with PR_TAG_PREFIX OR there are no tags
+                    DELETE=false
+                    if [ -z "$TAGS" ]; then
+                      DELETE=true
+                    else
+                      for TAG in $TAGS; do
+                        if [[ "$TAG" == $PR_TAG_PREFIX* ]]; then
+                          DELETE=true
+                          break
+                        fi
+                      done
+                    fi
+
+                    if [ "$DELETE" = true ]; then
+                      echo "Deleting $PACKAGE_NAME version $VERSION_ID (tags: $TAGS)..."
+                      curl -s -X DELETE \
+                        -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                        -H "Accept: application/vnd.github+json" \
+                        "https://api.github.com/orgs/$REPO_OWNER/packages/container/$PACKAGE_NAME/versions/$VERSION_ID"
+                    fi
+                  done
