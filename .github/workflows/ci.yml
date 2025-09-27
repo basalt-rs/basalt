@@ -144,6 +144,7 @@ jobs:
               run: cargo check --release
     push-containers:
         runs-on: blacksmith-4vcpu-ubuntu-2404
+        if: github.event_name == 'pull_request'
         needs: [eslint, build]
         permissions:
             contents: read
