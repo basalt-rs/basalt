@@ -17,7 +17,6 @@ jobs:
             contents: read
             packages: write
         env:
-            DOCKERFILE: dockerfile
             TAG: ghcr.io/${{ github.repository_owner }}/basalt-web:main
         steps:
             - uses: actions/checkout@v4
@@ -35,7 +34,7 @@ jobs:
               uses: useblacksmith/build-push-action@v2
               with:
                   context: .
-                  file: ./containers/${{ env.DOCKERFILE }}
+                  file: ./Dockerfile
                   platforms: linux/amd64,linux/arm64
                   push: true
                   tags: ${{ env.TAG }}
