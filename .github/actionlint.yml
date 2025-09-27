@@ -3,6 +3,8 @@ self-hosted-runner:
     labels:
         - blacksmith-2vcpu-ubuntu-2404
         - blacksmith-4vcpu-ubuntu-2404
+        - blacksmith-2vcpu-ubuntu-2404-arm
+        - blacksmith-4vcpu-ubuntu-2404-arm
 # Path-specific configurations.
 paths:
     # Glob pattern relative to the repository root for matching files. The path separator is always '/'.
