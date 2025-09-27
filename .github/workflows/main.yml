@@ -20,6 +20,7 @@ jobs:
                       platform: linux/amd64
                     - arch: arm64
                       runner: blacksmith-2vcpu-ubuntu-2404-arm
+
                       platform: linux/arm64
         runs-on: ${{ matrix.runner }}
         permissions:
@@ -47,6 +48,7 @@ jobs:
                   platforms: ${{ matrix.platform }}
                   push: true
                   tags: ${{ env.TAG }}-${{ matrix.arch }}
+
     manifest:
         needs: push-containers
         runs-on: ubuntu-24.04
