@@ -4,7 +4,7 @@ permissions:
 
 on:
     push:
-        branches: [main]
+        branches: [main, jack/push-dev-only-in-pr]
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
