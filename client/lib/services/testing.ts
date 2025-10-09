@@ -1,100 +1,134 @@
 import { toast } from '@/hooks';
 import { atom, useAtom } from 'jotai';
-import { allQuestionsAtom, currQuestionIdxAtom, useSubmissionStates } from './questions';
+import { allQuestionsAtom, currQuestionAtom, currQuestionIdxAtom, useSubmissionStates } from './questions';
 import { useWebSocket } from './ws';
-import { TestResults } from '../types';
+import { SubmissionHistory, TestResults } from '../types';
 import { editorContentAtom, selectedLanguageAtom } from '../competitor-state';
 import { ToastActionElement } from '@/components/ui/toast';
+import { tokenAtom, tryFetch } from './auth';
+import { ipAtom } from './api';
 
-const testsLoadingAtom = atom<'test' | 'submit' | null>(null);
 const testResultsAtom = atom<
-    (TestResults & { failed: number; passed: number; submitKind: 'test' | 'submit' }) | null
+    | null
+    | (
+        | ({ resultState: 'compile-fail' } & SubmissionHistory)
+        | { resultState: 'partial-results'; results: (TestResults | null)[] }
+        | ({ resultState: 'test-complete'; results: TestResults[]; } & SubmissionHistory)
+      ) & { kind: 'test' | 'submission' }
+
 >(null);
 export const useTesting = () => {
-    const [loading, setLoading] = useAtom(testsLoadingAtom);
     const [testResults, setTestResults] = useAtom(testResultsAtom);
     const { ws } = useWebSocket();
     const [editorContent] = useAtom(editorContentAtom);
     const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
-    const [allQuestions] = useAtom(allQuestionsAtom);
+    const [currentQuestion] = useAtom(currQuestionAtom);
     const [selectedLanguage] = useAtom(selectedLanguageAtom);
     const { setCurrentState } = useSubmissionStates();
+    const [token] = useAtom(tokenAtom);
+    const [ip] = useAtom(ipAtom);
 
-    const runTests = async () => {
-        setLoading('test');
-        try {
-            const { results, failed, passed } = await ws.sendAndWait({
-                kind: 'run-test',
-                language: selectedLanguage?.toLowerCase() || 'java',
-                problem: currentQuestionIdx,
+
+    const runTests = async (kind: 'test' | 'submission') => {
+        if (token === null) return;
+        if (ip === null) return;
+        if (selectedLanguage === undefined) return;
+
+        setTestResults({
+            resultState: 'partial-results',
+            kind,
+            results: currentQuestion.tests.map(() => null),
+        });
+
+        const out = await tryFetch<string>(`/questions/${currentQuestionIdx}/${kind}s`, token, ip, {
+            method: 'POST',
+            bodyJson: {
+                language: selectedLanguage.toLowerCase(),
                 solution: editorContent,
-            });
-            setTestResults({ ...results, failed, passed, submitKind: 'test' });
-        } catch (ex) {
-            console.error('Error running tests:', ex);
+            },
+        });
+        if (out === null) {
             setTestResults(null);
+            return;
         }
-        setLoading(null);
-    };
 
-    const submit = async (nextQuestion?: ToastActionElement) => {
-        setLoading('submit');
-        try {
-            const res = await ws.sendAndWait({
-                kind: 'submit',
-                language: selectedLanguage?.toLowerCase() || 'java',
-                problem: currentQuestionIdx,
-                solution: editorContent,
-            });
+        const testId: string = out;
+        const wsPrefix = `tests-${currentQuestionIdx}`;
+        const removeWsListeners = () => {
+            ws.removeEvent('tests-error', `${wsPrefix}-error`);
+            ws.removeEvent('test-results', `${wsPrefix}-results`);
+            ws.removeEvent('tests-complete', `${wsPrefix}-complete`);
+            ws.removeEvent('tests-cancelled', `${wsPrefix}-cancelled`);
+            ws.removeEvent('tests-compile-fail', `${wsPrefix}-compile-fail`);
+        };
 
-            if (res.kind === 'submit') {
-                const { passed, failed } = res;
-                setTestResults({ ...res.results, failed, passed, submitKind: 'submit' });
-                if (res.results.kind === 'individual') {
-                    if (failed === 0) {
-                        toast({
-                            title: 'Submission Passed!',
-                            variant: 'success',
-                            action:
-                                currentQuestionIdx < allQuestions.length - 1
-                                    ? nextQuestion
-                                    : undefined,
-                        });
-                    } else {
-                        toast({
-                            title: `Your solution passed ${passed} out of ${failed + passed} tests.`,
-                            description:
-                                res.remainingAttempts !== null &&
-                                `You have ${res.remainingAttempts} ${res.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
-                            variant: 'destructive',
-                        });
-                    }
-                }
-                setCurrentState((s) => ({
-                    ...s,
-                    remainingAttempts: res.remainingAttempts,
-                }));
-            } else {
-                setTestResults({
-                    kind: 'other-error',
-                    message: res.message,
-                    failed: 0,
-                    passed: 0,
-                    submitKind: 'submit',
+        ws.registerEvent('tests-error', ({ id }) => {
+            if (id === testId) {
+                setTestResults(null);
+                toast({
+                    title: 'An unexpected error occurred while running your tests',
+                    description: 'Please contact a competition host.',
+                    variant: 'destructive',
+                });
+                removeWsListeners();
+            }
+        }, `${wsPrefix}-error`, false);
+
+        ws.registerEvent('tests-cancelled', ({ id }) => {
+            if (id === testId) {
+                setTestResults(null);
+                removeWsListeners();
+                toast({
+                    title: 'Your running tests have been cancelled',
                 });
             }
-        } catch (ex) {
-            console.error('Error running submissions:', ex);
-            setTestResults(null);
-        }
-        setLoading(null);
+        }, `${wsPrefix}-cancelled`, false);
+
+        ws.registerEvent('tests-complete', (data) => {
+            if (data.id === testId) {
+                setTestResults({
+                    resultState: 'test-complete',
+                    kind,
+                    ...data,
+                });
+                removeWsListeners();
+            }
+        }, `${wsPrefix}-complete`, false);
+
+        ws.registerEvent('tests-compile-fail', (data) => {
+            if (data.id === testId) {
+                setTestResults({
+                    resultState: 'compile-fail',
+                    kind,
+                    ...data,
+                });
+                removeWsListeners();
+            }
+        }, `${wsPrefix}-compile-fail`, false);
+
+        ws.registerEvent('test-results', ({ id, results }) => {
+            if (id === testId) {
+                setTestResults(old => {
+                    if (!old || old.resultState !== 'partial-results') {
+                        console.error(`Recieved 'test-results' for '${id}' while results were in state '${old?.resultState}'`);
+                        return old;
+                    }
+                    console.log('before', old.results);
+                    const newResults = old === null ? [] : [...old.results];
+                    for (const result of results) {
+                        newResults[result.index] = result;
+                    }
+                    console.log('after', newResults);
+
+                    return {
+                        resultState: 'partial-results',
+                        kind,
+                        results: newResults,
+                    };
+                });
+            }
+        }, `${wsPrefix}-results`, false);
     };
 
-    return {
-        loading,
-        runTests,
-        submit,
-        testResults,
-        clearTestResults: () => setTestResults(null),
-    };
+    return { testResults, runTests };
 };

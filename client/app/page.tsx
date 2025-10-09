@@ -61,7 +61,7 @@ const Login = () => {
         try {
             const role = await login(username, password);
             if (role) {
-                router.replace(`/${role}`);
+                router.replace(`/${role.toLowerCase()}`);
                 return; // don't reset loading state
             } else {
                 setMessage('Invalid username or password');
@@ -244,7 +244,7 @@ export default function Home() {
 
     useEffect(() => {
         if (role) {
-            router.replace(`/${role}`);
+            router.replace(`/${role.toLowerCase()}`);
         }
     }, [router, role]);
 

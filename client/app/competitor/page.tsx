@@ -31,7 +31,7 @@ import { isTauri } from '@tauri-apps/api/core';
 import Link from 'next/link';
 import { ipAtom } from '@/lib/services/api';
 import { download } from '@/lib/tauri';
-import { TestResults } from '@/components/TestResults';
+import { TestResultsComp } from '@/components/TestResults';
 import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
@@ -122,7 +122,7 @@ const EditorButtons = () => {
             </div>
             <div className="flex flex-row">
                 <Tooltip tooltip="Run Tests">
-                    <Button size="icon" variant="ghost" onClick={runTests} disabled={!!loading}>
+                    <Button size="icon" variant="ghost" onClick={() => runTests('test')} disabled={!!loading}>
                         {loading === 'test' ? (
                             <Loader2 className="animate-spin text-in-progress" />
                         ) : (
@@ -214,7 +214,7 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
                         </div>
                     </ResizablePanel>
                     <ResizableHandle withHandle />
-                    {(loading || testResults) && (
+                    {testResults && (
                         <ResizablePanel
                             defaultSize={100}
                             minSize={10}
@@ -241,14 +241,9 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
 };
 
 const TestResultsPanel = () => {
-    const { loading } = useTesting();
     return (
         <div className="w-full">
-            {loading ? (
-                <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
-            ) : (
-                <TestResults />
-            )}
+            <TestResultsComp />
         </div>
     );
 };
