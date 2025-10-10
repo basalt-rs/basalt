@@ -10,19 +10,34 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Ellipsis, Loader2, Wifi, WifiOff } from 'lucide-react';
+import * as Dialog from '@/components/ui/dialog';
+import {
+    Ellipsis,
+    Loader2,
+    Pencil,
+    Plus,
+    SquareAsterisk,
+    Trash2,
+    User,
+    UserX,
+    Wifi,
+    WifiOff,
+} from 'lucide-react';
 import Timer from '@/components/Timer';
 import HostNavbar from '@/components/HostNavbar';
 import { currentHostTabAtom } from '@/lib/host-state';
 import { useClock } from '@/hooks/use-clock';
 import { useWebSocket } from '@/lib/services/ws';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ipAtom } from '@/lib/services/api';
 import { tokenAtom } from '@/lib/services/auth';
 import AnnouncementForm from './AnnoucementForm';
 import { useAnnouncements } from '@/lib/services/announcement';
 import { useTeams } from '@/hooks/use-teams';
 import { TeamInfo } from '@/lib/services/teams';
+import AddTeamDialog from '@/components/AddTeamDialog';
+import EditTeamDialog from '@/components/EditTeamDialog';
+import ChangeTeamPasswordDialog from '@/components/ChangeTeamPasswordDialog';
 import HostPanel from './HostPanel';
 
 export default function Host() {
@@ -32,6 +47,9 @@ export default function Host() {
     const { establishWs } = useWebSocket();
     const [ip] = useAtom(ipAtom);
     const [token] = useAtom(tokenAtom);
+    const [showAddTeam, setShowAddTeam] = useState(false);
+    const [editingTeam, setEditingTeam] = useState<TeamInfo | null>(null);
+    const [changingTeamPassword, setChangingTeamPassword] = useState<TeamInfo | null>(null);
 
     useEffect(() => {
         if (ip && token) establishWs(ip, token);
@@ -61,9 +79,52 @@ export default function Host() {
     return (
         <ResizablePanelGroup direction="horizontal" className="flex h-screen flex-grow">
             <ResizablePanel className="flex flex-col justify-between" defaultSize={30} maxSize={50}>
+                <Dialog.Dialog open={!!editingTeam} onOpenChange={() => setEditingTeam(null)}>
+                    <Dialog.DialogContent>
+                        <Dialog.DialogHeader>
+                            <Dialog.DialogTitle>Edit Team</Dialog.DialogTitle>
+                        </Dialog.DialogHeader>
+                        <EditTeamDialog
+                            afterSubmit={() => setEditingTeam(null)}
+                            team={editingTeam}
+                        />
+                    </Dialog.DialogContent>
+                </Dialog.Dialog>
+
+                <Dialog.Dialog
+                    open={!!changingTeamPassword}
+                    onOpenChange={() => setChangingTeamPassword(null)}
+                >
+                    <Dialog.DialogContent>
+                        <Dialog.DialogHeader>
+                            <Dialog.DialogTitle>Change Team Password</Dialog.DialogTitle>
+                        </Dialog.DialogHeader>
+                        <ChangeTeamPasswordDialog
+                            afterSubmit={() => setChangingTeamPassword(null)}
+                            team={changingTeamPassword}
+                        />
+                    </Dialog.DialogContent>
+                </Dialog.Dialog>
+
                 <div>
-                    <div className="flex h-fit items-center justify-between p-2">
-                        <div />
+                    <div className="flex h-fit items-center justify-between px-5 py-2">
+                        <Dialog.Dialog open={showAddTeam} onOpenChange={setShowAddTeam}>
+                            <Dialog.DialogTrigger>
+                                <Plus />
+                            </Dialog.DialogTrigger>
+                            <Dialog.DialogContent>
+                                <Dialog.DialogHeader>
+                                    <Dialog.DialogTitle>Add Team</Dialog.DialogTitle>
+                                </Dialog.DialogHeader>
+                                <AddTeamDialog
+                                    afterSubmit={() => setShowAddTeam(false)}
+                                    onBulkGenChange={() => {
+                                        setCurrentTab('gen');
+                                        setShowAddTeam(false);
+                                    }}
+                                />
+                            </Dialog.DialogContent>
+                        </Dialog.Dialog>
                         <p className="text-2xl uppercase">Teams</p>
                         <DropdownMenu>
                             <DropdownMenuTrigger>
@@ -84,11 +145,11 @@ export default function Host() {
                     )}
                     <div className="flex max-h-[45vh] flex-col gap-1.5 space-y-1 overflow-y-auto overflow-x-hidden p-2.5">
                         {teamsList
-                            .sort((a, b) => b.score - a.score || a.team.localeCompare(b.team))
-                            .map((team, index) => (
+                            .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+                            .map((team) => (
                                 <span
                                     className="flex w-full justify-between rounded border p-1.5"
-                                    key={index}
+                                    key={team.id}
                                 >
                                     <p className="w-1/2 truncate">
                                         <span className="flex gap-1">
@@ -100,7 +161,7 @@ export default function Host() {
                                             ) : (
                                                 <WifiOff className="text-gray-300 dark:text-gray-500" />
                                             )}
-                                            {team.team}
+                                            {team.displayName || team.name}
                                         </span>
                                     </p>
                                     <p>{team.score} pts</p>
@@ -113,32 +174,37 @@ export default function Host() {
                                             (team.lastSeenMs
                                                 ? Math.abs(Date.now() - team.lastSeenMs) < 45 * 1000
                                                 : false) ? (
-                                                <div>
+                                                <>
                                                     <DropdownMenuItem
                                                         onClick={() => {
                                                             setSelectedTeam(team);
                                                             setCurrentTab('teams');
                                                         }}
                                                     >
-                                                        View
+                                                        <User /> View
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
                                                         onClick={() => handleDisconnectTeam(team)}
                                                     >
-                                                        Kick
+                                                        <UserX /> Kick
                                                     </DropdownMenuItem>
-                                                </div>
+                                                </>
                                             ) : (
-                                                <div>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem
-                                                        onClick={() => handleRemoveTeam(team)}
-                                                    >
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </div>
+                                                <DropdownMenuItem
+                                                    onClick={() => handleRemoveTeam(team)}
+                                                >
+                                                    <Trash2 /> Delete
+                                                </DropdownMenuItem>
                                             )}
+                                            <DropdownMenuItem onClick={() => setEditingTeam(team)}>
+                                                <Pencil /> Edit
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                onClick={() => setChangingTeamPassword(team)}
+                                            >
+                                                <SquareAsterisk /> Change Password
+                                            </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </span>
