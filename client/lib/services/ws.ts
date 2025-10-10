@@ -1,5 +1,5 @@
 import { atom, useAtom } from 'jotai';
-import { CompileOutput, SubmissionHistory, TestResults, TestState } from '../types';
+import { SubmissionHistory, TestResults, TestState } from '../types';
 import { Announcement } from '../types';
 import { toast, ToasterToast } from '@/hooks';
 import { relativeTime } from '../utils';

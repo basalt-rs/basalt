@@ -102,36 +102,46 @@ const EditorButtons = () => {
 
         switch (history.state) {
             case 'failed':
-            case 'started': {
-                console.error(`Got history in state '${history.state}' after testing "finished"`);
-            }; break;
-            case 'finished': {
-                if (history.success) {
-                    toast({
-                        title: 'Solution Passed!',
-                        variant: 'success',
-                        description: 'Great Work!',
-                        action: currQuestionIdx < allQuestions.length - 1
-                            ? (
-                                <ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx((n) => n + 1)}>
-                                    Next Question
-                                </ToastAction>
-                            )
-                            : undefined,
-                    });
-                } else {
-                    toast({
-                        title: `Your solution passed ${history.passed} out of ${history.failed + history.passed} tests.`,
-                        description:
-                            currentState!.remainingAttempts !== null &&
-                            `You have ${currentState!.remainingAttempts} ${currentState!.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
-                        variant: 'destructive',
-                    });
+            case 'started':
+                {
+                    console.error(
+                        `Got history in state '${history.state}' after testing "finished"`
+                    );
                 }
-            }; break;
-            case 'cancelled': {
-                // we can ignore this
-            }; break;
+                break;
+            case 'finished':
+                {
+                    if (history.success) {
+                        toast({
+                            title: 'Solution Passed!',
+                            variant: 'success',
+                            description: 'Great Work!',
+                            action:
+                                currQuestionIdx < allQuestions.length - 1 ? (
+                                    <ToastAction
+                                        altText="Next Question"
+                                        onClick={() => setCurrQuestionIdx((n) => n + 1)}
+                                    >
+                                        Next Question
+                                    </ToastAction>
+                                ) : undefined,
+                        });
+                    } else {
+                        toast({
+                            title: `Your solution passed ${history.passed} out of ${history.failed + history.passed} tests.`,
+                            description:
+                                currentState!.remainingAttempts !== null &&
+                                `You have ${currentState!.remainingAttempts} ${currentState!.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                            variant: 'destructive',
+                        });
+                    }
+                }
+                break;
+            case 'cancelled':
+                {
+                    // we can ignore this
+                }
+                break;
         }
     };
 
@@ -241,16 +251,16 @@ const EditorButtons = () => {
 };
 
 const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
-    const { loading, testResults, clearTestResults } = useTesting();
+    const { testResults, resetTestResults } = useTesting();
     const [currQuestionIdx] = useAtom(currQuestionIdxAtom);
     const prevIdx = useRef(currQuestionIdx);
 
     useEffect(() => {
         if (prevIdx.current !== currQuestionIdx) {
-            clearTestResults();
+            resetTestResults();
             prevIdx.current = currQuestionIdx;
         }
-    }, [currQuestionIdx, clearTestResults]);
+    }, [currQuestionIdx, resetTestResults]);
 
     switch (tab) {
         case 'text-editor':

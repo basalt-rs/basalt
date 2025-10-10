@@ -1,6 +1,6 @@
 import { toast } from '@/hooks';
 import { atom, useAtom } from 'jotai';
-import { currQuestionAtom, currQuestionIdxAtom, useSubmissionStates } from './questions';
+import { currQuestionIdxAtom, useSubmissionStates } from './questions';
 import { useWebSocket } from './ws';
 import { SubmissionHistory, TestResults } from '../types';
 import { editorContentAtom, selectedLanguageAtom } from '../competitor-state';
@@ -8,7 +8,7 @@ import { tokenAtom, tryFetch } from './auth';
 import { ipAtom } from './api';
 
 type ActiveKind = 'test' | 'submission';
-type TestComplete = { results: TestResults[]; cases: number; } & SubmissionHistory;
+type TestComplete = { results: TestResults[]; cases: number } & SubmissionHistory;
 type PartialResults = {
     results: (TestResults | null)[];
     cases: number;
@@ -18,10 +18,10 @@ type PartialResults = {
 const testResultsAtom = atom<
     | null
     | ((
-        | ({ resultState: 'compile-fail'; } & SubmissionHistory)
-        | ({ resultState: 'partial-results'; } & PartialResults)
-        | ({ resultState: 'test-complete'; } & TestComplete)
-    ) & { kind: ActiveKind })
+          | ({ resultState: 'compile-fail' } & SubmissionHistory)
+          | ({ resultState: 'partial-results' } & PartialResults)
+          | ({ resultState: 'test-complete' } & TestComplete)
+      ) & { kind: ActiveKind })
 >(null);
 const pendingAtom = atom<ActiveKind | null>((get) => {
     const x = get(testResultsAtom);
@@ -38,7 +38,9 @@ export const useTesting = () => {
     const [ip] = useAtom(ipAtom);
     const [pending] = useAtom(pendingAtom);
 
-    const runTests = async (kind: ActiveKind): Promise<{ id: string; activeTest: Promise<SubmissionHistory> } | null> => {
+    const runTests = async (
+        kind: ActiveKind
+    ): Promise<{ id: string; activeTest: Promise<SubmissionHistory> } | null> => {
         if (token === null) return null;
         if (ip === null) return null;
         if (selectedLanguage === undefined) return null;
@@ -87,7 +89,7 @@ export const useTesting = () => {
             ws.removeEvent('tests-compiled', `${wsPrefix}-compiled`);
         };
 
-        setCurrentState(old => ({
+        setCurrentState((old) => ({
             ...old,
             state: old.state === 'not-attempted' ? 'in-progress' : old.state,
         }));
@@ -137,15 +139,16 @@ export const useTesting = () => {
                         ...data,
                     });
 
-                    setCurrentState(old => ({
+                    setCurrentState((old) => ({
                         ...old,
-                        state: kind === 'test'
-                            ? old.state === 'not-attempted'
-                                ? 'in-progress'
-                                : old.state
-                            : data.results.every(t => t.state === 'pass')
-                                ? 'pass'
-                                : 'fail',
+                        state:
+                            kind === 'test'
+                                ? old.state === 'not-attempted'
+                                    ? 'in-progress'
+                                    : old.state
+                                : data.results.every((t) => t.state === 'pass')
+                                  ? 'pass'
+                                  : 'fail',
                     }));
                     resolve(data);
                     removeWsListeners();
@@ -165,13 +168,14 @@ export const useTesting = () => {
                         kind,
                         ...data,
                     });
-                    setCurrentState(old => ({
+                    setCurrentState((old) => ({
                         ...old,
-                        state: kind === 'test'
-                            ? old.state === 'not-attempted'
-                                ? 'in-progress'
-                                : old.state
-                            : 'fail',
+                        state:
+                            kind === 'test'
+                                ? old.state === 'not-attempted'
+                                    ? 'in-progress'
+                                    : old.state
+                                : 'fail',
                     }));
                     resolve(data);
                     removeWsListeners();
@@ -244,5 +248,10 @@ export const useTesting = () => {
         };
     };
 
-    return { testResults, runTests, pending };
+    return {
+        testResults,
+        runTests,
+        pending,
+        resetTestResults: () => setTestResults(null),
+    };
 };
