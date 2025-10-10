@@ -36,24 +36,24 @@ export interface QuestionSubmissionState {
 }
 
 export interface SubmissionHistory {
-    id: string,
-    submitter: string,
-    time: string,
-    code: string,
-    questionIndex: number,
-    language: string,
-    compileResult: CompileResultState,
-    compileStdout: string,
-    compileStderr: string,
-    compileExitStatus: number,
-    test_only: boolean,
-    state: SubmissionState,
-    score: number,
-    passed: number,
-    failed: number,
-    success: boolean,
+    id: string;
+    submitter: string;
+    time: string;
+    code: string;
+    questionIndex: number;
+    language: string;
+    compileResult: CompileResultState;
+    compileStdout: string;
+    compileStderr: string;
+    compileExitStatus: number;
+    test_only: boolean;
+    state: SubmissionState;
+    score: number;
+    passed: number;
+    failed: number;
+    success: boolean;
     // milliseconds
-    timeTaken: number,
+    timeTaken: number;
 }
 
 export interface LeaderboardEntry {

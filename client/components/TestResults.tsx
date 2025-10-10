@@ -72,34 +72,45 @@ const InputOutput = ({
 
 const stylisedState = (state: TestResultState) => {
     switch (state) {
-        case 'pass': return 'Pass';
-        case 'runtime-fail': return 'Failed at Runtime';
-        case 'timed-out': return 'Timed Out';
-        case 'incorrect-output': return 'Incorrect Output';
-        default: throw new Error(`Unhandled stylisedState: '${state}'`);
+        case 'pass':
+            return 'Pass';
+        case 'runtime-fail':
+            return 'Failed at Runtime';
+        case 'timed-out':
+            return 'Timed Out';
+        case 'incorrect-output':
+            return 'Incorrect Output';
+        default:
+            throw new Error(`Unhandled stylisedState: '${state}'`);
     }
 };
 
-const OutputItem = ({ res, index }: { res: TestResults | null; index: number; }) => {
+const OutputItem = ({ res, index }: { res: TestResults | null; index: number }) => {
     const { testResults } = useTesting();
     const [currentQuestion] = useAtom(currQuestionAtom);
 
     return (
-        <Accordion.AccordionItem value={`test-${index}`} disabled={res === null || testResults!.kind === 'submission'}>
-            <Accordion.AccordionTrigger className="px-8" hideChevron={testResults?.kind === 'submission'}>
-                <div className="items-center justify-between flex flex-row w-full">
+        <Accordion.AccordionItem
+            value={`test-${index}`}
+            disabled={res === null || testResults!.kind === 'submission'}
+        >
+            <Accordion.AccordionTrigger
+                className="px-8"
+                hideChevron={testResults?.kind === 'submission'}
+            >
+                <div className="flex w-full flex-row items-center justify-between">
                     <h1>
                         <b>Test Case {index + 1}</b>
                     </h1>
-                    {
-                        res === null
-                            ? <Loader2 className="text-in-progress animate-spin" />
-                            : res.state === 'pass'
-                                ? <Check className="text-pass" />
-                                : <p className="flex flex-row gap-4">
-                                    {stylisedState(res.state)} <X className="text-fail" />
-                                </p>
-                    }
+                    {res === null ? (
+                        <Loader2 className="animate-spin text-in-progress" />
+                    ) : res.state === 'pass' ? (
+                        <Check className="text-pass" />
+                    ) : (
+                        <p className="flex flex-row gap-4">
+                            {stylisedState(res.state)} <X className="text-fail" />
+                        </p>
+                    )}
                 </div>
             </Accordion.AccordionTrigger>
             <Accordion.AccordionContent className="px-8 pb-8">
@@ -117,7 +128,7 @@ const OutputItem = ({ res, index }: { res: TestResults | null; index: number; })
                             useDiff={res.state !== 'pass'}
                         />
                         {res.stderr && (
-                            <div className="pt-1 flex flex-col gap-1">
+                            <div className="flex flex-col gap-1 pt-1">
                                 <p className="font-bold">Standard Error</p>
                                 <CodeBlock text={convertAnsi(res.stderr)} rawHtml />
                             </div>
@@ -126,6 +137,25 @@ const OutputItem = ({ res, index }: { res: TestResults | null; index: number; })
                 )}
             </Accordion.AccordionContent>
         </Accordion.AccordionItem>
+    );
+};
+
+const CompilerOutput = ({ stdout, stderr }: { stdout: string; stderr: string }) => {
+    return (
+        <>
+            {stdout && (
+                <div>
+                    <p className="font-bold">Standard Output</p>
+                    <CodeBlock text={convertAnsi(stdout)} rawHtml />
+                </div>
+            )}
+            {stderr && (
+                <div>
+                    <p className="font-bold">Standard Error</p>
+                    <CodeBlock text={convertAnsi(stderr)} rawHtml />
+                </div>
+            )}
+        </>
     );
 };
 
@@ -138,78 +168,103 @@ export default function TestResultsComponent() {
 
     useEffect(() => {
         // Collapse open accordions if they are loading
-        setOpenAccordions(a => {
+        setOpenAccordions((a) => {
             if (testResults.resultState === 'compile-fail') return [];
-            return a.filter(o => testResults.results[+o.split('-')[1]] !== null);
-        })
+            return a.filter((o) => testResults.results[+o.split('-')[1]] !== null);
+        });
     }, [testResults]);
 
     switch (testResults.resultState) {
         case 'test-complete':
         case 'partial-results': {
             const complete = testResults.resultState === 'test-complete';
-            const compilerTab = complete && (testResults.compileStderr || testResults.compileStdout);
-            const completed = testResults.results.reduce((p, c) => c === null ? p : p + 1, 0);
+            const compilerTab = complete
+                ? testResults.compileStderr || testResults.compileStdout
+                : testResults.compileOutput !== null &&
+                  (testResults.compileOutput.stderr || testResults.compileOutput.stdout);
+            const numCompleted = testResults.results.reduce((p, c) => (c === null ? p : p + 1), 0);
             return (
                 <>
                     <Progress
-                        value={completed / testResults.cases * 100}
+                        value={(numCompleted / testResults.cases) * 100}
                         color={testResults.kind === 'test' ? 'bg-in-progress/50' : 'bg-pass/50'}
                     />
                     <ScrollArea className="h-full w-full">
                         <Tabs.Tabs defaultValue="tests">
-                            <div className="flex justify-between items-center py-2 px-4">
+                            <div className="flex items-center justify-between px-4 py-2">
                                 {testResults.kind === 'submission' && (
-                                    <p className="flex flex-row gap-2">
-                                        <span className="font-bold">Score:</span> {complete ? testResults.score : <Loader2 className="animate-spin" />}
+                                    <p className="flex flex-row items-center gap-2">
+                                        <span className="font-bold">Score:</span>
+                                        <span>
+                                            {complete ? (
+                                                testResults.score
+                                            ) : (
+                                                <Loader2 className="size-4 animate-spin" />
+                                            )}
+                                        </span>
                                     </p>
                                 )}
 
                                 <p className="flex flex-row gap-2">
                                     <span className="font-bold">Passed:</span>
-                                    {
-                                        complete ? testResults.passed : testResults.results.reduce((p, c) => c?.state === 'pass' ? p + 1 : p, 0)
-                                    } / {
-                                        complete ? testResults.passed + testResults.failed : testResults.cases
-                                    }
+                                    <span>
+                                        {complete
+                                            ? testResults.passed
+                                            : testResults.results.reduce(
+                                                  (p, c) => (c?.state === 'pass' ? p + 1 : p),
+                                                  0
+                                              )}
+                                    </span>
+                                    <span>/</span>
+                                    <span>
+                                        {complete
+                                            ? testResults.passed + testResults.failed
+                                            : testResults.cases}
+                                    </span>
                                 </p>
 
-                                <p className="flex flex-row gap-2">
-                                    <span className="font-bold">Time Taken:</span> {complete
-                                        ? formatDuration(testResults.timeTaken)
-                                        : <Loader2 className="animate-spin" />
-                                    }
-                                </p>
-
-                                {compilerTab
-                                    && (
-                                        <Tabs.TabsList>
-                                            <Tabs.TabsTrigger value="tests">Tests</Tabs.TabsTrigger>
-                                            <Tabs.TabsTrigger value="compiler-output">Compiler Output</Tabs.TabsTrigger>
-                                        </Tabs.TabsList>
+                                <p className="flex flex-row items-center gap-2">
+                                    <span className="font-bold">Time Taken:</span>
+                                    {complete ? (
+                                        formatDuration(testResults.timeTaken)
+                                    ) : (
+                                        <Loader2 className="size-4 animate-spin" />
                                     )}
+                                </p>
+
+                                {compilerTab && (
+                                    <Tabs.TabsList>
+                                        <Tabs.TabsTrigger value="tests">Tests</Tabs.TabsTrigger>
+                                        <Tabs.TabsTrigger value="compiler-output">
+                                            Compiler Output
+                                        </Tabs.TabsTrigger>
+                                    </Tabs.TabsList>
+                                )}
                             </div>
                             <Separator />
                             <Tabs.TabsContent value="tests" className="mt-0">
-                                <Accordion.Accordion type="multiple" value={openAccordions} onValueChange={setOpenAccordions}>
+                                <Accordion.Accordion
+                                    type="multiple"
+                                    value={openAccordions}
+                                    onValueChange={setOpenAccordions}
+                                >
                                     {testResults.results?.map((res, i) => (
                                         <OutputItem res={res} index={i} key={i} />
                                     ))}
                                 </Accordion.Accordion>
                             </Tabs.TabsContent>
-                            {complete && compilerTab && (
+                            {compilerTab && (
                                 <Tabs.TabsContent value="compiler-output" className="gap-2 px-4">
-                                    {testResults.compileStdout && (
-                                        <div>
-                                            <p className="font-bold">Compiler Standard Output</p>
-                                            <CodeBlock text={convertAnsi(testResults.compileStdout)} rawHtml />
-                                        </div>
-                                    )}
-                                    {testResults.compileStderr && (
-                                        <div>
-                                            <p className="font-bold">Compiler Standard Error</p>
-                                            <CodeBlock text={convertAnsi(testResults.compileStderr)} rawHtml />
-                                        </div>
+                                    {testResults.resultState === 'partial-results' ? (
+                                        <CompilerOutput
+                                            stdout={testResults.compileOutput!.stdout}
+                                            stderr={testResults.compileOutput!.stderr}
+                                        />
+                                    ) : (
+                                        <CompilerOutput
+                                            stdout={testResults.compileStdout}
+                                            stderr={testResults.compileStderr}
+                                        />
                                     )}
                                 </Tabs.TabsContent>
                             )}
@@ -226,18 +281,25 @@ export default function TestResultsComponent() {
                         <div className="px-8 py-8">
                             <p className="pb-2 text-2xl text-fail">Solution failed to compile</p>
                             <p>
-                                <span className="font-bold">Exit Status:</span> {testResults.compileExitStatus}
+                                <span className="font-bold">Exit Status:</span>{' '}
+                                {testResults.compileExitStatus}
                             </p>
                             {testResults.compileStdout && (
                                 <div>
                                     <p className="font-bold">Standard Output</p>
-                                    <CodeBlock text={convertAnsi(testResults.compileStdout)} rawHtml />
+                                    <CodeBlock
+                                        text={convertAnsi(testResults.compileStdout)}
+                                        rawHtml
+                                    />
                                 </div>
                             )}
                             {testResults.compileStderr && (
                                 <div>
                                     <p className="font-bold">Standard Error</p>
-                                    <CodeBlock text={convertAnsi(testResults.compileStderr)} rawHtml />
+                                    <CodeBlock
+                                        text={convertAnsi(testResults.compileStderr)}
+                                        rawHtml
+                                    />
                                 </div>
                             )}
                         </div>
@@ -246,5 +308,4 @@ export default function TestResultsComponent() {
             );
         }
     }
-
-};
+}

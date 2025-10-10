@@ -10,7 +10,7 @@ export default {
     ],
     theme: {
         fontFamily: {
-            mono: ['monospace']
+            mono: ['monospace'],
         },
         extend: {
             colors: {

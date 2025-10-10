@@ -32,12 +32,15 @@ type EVENT_MAPPING = {
     // Private events
     'test-results': {
         id: string;
-        // The number of completed test cases
-        completed: number;
         results: TestResults[];
     };
-    'tests-error': { id: string; };
-    'tests-cancelled': { id: string; };
+    'tests-compiled': {
+        id: string;
+        stdout: string;
+        stderr: string;
+    };
+    'tests-error': { id: string };
+    'tests-cancelled': { id: string };
     'tests-complete': {
         results: TestResults[];
         remainingAttempts: number | null;
@@ -72,6 +75,7 @@ class BasaltWSClient {
         'tests-complete': [],
         'tests-compile-fail': [],
         'test-results': [],
+        'tests-compiled': [],
     };
     private onCloseTasks: (() => void)[] = [];
 
@@ -160,7 +164,7 @@ class BasaltWSClient {
         eventName: K,
         fn: BroadcastEventFn<K>,
         id: string | null = null,
-        oneTime: boolean = false,
+        oneTime: boolean = false
     ) {
         const idx = this.eventHandlers[eventName].findIndex((h) => h.id === id);
         if (idx !== -1) {

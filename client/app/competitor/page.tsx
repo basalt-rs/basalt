@@ -123,7 +123,12 @@ const EditorButtons = () => {
             </div>
             <div className="flex flex-row">
                 <Tooltip tooltip="Run Tests">
-                    <Button size="icon" variant="ghost" onClick={() => runTests('test')} disabled={!!pending}>
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => runTests('test')}
+                        disabled={!!pending}
+                    >
                         {pending === 'test' ? (
                             <Loader2 className="animate-spin text-in-progress" />
                         ) : (

@@ -1,6 +1,6 @@
 import { toast } from '@/hooks';
 import { atom, useAtom } from 'jotai';
-import { allQuestionsAtom, currQuestionAtom, currQuestionIdxAtom, useSubmissionStates } from './questions';
+import { currQuestionAtom, currQuestionIdxAtom, useSubmissionStates } from './questions';
 import { useWebSocket } from './ws';
 import { SubmissionHistory, TestResults } from '../types';
 import { editorContentAtom, selectedLanguageAtom } from '../competitor-state';
@@ -11,25 +11,30 @@ import { ipAtom } from './api';
 type ActiveKind = 'test' | 'submission';
 const testResultsAtom = atom<
     | null
-    | (
-        | ({ resultState: 'compile-fail' } & SubmissionHistory)
-        | { resultState: 'partial-results'; results: (TestResults | null)[]; cases: number; }
-        | ({ resultState: 'test-complete'; results: TestResults[]; cases: number; } & SubmissionHistory)
-    ) & { kind: ActiveKind }
-
+    | ((
+          | ({ resultState: 'compile-fail' } & SubmissionHistory)
+          | {
+                resultState: 'partial-results';
+                results: (TestResults | null)[];
+                cases: number;
+                compileOutput: { stdout: string; stderr: string } | null;
+            }
+          | ({
+                resultState: 'test-complete';
+                results: TestResults[];
+                cases: number;
+            } & SubmissionHistory)
+      ) & { kind: ActiveKind })
 >(null);
-const pendingAtom = atom<ActiveKind | null>(get => {
+const pendingAtom = atom<ActiveKind | null>((get) => {
     const x = get(testResultsAtom);
-    return x !== null && x.resultState === 'partial-results'
-        ? x.kind
-        : null;
+    return x !== null && x.resultState === 'partial-results' ? x.kind : null;
 });
 export const useTesting = () => {
     const [testResults, setTestResults] = useAtom(testResultsAtom);
     const { ws } = useWebSocket();
     const [editorContent] = useAtom(editorContentAtom);
     const [currentQuestionIdx] = useAtom(currQuestionIdxAtom);
-    const [currentQuestion] = useAtom(currQuestionAtom);
     const [selectedLanguage] = useAtom(selectedLanguageAtom);
     const { setCurrentState } = useSubmissionStates();
     const [token] = useAtom(tokenAtom);
@@ -41,13 +46,18 @@ export const useTesting = () => {
         if (ip === null) return;
         if (selectedLanguage === undefined) return;
 
-        const out = await tryFetch<{ id: string; cases: number; }>(`/questions/${currentQuestionIdx}/${kind}s`, token, ip, {
-            method: 'POST',
-            bodyJson: {
-                language: selectedLanguage.toLowerCase(),
-                solution: editorContent,
-            },
-        });
+        const out = await tryFetch<{ id: string; cases: number }>(
+            `/questions/${currentQuestionIdx}/${kind}s`,
+            token,
+            ip,
+            {
+                method: 'POST',
+                bodyJson: {
+                    language: selectedLanguage.toLowerCase(),
+                    solution: editorContent,
+                },
+            }
+        );
 
         if (out === null) {
             setTestResults(null);
@@ -59,6 +69,7 @@ export const useTesting = () => {
             kind,
             results: Array.from({ length: out.cases }, () => null),
             cases: out.cases,
+            compileOutput: null,
         });
 
         const testId: string = out.id;
@@ -69,78 +80,131 @@ export const useTesting = () => {
             ws.removeEvent('tests-complete', `${wsPrefix}-complete`);
             ws.removeEvent('tests-cancelled', `${wsPrefix}-cancelled`);
             ws.removeEvent('tests-compile-fail', `${wsPrefix}-compile-fail`);
+            ws.removeEvent('tests-compiled', `${wsPrefix}-compiled`);
         };
 
-        ws.registerEvent('tests-error', ({ id }) => {
-            if (id === testId) {
-                setTestResults(null);
-                toast({
-                    title: 'An unexpected error occurred while running your tests',
-                    description: 'Please contact a competition host.',
-                    variant: 'destructive',
-                });
-                removeWsListeners();
-            }
-        }, `${wsPrefix}-error`, false);
+        ws.registerEvent(
+            'tests-error',
+            ({ id }) => {
+                if (id === testId) {
+                    setTestResults(null);
+                    toast({
+                        title: 'An unexpected error occurred while running your tests',
+                        description: 'Please contact a competition host.',
+                        variant: 'destructive',
+                    });
+                    removeWsListeners();
+                }
+            },
+            `${wsPrefix}-error`,
+            false
+        );
 
-        ws.registerEvent('tests-cancelled', ({ id }) => {
-            if (id === testId) {
-                setTestResults(null);
-                removeWsListeners();
-                toast({
-                    title: 'Your running tests have been cancelled',
-                });
-            }
-        }, `${wsPrefix}-cancelled`, false);
+        ws.registerEvent(
+            'tests-cancelled',
+            ({ id }) => {
+                if (id === testId) {
+                    setTestResults(null);
+                    removeWsListeners();
+                    toast({
+                        title: 'Your running tests have been cancelled',
+                    });
+                }
+            },
+            `${wsPrefix}-cancelled`,
+            false
+        );
 
-        ws.registerEvent('tests-complete', (data) => {
-            if (data.id === testId) {
-                setTestResults({
-                    resultState: 'test-complete',
-                    kind,
-                    cases: out.cases,
-                    ...data,
-                });
-                removeWsListeners();
-                setCurrentState(s => ({ ...s, remainingAttempts: data.remainingAttempts }));
-            }
-        }, `${wsPrefix}-complete`, false);
-
-        ws.registerEvent('tests-compile-fail', (data) => {
-            if (data.id === testId) {
-                setTestResults({
-                    resultState: 'compile-fail',
-                    kind,
-                    ...data,
-                });
-                removeWsListeners();
-            }
-        }, `${wsPrefix}-compile-fail`, false);
-
-        ws.registerEvent('test-results', ({ id, results }) => {
-            if (id === testId) {
-                setTestResults(old => {
-                    if (!old || old.resultState !== 'partial-results') {
-                        console.error(`Recieved 'test-results' for '${id}' while results were in state '${old?.resultState}'`);
-                        return old;
-                    }
-
-                    console.log('before', old.results);
-                    const newResults = old === null ? [] : [...old.results];
-                    for (const result of results) {
-                        newResults[result.index] = result;
-                    }
-                    console.log('after', newResults);
-
-                    return {
-                        resultState: 'partial-results',
+        ws.registerEvent(
+            'tests-complete',
+            (data) => {
+                if (data.id === testId) {
+                    setTestResults({
+                        resultState: 'test-complete',
                         kind,
-                        cases: old.cases,
-                        results: newResults,
-                    };
-                });
-            }
-        }, `${wsPrefix}-results`, false);
+                        cases: out.cases,
+                        ...data,
+                    });
+                    removeWsListeners();
+                    setCurrentState((s) => ({ ...s, remainingAttempts: data.remainingAttempts }));
+                }
+            },
+            `${wsPrefix}-complete`,
+            false
+        );
+
+        ws.registerEvent(
+            'tests-compile-fail',
+            (data) => {
+                if (data.id === testId) {
+                    setTestResults({
+                        resultState: 'compile-fail',
+                        kind,
+                        ...data,
+                    });
+                    removeWsListeners();
+                }
+            },
+            `${wsPrefix}-compile-fail`,
+            false
+        );
+
+        ws.registerEvent(
+            'test-results',
+            ({ id, results }) => {
+                if (id === testId) {
+                    setTestResults((old) => {
+                        if (!old || old.resultState !== 'partial-results') {
+                            console.error(
+                                `Recieved 'test-results' for '${id}' while results were in state '${old?.resultState}'`
+                            );
+                            return old;
+                        }
+
+                        const newResults = old === null ? [] : [...old.results];
+                        for (const result of results) {
+                            newResults[result.index] = result;
+                        }
+
+                        return {
+                            resultState: 'partial-results',
+                            kind,
+                            cases: old.cases,
+                            results: newResults,
+                            compileOutput: old.compileOutput,
+                        };
+                    });
+                }
+            },
+            `${wsPrefix}-results`,
+            false
+        );
+
+        ws.registerEvent(
+            'tests-compiled',
+            ({ id, stdout, stderr }) => {
+                if (id === testId) {
+                    setTestResults((old) => {
+                        if (!old || old.resultState !== 'partial-results') {
+                            console.error(
+                                `Recieved 'tests-compiled' for '${id}' while results were in state '${old?.resultState}'`
+                            );
+                            return old;
+                        }
+
+                        return {
+                            resultState: 'partial-results',
+                            kind,
+                            cases: old.cases,
+                            results: old.results,
+                            compileOutput: { stdout, stderr },
+                        };
+                    });
+                }
+            },
+            `${wsPrefix}-compiled`,
+            false
+        );
     };
 
     return { testResults, runTests, pending };

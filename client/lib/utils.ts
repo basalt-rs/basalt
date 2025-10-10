@@ -34,7 +34,7 @@ export const relativeTime = (date: Date | string | number) => {
 export const formatDuration = (milliseconds: number): string => {
     const result = [];
     if (milliseconds >= 60 * 1000) {
-        const mins = Math.floor(milliseconds / 60 * 1000);
+        const mins = Math.floor((milliseconds / 60) * 1000);
         result.push(mins + 'm');
         milliseconds %= 60 * 1000;
     }
