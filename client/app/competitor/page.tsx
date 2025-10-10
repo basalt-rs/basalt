@@ -46,6 +46,7 @@ import {
 } from '@/components/ui/table';
 import { ToastAction } from '@radix-ui/react-toast';
 import { QuestionDetails } from '@/components/QuestionDetails';
+import { toast } from '@/hooks';
 
 const EditorButtons = () => {
     const setEditorContent = useSetAtom(editorContentAtom);
@@ -55,7 +56,8 @@ const EditorButtons = () => {
     const { pending, runTests } = useTesting();
     const { currentState } = useSubmissionStates();
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
-    const setCurrQuestionIdx = useSetAtom(currQuestionIdxAtom);
+    const [currQuestionIdx, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
+    const [allQuestions] = useAtom(allQuestionsAtom);
 
     // Defaults to first language if no language selected
     useEffect(() => {
@@ -83,13 +85,54 @@ const EditorButtons = () => {
         event.target.value = '';
     };
 
-    const submitSolution = () => {
-        runTests('submission');
-        // submit(
-        //     <ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx((n) => n + 1)}>
-        //         Next Question
-        //     </ToastAction>
-        // );
+    const submitSolution = async () => {
+        const ret = await runTests('submission');
+        if (ret === null) return;
+        const history = await ret.activeTest;
+        if (history.compileResult === 'runtime-fail' || history.compileResult === 'timed-out') {
+            toast({
+                title: 'Compilation Error!',
+                variant: 'destructive',
+                description: currentState?.remainingAttempts
+                    ? `Your solution could not be compiled!  You have ${currentState?.remainingAttempts} ${currentState?.remainingAttempts === 1 ? 'attempt' : 'attempts'} left.`
+                    : `Your solution could not be compiled!`,
+            });
+            return;
+        }
+
+        switch (history.state) {
+            case 'failed':
+            case 'started': {
+                console.error(`Got history in state '${history.state}' after testing "finished"`);
+            }; break;
+            case 'finished': {
+                if (history.success) {
+                    toast({
+                        title: 'Solution Passed!',
+                        variant: 'success',
+                        description: 'Great Work!',
+                        action: currQuestionIdx < allQuestions.length - 1
+                            ? (
+                                <ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx((n) => n + 1)}>
+                                    Next Question
+                                </ToastAction>
+                            )
+                            : undefined,
+                    });
+                } else {
+                    toast({
+                        title: `Your solution passed ${history.passed} out of ${history.failed + history.passed} tests.`,
+                        description:
+                            currentState!.remainingAttempts !== null &&
+                            `You have ${currentState!.remainingAttempts} ${currentState!.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                        variant: 'destructive',
+                    });
+                }
+            }; break;
+            case 'cancelled': {
+                // we can ignore this
+            }; break;
+        }
     };
 
     return (

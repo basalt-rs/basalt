@@ -4,27 +4,24 @@ import { currQuestionAtom, currQuestionIdxAtom, useSubmissionStates } from './qu
 import { useWebSocket } from './ws';
 import { SubmissionHistory, TestResults } from '../types';
 import { editorContentAtom, selectedLanguageAtom } from '../competitor-state';
-import { ToastActionElement } from '@/components/ui/toast';
 import { tokenAtom, tryFetch } from './auth';
 import { ipAtom } from './api';
 
 type ActiveKind = 'test' | 'submission';
+type TestComplete = { results: TestResults[]; cases: number; } & SubmissionHistory;
+type PartialResults = {
+    results: (TestResults | null)[];
+    cases: number;
+    compileOutput: { stdout: string; stderr: string } | null;
+};
+
 const testResultsAtom = atom<
     | null
     | ((
-          | ({ resultState: 'compile-fail' } & SubmissionHistory)
-          | {
-                resultState: 'partial-results';
-                results: (TestResults | null)[];
-                cases: number;
-                compileOutput: { stdout: string; stderr: string } | null;
-            }
-          | ({
-                resultState: 'test-complete';
-                results: TestResults[];
-                cases: number;
-            } & SubmissionHistory)
-      ) & { kind: ActiveKind })
+        | ({ resultState: 'compile-fail'; } & SubmissionHistory)
+        | ({ resultState: 'partial-results'; } & PartialResults)
+        | ({ resultState: 'test-complete'; } & TestComplete)
+    ) & { kind: ActiveKind })
 >(null);
 const pendingAtom = atom<ActiveKind | null>((get) => {
     const x = get(testResultsAtom);
@@ -41,10 +38,10 @@ export const useTesting = () => {
     const [ip] = useAtom(ipAtom);
     const [pending] = useAtom(pendingAtom);
 
-    const runTests = async (kind: ActiveKind) => {
-        if (token === null) return;
-        if (ip === null) return;
-        if (selectedLanguage === undefined) return;
+    const runTests = async (kind: ActiveKind): Promise<{ id: string; activeTest: Promise<SubmissionHistory> } | null> => {
+        if (token === null) return null;
+        if (ip === null) return null;
+        if (selectedLanguage === undefined) return null;
 
         const out = await tryFetch<{ id: string; cases: number }>(
             `/questions/${currentQuestionIdx}/${kind}s`,
@@ -61,8 +58,15 @@ export const useTesting = () => {
 
         if (out === null) {
             setTestResults(null);
-            return;
+            return null;
         }
+
+        let resolve: (result: SubmissionHistory) => void;
+        let reject: (reason: 'cancelled' | 'error') => void;
+        const promise = new Promise<SubmissionHistory>((res, rej) => {
+            resolve = res;
+            reject = rej;
+        });
 
         setTestResults({
             resultState: 'partial-results',
@@ -83,6 +87,11 @@ export const useTesting = () => {
             ws.removeEvent('tests-compiled', `${wsPrefix}-compiled`);
         };
 
+        setCurrentState(old => ({
+            ...old,
+            state: old.state === 'not-attempted' ? 'in-progress' : old.state,
+        }));
+
         ws.registerEvent(
             'tests-error',
             ({ id }) => {
@@ -94,6 +103,7 @@ export const useTesting = () => {
                         variant: 'destructive',
                     });
                     removeWsListeners();
+                    reject('error');
                 }
             },
             `${wsPrefix}-error`,
@@ -109,6 +119,7 @@ export const useTesting = () => {
                     toast({
                         title: 'Your running tests have been cancelled',
                     });
+                    reject('cancelled');
                 }
             },
             `${wsPrefix}-cancelled`,
@@ -125,6 +136,18 @@ export const useTesting = () => {
                         cases: out.cases,
                         ...data,
                     });
+
+                    setCurrentState(old => ({
+                        ...old,
+                        state: kind === 'test'
+                            ? old.state === 'not-attempted'
+                                ? 'in-progress'
+                                : old.state
+                            : data.results.every(t => t.state === 'pass')
+                                ? 'pass'
+                                : 'fail',
+                    }));
+                    resolve(data);
                     removeWsListeners();
                     setCurrentState((s) => ({ ...s, remainingAttempts: data.remainingAttempts }));
                 }
@@ -142,6 +165,15 @@ export const useTesting = () => {
                         kind,
                         ...data,
                     });
+                    setCurrentState(old => ({
+                        ...old,
+                        state: kind === 'test'
+                            ? old.state === 'not-attempted'
+                                ? 'in-progress'
+                                : old.state
+                            : 'fail',
+                    }));
+                    resolve(data);
                     removeWsListeners();
                 }
             },
@@ -205,6 +237,11 @@ export const useTesting = () => {
             `${wsPrefix}-compiled`,
             false
         );
+
+        return {
+            id: testId,
+            activeTest: promise,
+        };
     };
 
     return { testResults, runTests, pending };
