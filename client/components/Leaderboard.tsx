@@ -20,11 +20,11 @@ const TeamRank = () => {
         <div className="flex flex-col items-center gap-4 pb-4">
             {leaderboard.map((player, index) => (
                 <Card
-                    key={player.username}
+                    key={player.user.id}
                     className="flex w-1/2 min-w-[600px] flex-row p-6 text-xl shadow-md"
                 >
                     <div className="flex w-1/3 flex-row items-center gap-2">
-                        <b>{player.username}</b>
+                        <b>{player.user.displayName || player.user.username}</b>
                         {index < 3 && (
                             <span className={trophyColor(index)}>
                                 <Trophy fill="currentColor" size="1em" />

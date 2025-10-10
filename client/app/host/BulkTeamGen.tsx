@@ -1,0 +1,212 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { useState } from 'react';
+import { randomName, randomPassword } from '@/lib/utils';
+import { ChevronLeft, ChevronRight, Loader2, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Tooltip } from '@/components/util';
+import { CreateTeam, useTeams } from '@/hooks/use-teams';
+import { toast } from '@/hooks/use-toast';
+
+export default function BulkTeamGen() {
+    const [toGenerate, setToGenerate] = useState(1);
+    const [teams, setTeams] = useState<(CreateTeam & { conflict: boolean })[]>([]);
+    const { createTeam } = useTeams();
+    const [currentTeamPage, setCurrentTeamPage] = useState(0);
+    const [loadingCreate, setLoadingCreate] = useState(false);
+
+    const generate = () => {
+        setTeams((old) => [
+            ...old,
+            ...Array.from(
+                { length: Math.max(0, Math.min(100 - old.length, toGenerate)) },
+                randomTeam
+            ),
+        ]);
+    };
+
+    const randomTeam = () => {
+        const { username, displayName } = randomName();
+
+        return {
+            username,
+            displayName,
+            password: randomPassword(),
+            conflict: false,
+        };
+    };
+
+    const regenTeam = (index: number) => {
+        setTeams((old) => old.map((t, i) => (i === index ? randomTeam() : t)));
+    };
+
+    const removeTeam = (index: number) => {
+        setTeams((old) => old.filter((_, i) => i !== index));
+    };
+
+    const add = async () => {
+        setLoadingCreate(true);
+        try {
+            await createTeam(teams);
+        } catch (ex) {
+            const x = ex as { status: number; body: string[] };
+            if (x.status === 409) {
+                setTeams(([...next]) => {
+                    for (const conflict of x.body) {
+                        const match = next.find((n) => n.username === conflict);
+                        if (match) match.conflict = true;
+                    }
+                    return next;
+                });
+            }
+            toast({
+                title: `${x.body.length} ${x.body.length === 1 ? 'name' : 'names'} conflicted with already existing teams.`,
+                variant: 'destructive',
+            });
+        }
+        setLoadingCreate(false);
+        console.log(teams);
+    };
+
+    const totalPages = Math.ceil(teams.length / 10);
+
+    return (
+        <div className="p-2">
+            <div className="flex w-full flex-col items-center space-y-4">
+                <div className="w-1/3">
+                    <Label htmlFor="num-teams">Number of teams to generate</Label>
+                    <div className="flex w-full flex-row space-x-2">
+                        <Input
+                            id="num-teams"
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={toGenerate}
+                            onChange={(s) => setToGenerate(+s.target.value)}
+                        />
+                        <Tooltip
+                            tooltip="Up to 100 teams may be added at a time"
+                            disabled={teams.length < 100}
+                        >
+                            <Button
+                                variant="secondary"
+                                onClick={generate}
+                                disabled={teams.length >= 100}
+                            >
+                                Generate {teams.length !== 0 && 'More'} Teams
+                            </Button>
+                        </Tooltip>
+                    </div>
+                    <p className="w-full pl-1 pt-1 text-[0.8rem] text-muted-foreground">
+                        Teams will not be added to the competition until you press Submit
+                    </p>
+                </div>
+
+                {teams.length !== 0 && (
+                    <div className="mx-auto flex w-5/6 flex-col space-y-4">
+                        <Table>
+                            <TableCaption>
+                                <div className="flex flex-row items-center justify-between">
+                                    Page {currentTeamPage + 1} of {totalPages}
+                                    <div className="flex space-x-2 px-2">
+                                        <Button
+                                            variant="secondary"
+                                            size="icon"
+                                            disabled={currentTeamPage === 0}
+                                            onClick={() => setCurrentTeamPage((c) => c - 1)}
+                                        >
+                                            <ChevronLeft />
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            size="icon"
+                                            disabled={currentTeamPage === totalPages - 1}
+                                            onClick={() => setCurrentTeamPage((c) => c + 1)}
+                                        >
+                                            <ChevronRight />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </TableCaption>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-1/4">Username</TableHead>
+                                    <TableHead className="w-1/4">Display Name</TableHead>
+                                    <TableHead className="w-1/4">Password</TableHead>
+                                    <TableHead className="w-1/6" />
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {teams
+                                    .slice(currentTeamPage * 10, (currentTeamPage + 1) * 10)
+                                    .map((team, i) => (
+                                        <TableRow
+                                            key={team.username}
+                                            className={team.conflict ? 'text-fail' : ''}
+                                        >
+                                            <TableCell>{team.username}</TableCell>
+                                            <TableCell>{team.displayName}</TableCell>
+                                            <TableCell>{team.password}</TableCell>
+                                            <TableCell className="space-x-2 text-right">
+                                                <Tooltip tooltip="Regenerate User">
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            regenTeam(i + currentTeamPage * 10)
+                                                        }
+                                                    >
+                                                        <RefreshCw />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip tooltip="Remove User">
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            removeTeam(i + currentTeamPage * 10)
+                                                        }
+                                                    >
+                                                        <Trash2 />
+                                                    </Button>
+                                                </Tooltip>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                )}
+
+                <div className="mx-auto flex w-1/3 flex-col space-y-4">
+                    <Tooltip
+                        tooltip="You must generate a team before submitting"
+                        disabled={teams.length !== 0}
+                    >
+                        <Button
+                            onClick={add}
+                            disabled={loadingCreate || teams.length === 0}
+                            className="w-full"
+                        >
+                            <span className="flex gap-2">
+                                {loadingCreate ? <Loader2 className="animate-spin" /> : <Plus />}{' '}
+                                Submit
+                            </span>
+                        </Button>
+                    </Tooltip>
+                </div>
+            </div>
+        </div>
+    );
+}

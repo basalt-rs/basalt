@@ -4,6 +4,7 @@ import { useAtom } from 'jotai';
 import QuestionAccordion from './QuestionAccordion';
 import TeamInspector from './TeamInspector';
 import Leaderboard from '@/components/Leaderboard';
+import BulkTeamGen from './BulkTeamGen';
 
 export default function HostPanel() {
     const [currentTab] = useAtom(currentHostTabAtom);
@@ -19,5 +20,7 @@ export default function HostPanel() {
             return <TeamInspector />;
         case 'leaderboard':
             return <Leaderboard className="p-4" />;
+        case 'gen':
+            return <BulkTeamGen />;
     }
 }

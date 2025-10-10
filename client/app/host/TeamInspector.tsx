@@ -1,4 +1,4 @@
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import {
     Select,
     SelectContent,
@@ -6,17 +6,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Wifi, WifiOff } from 'lucide-react';
-import { selectedQuestionAtom } from '@/lib/host-state';
+import { ArrowLeft, Plus, Wifi, WifiOff } from 'lucide-react';
+import { currentHostTabAtom, selectedQuestionAtom } from '@/lib/host-state';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import TeamInfo from './TeamInfo';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useTeams } from '@/hooks/use-teams';
+import * as Dialog from '@/components/ui/dialog';
+import { useState } from 'react';
+import AddTeamDialog from '@/components/AddTeamDialog';
 
 export default function TeamInspector() {
-    const { teamsList, selectedTeam, setSelectedTeam, setSelectedTeamByName } = useTeams();
+    const { teamsList, selectedTeam, setSelectedTeam, setSelectedTeamById } = useTeams();
     const [selectedQuestion, setSelectedQuestion] = useAtom(selectedQuestionAtom);
+    const [showAddTeam, setShowAddTeam] = useState(false);
+    const setCurrentTab = useSetAtom(currentHostTabAtom);
 
     const back = () => {
         if (selectedQuestion !== null) {
@@ -30,7 +35,7 @@ export default function TeamInspector() {
     return (
         <div className="flex flex-grow flex-col">
             <div
-                className={`flex flex-row items-center px-2 pt-2 ${selectedTeam === null ? 'justify-end' : 'justify-between'}`}
+                className={`flex flex-row items-center gap-2 px-2 pt-2 ${selectedTeam === null ? 'justify-end' : 'justify-between'}`}
             >
                 {selectedTeam !== null && (
                     <Button variant="ghost" className="flex" onClick={back}>
@@ -38,16 +43,38 @@ export default function TeamInspector() {
                         Back
                     </Button>
                 )}
+                {selectedTeam === null && (
+                    <Dialog.Dialog open={showAddTeam} onOpenChange={setShowAddTeam}>
+                        <Dialog.DialogTrigger asChild>
+                            <Button variant="outline" className="flex">
+                                <Plus />
+                                Add Team
+                            </Button>
+                        </Dialog.DialogTrigger>
+                        <Dialog.DialogContent>
+                            <Dialog.DialogHeader>
+                                <Dialog.DialogTitle>Add Team</Dialog.DialogTitle>
+                            </Dialog.DialogHeader>
+                            <AddTeamDialog
+                                afterSubmit={() => setShowAddTeam(false)}
+                                onBulkGenChange={() => {
+                                    setCurrentTab('gen');
+                                    setShowAddTeam(false);
+                                }}
+                            />
+                        </Dialog.DialogContent>
+                    </Dialog.Dialog>
+                )}
                 <Select
-                    value={selectedTeam ? selectedTeam.team : ''}
-                    onValueChange={(value) => setSelectedTeamByName(value)}
+                    value={selectedTeam ? selectedTeam.id : ''}
+                    onValueChange={(value) => setSelectedTeamById(value)}
                 >
                     <SelectTrigger className="flex w-fit">
                         <SelectValue placeholder="Select A Team" />
                     </SelectTrigger>
                     <SelectContent>
-                        {teamsList.map((team, index) => (
-                            <SelectItem value={team.team} key={index}>
+                        {teamsList.map((team) => (
+                            <SelectItem value={team.id} key={team.id}>
                                 <div className="flex gap-1">
                                     {!team.disconnected &&
                                     (team.lastSeenMs
@@ -57,7 +84,7 @@ export default function TeamInspector() {
                                     ) : (
                                         <WifiOff className="text-gray-300 dark:text-gray-500" />
                                     )}
-                                    {team.team}
+                                    {team.name}
                                 </div>
                             </SelectItem>
                         ))}
@@ -85,7 +112,7 @@ export default function TeamInspector() {
                                             ) : (
                                                 <WifiOff className="text-gray-300 dark:text-gray-500" />
                                             )}
-                                            {team.team}
+                                            {team.name}
                                         </span>
                                         <p>{team.score} points</p>
                                     </CardTitle>
