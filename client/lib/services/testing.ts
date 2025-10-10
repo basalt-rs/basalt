@@ -8,15 +8,22 @@ import { ToastActionElement } from '@/components/ui/toast';
 import { tokenAtom, tryFetch } from './auth';
 import { ipAtom } from './api';
 
+type ActiveKind = 'test' | 'submission';
 const testResultsAtom = atom<
     | null
     | (
         | ({ resultState: 'compile-fail' } & SubmissionHistory)
-        | { resultState: 'partial-results'; results: (TestResults | null)[] }
-        | ({ resultState: 'test-complete'; results: TestResults[]; } & SubmissionHistory)
-      ) & { kind: 'test' | 'submission' }
+        | { resultState: 'partial-results'; results: (TestResults | null)[]; cases: number; }
+        | ({ resultState: 'test-complete'; results: TestResults[]; cases: number; } & SubmissionHistory)
+    ) & { kind: ActiveKind }
 
 >(null);
+const pendingAtom = atom<ActiveKind | null>(get => {
+    const x = get(testResultsAtom);
+    return x !== null && x.resultState === 'partial-results'
+        ? x.kind
+        : null;
+});
 export const useTesting = () => {
     const [testResults, setTestResults] = useAtom(testResultsAtom);
     const { ws } = useWebSocket();
@@ -27,32 +34,34 @@ export const useTesting = () => {
     const { setCurrentState } = useSubmissionStates();
     const [token] = useAtom(tokenAtom);
     const [ip] = useAtom(ipAtom);
+    const [pending] = useAtom(pendingAtom);
 
-
-    const runTests = async (kind: 'test' | 'submission') => {
+    const runTests = async (kind: ActiveKind) => {
         if (token === null) return;
         if (ip === null) return;
         if (selectedLanguage === undefined) return;
 
-        setTestResults({
-            resultState: 'partial-results',
-            kind,
-            results: currentQuestion.tests.map(() => null),
-        });
-
-        const out = await tryFetch<string>(`/questions/${currentQuestionIdx}/${kind}s`, token, ip, {
+        const out = await tryFetch<{ id: string; cases: number; }>(`/questions/${currentQuestionIdx}/${kind}s`, token, ip, {
             method: 'POST',
             bodyJson: {
                 language: selectedLanguage.toLowerCase(),
                 solution: editorContent,
             },
         });
+
         if (out === null) {
             setTestResults(null);
             return;
         }
 
-        const testId: string = out;
+        setTestResults({
+            resultState: 'partial-results',
+            kind,
+            results: Array.from({ length: out.cases }, () => null),
+            cases: out.cases,
+        });
+
+        const testId: string = out.id;
         const wsPrefix = `tests-${currentQuestionIdx}`;
         const removeWsListeners = () => {
             ws.removeEvent('tests-error', `${wsPrefix}-error`);
@@ -89,9 +98,11 @@ export const useTesting = () => {
                 setTestResults({
                     resultState: 'test-complete',
                     kind,
+                    cases: out.cases,
                     ...data,
                 });
                 removeWsListeners();
+                setCurrentState(s => ({ ...s, remainingAttempts: data.remainingAttempts }));
             }
         }, `${wsPrefix}-complete`, false);
 
@@ -113,6 +124,7 @@ export const useTesting = () => {
                         console.error(`Recieved 'test-results' for '${id}' while results were in state '${old?.resultState}'`);
                         return old;
                     }
+
                     console.log('before', old.results);
                     const newResults = old === null ? [] : [...old.results];
                     for (const result of results) {
@@ -123,6 +135,7 @@ export const useTesting = () => {
                     return {
                         resultState: 'partial-results',
                         kind,
+                        cases: old.cases,
                         results: newResults,
                     };
                 });
@@ -130,5 +143,5 @@ export const useTesting = () => {
         }, `${wsPrefix}-results`, false);
     };
 
-    return { testResults, runTests };
+    return { testResults, runTests, pending };
 };

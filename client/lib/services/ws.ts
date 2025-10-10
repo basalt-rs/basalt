@@ -30,10 +30,18 @@ type EVENT_MAPPING = {
     'team-disconnected': TeamInfo;
 
     // Private events
-    'test-results': { id: string; results: TestResults[] };
+    'test-results': {
+        id: string;
+        // The number of completed test cases
+        completed: number;
+        results: TestResults[];
+    };
     'tests-error': { id: string; };
     'tests-cancelled': { id: string; };
-    'tests-complete': { results: TestResults[] } & SubmissionHistory;
+    'tests-complete': {
+        results: TestResults[];
+        remainingAttempts: number | null;
+    } & SubmissionHistory;
     'tests-compile-fail': SubmissionHistory;
 };
 

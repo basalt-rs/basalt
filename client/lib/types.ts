@@ -49,6 +49,8 @@ export interface SubmissionHistory {
     test_only: boolean,
     state: SubmissionState,
     score: number,
+    passed: number,
+    failed: number,
     success: boolean,
     // milliseconds
     timeTaken: number,

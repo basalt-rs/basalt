@@ -31,7 +31,7 @@ import { isTauri } from '@tauri-apps/api/core';
 import Link from 'next/link';
 import { ipAtom } from '@/lib/services/api';
 import { download } from '@/lib/tauri';
-import { TestResultsComp } from '@/components/TestResults';
+import TestResultsPanel from '@/components/TestResults';
 import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
@@ -52,7 +52,7 @@ const EditorButtons = () => {
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
     const [ip] = useAtom(ipAtom);
-    const { loading, runTests, submit } = useTesting();
+    const { pending, runTests } = useTesting();
     const { currentState } = useSubmissionStates();
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
     const setCurrQuestionIdx = useSetAtom(currQuestionIdxAtom);
@@ -84,11 +84,12 @@ const EditorButtons = () => {
     };
 
     const submitSolution = () => {
-        submit(
-            <ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx((n) => n + 1)}>
-                Next Question
-            </ToastAction>
-        );
+        runTests('submission');
+        // submit(
+        //     <ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx((n) => n + 1)}>
+        //         Next Question
+        //     </ToastAction>
+        // );
     };
 
     return (
@@ -122,8 +123,8 @@ const EditorButtons = () => {
             </div>
             <div className="flex flex-row">
                 <Tooltip tooltip="Run Tests">
-                    <Button size="icon" variant="ghost" onClick={() => runTests('test')} disabled={!!loading}>
-                        {loading === 'test' ? (
+                    <Button size="icon" variant="ghost" onClick={() => runTests('test')} disabled={!!pending}>
+                        {pending === 'test' ? (
                             <Loader2 className="animate-spin text-in-progress" />
                         ) : (
                             <FlaskConical className="text-in-progress" />
@@ -160,12 +161,12 @@ const EditorButtons = () => {
                         variant="ghost"
                         onClick={submitSolution}
                         disabled={
-                            !!loading ||
+                            !!pending ||
                             currentState?.state === 'pass' ||
                             currentState?.remainingAttempts === 0
                         }
                     >
-                        {loading === 'submit' ? (
+                        {pending === 'submission' ? (
                             <Loader2 className="animate-spin text-pass" />
                         ) : (
                             <SendHorizonal className="text-pass" />
@@ -213,7 +214,7 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
                             <CodeEditor />
                         </div>
                     </ResizablePanel>
-                    <ResizableHandle withHandle />
+                    <ResizableHandle />
                     {testResults && (
                         <ResizablePanel
                             defaultSize={100}
@@ -222,9 +223,7 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
                             collapsedSize={0}
                             className="h-full"
                         >
-                            <ScrollArea className="h-full w-full">
-                                <TestResultsPanel />
-                            </ScrollArea>
+                            <TestResultsPanel />
                         </ResizablePanel>
                     )}
                 </ResizablePanelGroup>
@@ -238,14 +237,6 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
         default:
             return 'unreachable';
     }
-};
-
-const TestResultsPanel = () => {
-    return (
-        <div className="w-full">
-            <TestResultsComp />
-        </div>
-    );
 };
 
 const Summary = () => {

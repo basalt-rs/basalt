@@ -9,6 +9,9 @@ export default {
         './lib/*.{js,ts,jsx,tsx,mdx}',
     ],
     theme: {
+        fontFamily: {
+            mono: ['monospace']
+        },
         extend: {
             colors: {
                 pass: '#03dd70',
