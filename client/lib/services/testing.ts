@@ -25,7 +25,7 @@ export const useTesting = () => {
         try {
             const { results, failed, passed } = await ws.sendAndWait({
                 kind: 'run-test',
-                language: selectedLanguage?.toLowerCase() || 'java',
+                language: selectedLanguage?.name.toLowerCase() || 'java',
                 problem: currentQuestionIdx,
                 solution: editorContent,
             });
@@ -42,7 +42,7 @@ export const useTesting = () => {
         try {
             const res = await ws.sendAndWait({
                 kind: 'submit',
-                language: selectedLanguage?.toLowerCase() || 'java',
+                language: selectedLanguage?.name.toLowerCase() || 'java',
                 problem: currentQuestionIdx,
                 solution: editorContent,
             });

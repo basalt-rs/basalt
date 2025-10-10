@@ -1,3 +1,4 @@
+import { LanguageSyntax } from './editor/lang';
 import { User } from './services/auth';
 
 export type TestState = 'pass' | 'fail' | 'in-progress' | 'not-attempted';
@@ -9,7 +10,7 @@ export interface Test {
 }
 
 export interface QuestionResponse {
-    languages?: Languages[];
+    languages: Language[];
     title: string;
     points: number;
     description?: string;
@@ -57,9 +58,9 @@ export interface LeaderboardEntry {
     submissionStates: TestState[];
 }
 
-export interface Languages {
+export interface Language {
     name: string;
-    syntax: string;
+    syntax: LanguageSyntax;
 }
 
 export interface Announcement {

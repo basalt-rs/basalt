@@ -59,8 +59,8 @@ const EditorButtons = () => {
 
     // Defaults to first language if no language selected
     useEffect(() => {
-        if (currQuestion?.languages?.length) {
-            setSelectedLanguage((prev) => prev ?? currQuestion?.languages?.[0]?.name);
+        if (currQuestion?.languages.length) {
+            setSelectedLanguage((prev) => prev ?? currQuestion.languages[0]);
         }
     }, [currQuestion, setSelectedLanguage]);
 
@@ -173,12 +173,12 @@ const EditorButtons = () => {
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
-                    <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                    <Select value={selectedLanguage?.name} onValueChange={(v) => setSelectedLanguage(currQuestion.languages.find(l => l.name === v) ?? null)}>
                         <SelectTrigger className="w-56">
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>
                         <SelectContent>
-                            {currQuestion?.languages?.map((l) => (
+                            {currQuestion?.languages.map((l) => (
                                 <SelectItem key={l.name} value={l.name}>
                                     {l.name}
                                 </SelectItem>

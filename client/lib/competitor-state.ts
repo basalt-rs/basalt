@@ -1,6 +1,7 @@
 import { atomWithStorage } from 'jotai/utils';
 import { atom } from 'jotai';
 import { currQuestionIdxAtom } from './services/questions';
+import { Language } from './types';
 
 export interface EditorSettings {
     theme: string;
@@ -55,7 +56,7 @@ export const editorContentAtom = atom(
     }
 );
 
-export const selectedLanguageAtom = atom<string>();
+export const selectedLanguageAtom = atom<Language | null>(null);
 
 export interface TestResult {
     state: 'pass' | 'fail';
