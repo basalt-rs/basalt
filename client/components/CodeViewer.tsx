@@ -1,53 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import AceEditor from 'react-ace';
+import React, { useEffect, useRef, useState } from 'react';
+import CodeMirror, { Extension, ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { useAtom } from 'jotai';
 import { editorSettingsAtom } from '@/lib/competitor-state';
-import 'ace-builds/src-noconflict/theme-monokai';
-import('ace-builds/src-noconflict/mode-javascript');
-import 'ace-builds/src-noconflict/keybinding-vim';
-import 'ace-builds/src-noconflict/keybinding-emacs';
-import 'ace-builds/src-noconflict/keybinding-sublime';
-import 'ace-builds/src-noconflict/ext-language_tools';
+import { cn } from '@/lib/utils';
+import { type LanguageSyntax } from '@/lib/editor/langs';
+import { getExtensions } from '@/lib/editor';
 
-export const CodeViewer = ({ code, className = '' }: { code: string; className?: string }) => {
-    const [editorSettings] = useAtom(editorSettingsAtom);
-    const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
+export const CodeViewer = ({
+    code,
+    language = 'javascript',
+    className = '',
+}: {
+    code: string;
+    language?: LanguageSyntax;
+    className?: string;
+}) => {
+    const [settings] = useAtom(editorSettingsAtom);
+    const $editor = useRef<ReactCodeMirrorRef>(null);
+    const [extensions, setExtensions] = useState<Extension[]>([]);
 
     useEffect(() => {
-        (async () => {
-            await import(`ace-builds/src-noconflict/theme-${editorSettings.theme}`);
-            setEditorTheme(editorSettings.theme);
-
-            if (editorSettings.keybind !== 'ace') {
-                await import(`ace-builds/src-noconflict/keybinding-${editorSettings.keybind}`);
-            }
-        })();
-    }, [editorSettings]);
+        setExtensions(getExtensions(settings, language));
+        if ($editor.current) {
+            // TODO: this seems less than ideal
+            $editor.current.editor?.querySelectorAll<HTMLElement>('.cm-editor *').forEach((e) => {
+                e.style.fontSize = `${settings.fontSize}px`;
+            });
+        }
+    }, [language, settings, $editor]);
 
     return (
-        <AceEditor
-            mode="javascript"
-            theme={editorTheme}
-            name="code-editor"
-            editorProps={{ $blockScrolling: true }}
-            width="100%"
-            height="100%"
+        <CodeMirror
+            extensions={extensions}
+            ref={$editor}
+            autoFocus
+            readOnly
+            theme="none"
+            className={cn('h-full w-full', className)}
             value={code}
-            className={className}
-            setOptions={{
-                readOnly: true,
-                fontSize: editorSettings.fontSize,
-                tabSize: editorSettings.tabSize,
-                useSoftTabs: editorSettings.useSoftTabs,
-                enableBasicAutocompletion: editorSettings.enableBasicAutocompletion,
-                enableLiveAutocompletion: editorSettings.enableLiveAutocompletion,
-                highlightActiveLine: editorSettings.highlightActiveLine,
-                showGutter: editorSettings.showGutter,
-                displayIndentGuides: editorSettings.displayIndentGuides,
-                relativeLineNumbers: editorSettings.relativeLineNumbers,
-                foldStyle: editorSettings.foldStyle,
-            }}
-            keyboardHandler={editorSettings.keybind}
+            basicSetup={false}
         />
     );
 };
