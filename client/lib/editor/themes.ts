@@ -1,4 +1,4 @@
-import * as allThemes from '@uiw/codemirror-themes-all'
+import * as allThemes from '@uiw/codemirror-themes-all';
 
 const themes = {
     abcdef: {

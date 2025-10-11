@@ -17,7 +17,7 @@ import { EditorSettings, Keymap, LineNumbers } from '@/lib/editor/settings';
 import themes, { Theme } from '@/lib/editor/themes';
 import { ScrollArea } from './ui/scroll-area';
 
-type Option<K> = { id: K; label: string; description?: string; };
+type Option<K> = { id: K; label: string; description?: string };
 
 const TOGGLES: Option<keyof EditorSettings>[] = [
     { id: 'highlightActiveLine', label: 'Highlight Active Line' },
@@ -42,15 +42,6 @@ const LINE_NUMBERS: Option<LineNumbers>[] = [
     { id: 'relative', label: 'Relative' },
 ];
 
-const CURSOR_STYLES = [
-    { id: 'ace', label: 'Ace (Default)' },
-    { id: 'slim', label: 'Slim' },
-    { id: 'smooth', label: 'Smooth' },
-    { id: 'smooth-slim', label: 'Smooth and Slim' },
-    { id: 'wide', label: 'Wide' },
-] as const;
-
-
 const TABS = [
     { id: 'general', label: 'General', disabled: true },
     { id: 'editor', label: 'Editor', disabled: false },
@@ -61,13 +52,13 @@ const parseInRange = (num: string, min: number, max?: number): number => {
     if (isNaN(n) || n <= min) return min;
     if (max && n >= max) return max;
     return n;
-}
+};
 
 const EditorTab = () => {
     const [editorSettings, setEditorSettings] = useAtom(editorSettingsAtom);
 
     return (
-        <div className="flex flex-col gap-3 m-2">
+        <div className="m-2 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
                 <Label className="font-bold">Theme</Label>
                 <Select
@@ -97,7 +88,8 @@ const EditorTab = () => {
                     value={editorSettings.lineNumbers}
                     onValueChange={(lineNumbers: LineNumbers) =>
                         setEditorSettings({ ...editorSettings, lineNumbers })
-                    }>
+                    }
+                >
                     <SelectTrigger>
                         <SelectValue placeholder="Select a line number style" />
                     </SelectTrigger>
@@ -182,7 +174,6 @@ const EditorTab = () => {
                     </div>
                 ))}
             </div>
-
         </div>
     );
 };
@@ -191,7 +182,7 @@ export default function Settings() {
     const [selectedItem, setSelectedItem] = useState<(typeof TABS)[number]['id']>('editor');
 
     return (
-        <div className="flex w-full flex-row gap-8 h-full">
+        <div className="flex h-full w-full flex-row gap-8">
             <div className="flex w-1/4 flex-col space-y-2">
                 <h1 className="flex justify-center font-bold">Configuration Options</h1>
                 {TABS.map((t, i) => (
@@ -206,7 +197,7 @@ export default function Settings() {
                 ))}
             </div>
 
-            <ScrollArea className="p-2 flex-grow">
+            <ScrollArea className="flex-grow p-2">
                 {selectedItem === 'editor' && <EditorTab />}
             </ScrollArea>
         </div>

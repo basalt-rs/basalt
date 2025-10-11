@@ -173,7 +173,14 @@ const EditorButtons = () => {
                     </Button>
                 </Tooltip>
                 <span className="ml-auto">
-                    <Select value={selectedLanguage?.name} onValueChange={(v) => setSelectedLanguage(currQuestion.languages.find(l => l.name === v) ?? null)}>
+                    <Select
+                        value={selectedLanguage?.name}
+                        onValueChange={(v) =>
+                            setSelectedLanguage(
+                                currQuestion.languages.find((l) => l.name === v) ?? null
+                            )
+                        }
+                    >
                         <SelectTrigger className="w-56">
                             <SelectValue placeholder="Programming Language" />
                         </SelectTrigger>

@@ -110,7 +110,7 @@ export default function UserMenu() {
                 </DropdownMenu>
 
                 <Dialog open={settingsOpen} onOpenChange={setOpen}>
-                    <DialogContent className="h-[60vh] max-w-[60vw] flex flex-col">
+                    <DialogContent className="flex h-[60vh] max-w-[60vw] flex-col">
                         <DialogHeader>
                             <DialogTitle className="flex justify-center">Settings</DialogTitle>
                         </DialogHeader>

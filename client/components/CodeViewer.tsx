@@ -1,26 +1,44 @@
-import React from 'react';
-import { StreamLanguage } from '@codemirror/language';
-import CodeMirror from '@uiw/react-codemirror';
+import React, { useEffect, useRef, useState } from 'react';
+import CodeMirror, { Extension, ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { useAtom } from 'jotai';
 import { editorSettingsAtom } from '@/lib/competitor-state';
-import { vim } from '@replit/codemirror-vim';
 import { cn } from '@/lib/utils';
-import langs, { type LanguageSyntax } from '@/lib/editor/lang';
+import { type LanguageSyntax } from '@/lib/editor/langs';
+import { getExtensions } from '@/lib/editor';
 
-export const CodeViewer = ({ code, language = 'javascript', className = '' }: { code: string; language?: LanguageSyntax; className?: string }) => {
-    const [editorSettings] = useAtom(editorSettingsAtom);
+export const CodeViewer = ({
+    code,
+    language = 'javascript',
+    className = '',
+}: {
+    code: string;
+    language?: LanguageSyntax;
+    className?: string;
+}) => {
+    const [settings] = useAtom(editorSettingsAtom);
+    const $editor = useRef<ReactCodeMirrorRef>(null);
+    const [extensions, setExtensions] = useState<Extension[]>([]);
+
+    useEffect(() => {
+        setExtensions(getExtensions(settings, language));
+        if ($editor.current) {
+            // TODO: this seems less than ideal
+            $editor.current.editor?.querySelectorAll<HTMLElement>('.cm-editor *').forEach((e) => {
+                e.style.fontSize = `${settings.fontSize}px`;
+            });
+        }
+    }, [language, settings, $editor]);
 
     return (
         <CodeMirror
-            extensions={[
-                StreamLanguage.define(langs[language]),
-                vim(),
-            ]}
-            theme="dark"
-            height="100%"
-            className={cn("w-full h-full", className)}
-            value={code}
+            extensions={extensions}
+            ref={$editor}
+            autoFocus
             readOnly
+            theme="none"
+            className={cn('h-full w-full', className)}
+            value={code}
+            basicSetup={false}
         />
     );
 };

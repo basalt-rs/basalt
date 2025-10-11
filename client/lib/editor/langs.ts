@@ -4,7 +4,21 @@ import { apl } from '@codemirror/legacy-modes/mode/apl';
 import { asciiArmor } from '@codemirror/legacy-modes/mode/asciiarmor';
 import { asterisk } from '@codemirror/legacy-modes/mode/asterisk';
 import { brainfuck } from '@codemirror/legacy-modes/mode/brainfuck';
-import { c, cpp, java, csharp, scala, kotlin, shader, nesC, objectiveC, objectiveCpp, squirrel, ceylon, dart } from '@codemirror/legacy-modes/mode/clike';
+import {
+    c,
+    cpp,
+    java,
+    csharp,
+    scala,
+    kotlin,
+    shader,
+    nesC,
+    objectiveC,
+    objectiveCpp,
+    squirrel,
+    ceylon,
+    dart,
+} from '@codemirror/legacy-modes/mode/clike';
 import { clojure } from '@codemirror/legacy-modes/mode/clojure';
 import { cmake } from '@codemirror/legacy-modes/mode/cmake';
 import { cobol } from '@codemirror/legacy-modes/mode/cobol';
@@ -76,7 +90,21 @@ import { smalltalk } from '@codemirror/legacy-modes/mode/smalltalk';
 import { solr } from '@codemirror/legacy-modes/mode/solr';
 import { sparql } from '@codemirror/legacy-modes/mode/sparql';
 import { spreadsheet } from '@codemirror/legacy-modes/mode/spreadsheet';
-import { standardSQL, msSQL, mySQL, mariaDB, sqlite, cassandra, plSQL, hive, pgSQL, gql, gpSQL, sparkSQL, esper } from '@codemirror/legacy-modes/mode/sql';
+import {
+    standardSQL,
+    msSQL,
+    mySQL,
+    mariaDB,
+    sqlite,
+    cassandra,
+    plSQL,
+    hive,
+    pgSQL,
+    gql,
+    gpSQL,
+    sparkSQL,
+    esper,
+} from '@codemirror/legacy-modes/mode/sql';
 import { stex, stexMath } from '@codemirror/legacy-modes/mode/stex';
 import { stylus } from '@codemirror/legacy-modes/mode/stylus';
 import { swift } from '@codemirror/legacy-modes/mode/swift';
@@ -101,8 +129,6 @@ import { xQuery } from '@codemirror/legacy-modes/mode/xquery';
 import { yacas } from '@codemirror/legacy-modes/mode/yacas';
 import { yaml } from '@codemirror/legacy-modes/mode/yaml';
 import { z80, ez80 } from '@codemirror/legacy-modes/mode/z80';
-
-
 
 // Exports generated with:
 // grep 'export declare const .*' mode/*.d.ts | tr '/ :' '   ' | awk -F' ' 'BEGIN { print "const langs: Record<string, StreamParser<unknown>> = {" } { print "    " $6 ","; if (tolower($6) != $6) print "    " tolower($6)": "$6"," } END { print "\n};\nexport default langs;" }'

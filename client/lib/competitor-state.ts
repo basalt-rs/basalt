@@ -4,7 +4,10 @@ import { currQuestionIdxAtom } from './services/questions';
 import { Language } from './types';
 import { defaultEditorSettings, EditorSettings } from './editor/settings';
 
-export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settings', defaultEditorSettings);
+export const editorSettingsAtom = atomWithStorage<EditorSettings>(
+    'editor-settings',
+    defaultEditorSettings
+);
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
 
 const editorsAtom = atomWithStorage<string[]>('editors', []);

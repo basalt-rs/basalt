@@ -1,4 +1,4 @@
-import { Theme } from "./themes";
+import { Theme } from './themes';
 
 export type Keymap = 'default' | 'vscode' | 'vim' | 'emacs';
 export type LineNumbers = 'off' | 'normal' | 'relative';
