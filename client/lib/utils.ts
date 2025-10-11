@@ -31,6 +31,27 @@ export const relativeTime = (date: Date | string | number) => {
     return RTF.format(elapsedHours, 'hour');
 };
 
+export const formatDuration = (milliseconds: number): string => {
+    const result = [];
+    if (milliseconds >= 60 * 1000) {
+        const mins = Math.floor((milliseconds / 60) * 1000);
+        result.push(mins + 'm');
+        milliseconds %= 60 * 1000;
+    }
+
+    if (milliseconds >= 1000) {
+        const secs = Math.floor(milliseconds / 1000);
+        result.push(secs + 's');
+        milliseconds %= 1000;
+    }
+
+    if (milliseconds > 0) {
+        result.push(milliseconds + 'ms');
+    }
+
+    return result.join(' ');
+};
+
 export const titleCase = (s: string): string => s[0].toUpperCase() + s.slice(1).toLowerCase();
 
 export const randomName = () => {

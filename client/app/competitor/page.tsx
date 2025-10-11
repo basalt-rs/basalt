@@ -31,7 +31,7 @@ import { isTauri } from '@tauri-apps/api/core';
 import Link from 'next/link';
 import { ipAtom } from '@/lib/services/api';
 import { download } from '@/lib/tauri';
-import { TestResults } from '@/components/TestResults';
+import TestResultsPanel from '@/components/TestResults';
 import { useTesting } from '@/lib/services/testing';
 import { Status } from '@/components/Status';
 import { useAnnouncements } from '@/lib/services/announcement';
@@ -46,16 +46,18 @@ import {
 } from '@/components/ui/table';
 import { ToastAction } from '@radix-ui/react-toast';
 import { QuestionDetails } from '@/components/QuestionDetails';
+import { toast } from '@/hooks';
 
 const EditorButtons = () => {
     const setEditorContent = useSetAtom(editorContentAtom);
     const fileUploadRef = useRef<HTMLInputElement>(null);
     const [currQuestion] = useAtom(currQuestionAtom);
     const [ip] = useAtom(ipAtom);
-    const { loading, runTests, submit } = useTesting();
+    const { pending, runTests } = useTesting();
     const { currentState } = useSubmissionStates();
     const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
-    const setCurrQuestionIdx = useSetAtom(currQuestionIdxAtom);
+    const [currQuestionIdx, setCurrQuestionIdx] = useAtom(currQuestionIdxAtom);
+    const [allQuestions] = useAtom(allQuestionsAtom);
 
     // Defaults to first language if no language selected
     useEffect(() => {
@@ -83,12 +85,64 @@ const EditorButtons = () => {
         event.target.value = '';
     };
 
-    const submitSolution = () => {
-        submit(
-            <ToastAction altText="Next Question" onClick={() => setCurrQuestionIdx((n) => n + 1)}>
-                Next Question
-            </ToastAction>
-        );
+    const submitSolution = async () => {
+        const ret = await runTests('submission');
+        if (ret === null) return;
+        const history = await ret.activeTest;
+        if (history.compileResult === 'runtime-fail' || history.compileResult === 'timed-out') {
+            toast({
+                title: 'Compilation Error!',
+                variant: 'destructive',
+                description: currentState?.remainingAttempts
+                    ? `Your solution could not be compiled!  You have ${currentState?.remainingAttempts} ${currentState?.remainingAttempts === 1 ? 'attempt' : 'attempts'} left.`
+                    : `Your solution could not be compiled!`,
+            });
+            return;
+        }
+
+        switch (history.state) {
+            case 'failed':
+            case 'started':
+                {
+                    console.error(
+                        `Got history in state '${history.state}' after testing "finished"`
+                    );
+                }
+                break;
+            case 'finished':
+                {
+                    if (history.success) {
+                        toast({
+                            title: 'Solution Passed!',
+                            variant: 'success',
+                            description: 'Great Work!',
+                            action:
+                                currQuestionIdx < allQuestions.length - 1 ? (
+                                    <ToastAction
+                                        altText="Next Question"
+                                        onClick={() => setCurrQuestionIdx((n) => n + 1)}
+                                    >
+                                        Next Question
+                                    </ToastAction>
+                                ) : undefined,
+                        });
+                    } else {
+                        toast({
+                            title: `Your solution passed ${history.passed} out of ${history.failed + history.passed} tests.`,
+                            description:
+                                currentState!.remainingAttempts !== null &&
+                                `You have ${currentState!.remainingAttempts} ${currentState!.remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining`,
+                            variant: 'destructive',
+                        });
+                    }
+                }
+                break;
+            case 'cancelled':
+                {
+                    // we can ignore this
+                }
+                break;
+        }
     };
 
     return (
@@ -122,8 +176,13 @@ const EditorButtons = () => {
             </div>
             <div className="flex flex-row">
                 <Tooltip tooltip="Run Tests">
-                    <Button size="icon" variant="ghost" onClick={runTests} disabled={!!loading}>
-                        {loading === 'test' ? (
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => runTests('test')}
+                        disabled={!!pending}
+                    >
+                        {pending === 'test' ? (
                             <Loader2 className="animate-spin text-in-progress" />
                         ) : (
                             <FlaskConical className="text-in-progress" />
@@ -160,12 +219,12 @@ const EditorButtons = () => {
                         variant="ghost"
                         onClick={submitSolution}
                         disabled={
-                            !!loading ||
+                            !!pending ||
                             currentState?.state === 'pass' ||
                             currentState?.remainingAttempts === 0
                         }
                     >
-                        {loading === 'submit' ? (
+                        {pending === 'submission' ? (
                             <Loader2 className="animate-spin text-pass" />
                         ) : (
                             <SendHorizonal className="text-pass" />
@@ -192,16 +251,16 @@ const EditorButtons = () => {
 };
 
 const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) => {
-    const { loading, testResults, clearTestResults } = useTesting();
+    const { testResults, resetTestResults } = useTesting();
     const [currQuestionIdx] = useAtom(currQuestionIdxAtom);
     const prevIdx = useRef(currQuestionIdx);
 
     useEffect(() => {
         if (prevIdx.current !== currQuestionIdx) {
-            clearTestResults();
+            resetTestResults();
             prevIdx.current = currQuestionIdx;
         }
-    }, [currQuestionIdx, clearTestResults]);
+    }, [currQuestionIdx, resetTestResults]);
 
     switch (tab) {
         case 'text-editor':
@@ -213,8 +272,8 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
                             <CodeEditor />
                         </div>
                     </ResizablePanel>
-                    <ResizableHandle withHandle />
-                    {(loading || testResults) && (
+                    <ResizableHandle />
+                    {testResults && (
                         <ResizablePanel
                             defaultSize={100}
                             minSize={10}
@@ -222,9 +281,7 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
                             collapsedSize={0}
                             className="h-full"
                         >
-                            <ScrollArea className="h-full w-full">
-                                <TestResultsPanel />
-                            </ScrollArea>
+                            <TestResultsPanel />
                         </ResizablePanel>
                     )}
                 </ResizablePanelGroup>
@@ -238,19 +295,6 @@ const TabContent = ({ tab }: { tab: ExtractAtomValue<typeof currentTabAtom> }) =
         default:
             return 'unreachable';
     }
-};
-
-const TestResultsPanel = () => {
-    const { loading } = useTesting();
-    return (
-        <div className="w-full">
-            {loading ? (
-                <Loader2 size={64} className="mx-auto my-4 animate-spin text-in-progress" />
-            ) : (
-                <TestResults />
-            )}
-        </div>
-    );
 };
 
 const Summary = () => {
