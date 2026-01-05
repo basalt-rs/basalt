@@ -1,62 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import AceEditor from 'react-ace';
+import React, { useEffect, useRef, useState } from 'react';
+import CodeMirror, { Extension, ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { useAtom } from 'jotai';
 import {
     editorContentAtom,
     editorSettingsAtom,
     selectedLanguageAtom,
 } from '@/lib/competitor-state';
-import 'ace-builds/esm-resolver';
-import 'ace-builds/src-noconflict/theme-monokai';
-import 'ace-builds/src-noconflict/ext-language_tools';
-import { currQuestionAtom } from '@/lib/services/questions';
+import { getExtensions } from '@/lib/editor';
 
 export default function CodeEditor() {
     const [editorContent, setEditorContent] = useAtom(editorContentAtom);
-    const [editorSettings] = useAtom(editorSettingsAtom);
-    const [languageValue] = useAtom(selectedLanguageAtom);
-    const [editorTheme, setEditorTheme] = useState(editorSettings.theme);
-    const [question] = useAtom(currQuestionAtom);
+    const [settings] = useAtom(editorSettingsAtom);
+    const [language] = useAtom(selectedLanguageAtom);
+    const $editor = useRef<ReactCodeMirrorRef>(null);
+    const [extensions, setExtensions] = useState<Extension[]>([]);
 
     useEffect(() => {
-        (async () => {
-            await import(`ace-builds/src-noconflict/theme-${editorSettings.theme}`);
-            setEditorTheme(editorSettings.theme);
-
-            if (editorSettings.keybind !== 'ace') {
-                await import(`ace-builds/src-noconflict/keybinding-${editorSettings.keybind}`);
-            }
-            if (languageValue) {
-                await import(
-                    `ace-builds/src-noconflict/mode-${question?.languages?.find((l) => l.name === languageValue)?.syntax || 'plaintext'}`
-                );
-            }
-        })();
-    }, [editorSettings, languageValue, question]);
+        setExtensions(getExtensions(settings, language?.syntax));
+        if ($editor.current) {
+            // TODO: this seems less than ideal
+            $editor.current.editor?.querySelectorAll<HTMLElement>('.cm-editor *').forEach((e) => {
+                e.style.fontSize = `${settings.fontSize}px`;
+            });
+        }
+    }, [language, settings, $editor]);
 
     return (
-        <AceEditor
-            mode={question?.languages?.find((l) => l.name === languageValue)?.syntax || 'plaintext'}
-            theme={editorTheme}
-            name="code-editor"
-            editorProps={{ $blockScrolling: true }}
-            width="100%"
-            height="100%"
+        <CodeMirror
+            extensions={extensions}
+            ref={$editor}
+            autoFocus
+            theme="none"
+            className="h-full w-full"
             value={editorContent}
             onChange={setEditorContent}
-            setOptions={{
-                fontSize: editorSettings.fontSize,
-                tabSize: editorSettings.tabSize,
-                useSoftTabs: editorSettings.useSoftTabs,
-                enableBasicAutocompletion: editorSettings.enableBasicAutocompletion,
-                enableLiveAutocompletion: editorSettings.enableLiveAutocompletion,
-                highlightActiveLine: editorSettings.highlightActiveLine,
-                showGutter: editorSettings.showGutter,
-                displayIndentGuides: editorSettings.displayIndentGuides,
-                relativeLineNumbers: editorSettings.relativeLineNumbers,
-                foldStyle: editorSettings.foldStyle,
-            }}
-            keyboardHandler={editorSettings.keybind}
+            basicSetup={false}
         />
     );
 }

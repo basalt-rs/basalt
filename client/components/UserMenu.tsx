@@ -1,7 +1,7 @@
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { User, Sun, Moon, SunMoon, LogOut, Settings, Bell } from 'lucide-react';
+import { User, Sun, Moon, SunMoon, LogOut, SettingsIcon, Bell } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useAtom } from 'jotai';
 import { currentUserAtom } from '@/lib/services/auth';
 import { useLogin } from '@/lib/services/auth';
-import { Editor } from './Settings';
+import Settings from './Settings';
 import { useRouter } from 'next/navigation';
 import { announcementsAtom } from '@/lib/services/announcement';
 import { Separator } from './ui/separator';
@@ -98,7 +98,7 @@ export default function UserMenu() {
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>
                             <DropdownMenuItem onClick={() => setOpen(true)}>
-                                <Settings /> Settings
+                                <SettingsIcon /> Settings
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={handleLogout}>
@@ -110,11 +110,13 @@ export default function UserMenu() {
                 </DropdownMenu>
 
                 <Dialog open={settingsOpen} onOpenChange={setOpen}>
-                    <DialogContent className="min-w-[600px] max-w-[40vw]">
+                    <DialogContent className="flex h-[60vh] max-w-[60vw] flex-col">
                         <DialogHeader>
                             <DialogTitle className="flex justify-center">Settings</DialogTitle>
                         </DialogHeader>
-                        <Editor />
+                        <div className="h-[90%]">
+                            <Settings />
+                        </div>
                     </DialogContent>
                 </Dialog>
             </div>
