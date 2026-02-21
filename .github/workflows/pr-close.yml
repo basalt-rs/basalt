@@ -21,4 +21,4 @@ jobs:
 
             - name: Delete PR image tag
               run: |
-                  skopeo delete docker://ghcr.io/${{ github.repository }}:dev-pr-${{ github.event.number }}
+                  skopeo delete --creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" docker://ghcr.io/${{ github.repository }}:dev-pr-${{ github.event.number }}
