@@ -131,14 +131,12 @@ jobs:
                   workspaces: "./client/src-tauri -> target"
 
             - name: install frontend dependencies
-              # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
-              run: npm install # change this to npm or pnpm depending on which one you use.
+              run: npm install
               working-directory: ./client
 
-            # Skipped because of https://github.com/basalt-rs/basalt/issues/65
-            # - name: build frontend
-            #   run: npm run build
-            #   working-directory: ./client
+            - name: build frontend
+              run: npm run build
+              working-directory: ./client
 
             - name: ensure app builds
               run: cargo check --release

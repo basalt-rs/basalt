@@ -1,40 +1,13 @@
 import { atomWithStorage } from 'jotai/utils';
 import { atom } from 'jotai';
 import { currQuestionIdxAtom } from './services/questions';
+import { Language } from './types';
+import { defaultEditorSettings, EditorSettings } from './editor/settings';
 
-export interface EditorSettings {
-    theme: string;
-    useSoftTabs: boolean;
-    showGutter: boolean;
-    enableBasicAutocompletion: boolean;
-    enableLiveAutocompletion: boolean;
-    highlightActiveLine: boolean;
-    relativeLineNumbers: boolean;
-    displayIndentGuides: boolean;
-    fontSize: number;
-    tabSize: number;
-    keybind: 'ace' | 'vscode' | 'vim' | 'emacs' | 'sublime' | undefined;
-    cursorStyle: 'ace' | 'slim' | 'smooth' | 'smooth-slim' | 'wide' | undefined;
-    foldStyle: 'manual' | 'markbegin' | 'markbeginend' | undefined;
-}
-
-// Default Editor Configurations
-export const editorSettingsAtom = atomWithStorage<EditorSettings>('editor-settings', {
-    theme: 'monokai',
-    useSoftTabs: true,
-    showGutter: true,
-    enableBasicAutocompletion: true,
-    enableLiveAutocompletion: true,
-    highlightActiveLine: false,
-    relativeLineNumbers: false,
-    displayIndentGuides: false,
-    fontSize: 16,
-    tabSize: 4,
-    keybind: 'ace',
-    cursorStyle: 'ace',
-    foldStyle: 'manual',
-});
-
+export const editorSettingsAtom = atomWithStorage<EditorSettings>(
+    'editor-settings',
+    defaultEditorSettings
+);
 export const currentTabAtom = atom<'text-editor' | 'leaderboard'>('text-editor');
 
 const editorsAtom = atomWithStorage<string[]>('editors', []);
@@ -55,7 +28,7 @@ export const editorContentAtom = atom(
     }
 );
 
-export const selectedLanguageAtom = atom<string>();
+export const selectedLanguageAtom = atom<Language | null>(null);
 
 export interface TestResult {
     state: 'pass' | 'fail';
