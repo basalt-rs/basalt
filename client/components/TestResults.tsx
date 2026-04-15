@@ -1,189 +1,311 @@
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Diff } from './Diff';
 import { CodeBlock } from './util';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import * as Accordion from './ui/accordion';
+import * as Tabs from './ui/tabs';
 import { inlineDiffAtom } from '@/lib/competitor-state';
 import AnsiConvert from 'ansi-to-html';
 import { useAtom } from 'jotai';
-import { Check, CircleX, Clock, TriangleAlert } from 'lucide-react';
-import { SimpleOutput, Test, TestOutput } from '@/lib/types';
+import { Check, Loader2, X } from 'lucide-react';
+import { TestResults, TestResultState } from '@/lib/types';
 import { useTesting } from '@/lib/services/testing';
+import { currQuestionAtom } from '@/lib/services/questions';
+import { useEffect, useState } from 'react';
+import { formatDuration } from '@/lib/utils';
 
 const c = new AnsiConvert();
 const convertAnsi = (x: string): string => {
     return c.toHtml(x);
 };
 
-const IncorrectOutput = ({
+const InputOutput = ({
     input,
     expected,
     actual,
+    useDiff = true,
 }: {
     input: string;
     expected: string;
     actual: string;
+    useDiff: boolean;
 }) => {
     const [inline, setInline] = useAtom(inlineDiffAtom);
     return (
         <>
-            <div className="flex w-full flex-row justify-between">
-                <h1 className="flex items-center gap-2 py-2 text-2xl">
-                    <CircleX className="text-fail" />
-                    Incorrect Output
-                </h1>
-                <span className="flex flex-row items-center gap-2">
-                    <Switch checked={inline} onCheckedChange={setInline} />
-                    <Label>Inline diff</Label>
-                </span>
-            </div>
-            <div className="flex flex-row gap-4">
+            {useDiff && (
+                <div className="flex w-full flex-row justify-end">
+                    <span className="flex flex-row items-center gap-2">
+                        <Switch checked={inline} onCheckedChange={setInline} />
+                        <Label>Inline diff</Label>
+                    </span>
+                </div>
+            )}
+            <div className="flex flex-row gap-6">
                 {input && (
                     <div className="flex h-full flex-grow flex-col gap-2">
                         <b>Input</b>
                         <CodeBlock text={input} />
                     </div>
                 )}
-                <Diff left={expected} right={actual} inline={inline} />
+                {useDiff ? (
+                    <Diff left={expected} right={actual} inline={inline} />
+                ) : (
+                    <>
+                        <div className="flex h-full flex-grow flex-col gap-2">
+                            <b>Expected Output</b>
+                            <CodeBlock text={expected} />
+                        </div>
+                        <div className="flex h-full flex-grow flex-col gap-2">
+                            <b>Actual Output</b>
+                            <CodeBlock text={actual} />
+                        </div>
+                    </>
+                )}
             </div>
         </>
     );
 };
 
-const GeneralError = ({ error, output }: { error?: string; output: SimpleOutput }) => {
+const stylisedState = (state: TestResultState) => {
+    switch (state) {
+        case 'pass':
+            return 'Pass';
+        case 'runtime-fail':
+            return 'Failed at Runtime';
+        case 'timed-out':
+            return 'Timed Out';
+        case 'incorrect-output':
+            return 'Incorrect Output';
+        default:
+            throw new Error(`Unhandled stylisedState: '${state}'`);
+    }
+};
+
+const OutputItem = ({ res, index }: { res: TestResults | null; index: number }) => {
+    const { testResults } = useTesting();
+    const [currentQuestion] = useAtom(currQuestionAtom);
+
+    return (
+        <Accordion.AccordionItem
+            value={`test-${index}`}
+            disabled={res === null || testResults!.kind === 'submission'}
+        >
+            <Accordion.AccordionTrigger
+                className="px-8"
+                hideChevron={testResults?.kind === 'submission'}
+            >
+                <div className="flex w-full flex-row items-center justify-between">
+                    <h1>
+                        <b>Test Case {index + 1}</b>
+                    </h1>
+                    {res === null ? (
+                        <Loader2 className="animate-spin text-in-progress" />
+                    ) : res.state === 'pass' ? (
+                        <Check className="text-pass" />
+                    ) : (
+                        <p className="flex flex-row gap-4">
+                            {stylisedState(res.state)} <X className="text-fail" />
+                        </p>
+                    )}
+                </div>
+            </Accordion.AccordionTrigger>
+            <Accordion.AccordionContent className="px-8 pb-8">
+                {res !== null && testResults!.kind === 'test' && (
+                    <>
+                        {res.exitStatus !== 0 && (
+                            <p>
+                                <span className="font-bold">Exit Status:</span> {res.exitStatus}
+                            </p>
+                        )}
+                        <InputOutput
+                            input={currentQuestion.tests[res.index].input}
+                            expected={currentQuestion.tests[res.index].output}
+                            actual={res.stdout}
+                            useDiff={res.state !== 'pass'}
+                        />
+                        {res.stderr && (
+                            <div className="flex flex-col gap-1 pt-1">
+                                <p className="font-bold">Standard Error</p>
+                                <CodeBlock text={convertAnsi(res.stderr)} rawHtml />
+                            </div>
+                        )}
+                    </>
+                )}
+            </Accordion.AccordionContent>
+        </Accordion.AccordionItem>
+    );
+};
+
+const CompilerOutput = ({ stdout, stderr }: { stdout: string; stderr: string }) => {
     return (
         <>
-            {error && (
+            {stdout && (
                 <div>
-                    <p className="pb-2 text-xl">{error}</p>
+                    <p className="font-bold">Standard Output</p>
+                    <CodeBlock text={convertAnsi(stdout)} rawHtml />
                 </div>
             )}
-            <div className="flex flex-row gap-4">
-                {output.stdout && (
-                    <div className="flex h-full flex-grow flex-col gap-2">
-                        <b>Standard Output</b>
-                        <CodeBlock text={convertAnsi(output.stdout)} rawHtml />
-                    </div>
-                )}
-                {output.stderr && (
-                    <div className="flex h-full flex-grow flex-col gap-2">
-                        <b>Standard Error</b>
-                        <CodeBlock text={convertAnsi(output.stderr)} rawHtml />
-                    </div>
-                )}
-                {!output.stdout && !output.stderr && <p>No output</p>}
-            </div>
+            {stderr && (
+                <div>
+                    <p className="font-bold">Standard Error</p>
+                    <CodeBlock text={convertAnsi(stderr)} rawHtml />
+                </div>
+            )}
         </>
     );
 };
 
-const TestDetails = ({ output, test }: { output: TestOutput; test: Test }) => {
-    if (output.kind === 'pass') {
-        return (
-            <h1 className="flex items-center gap-2 text-2xl">
-                <Check className="text-pass" />
-                Test Passed!
-            </h1>
-        );
-    }
-
-    if (output.reason === 'timeout') {
-        return (
-            <h1 className="flex items-center gap-2 text-2xl">
-                <Clock className="text-red" />
-                Solution timed out
-            </h1>
-        );
-    }
-
-    if (output.reason === 'incorrect-output') {
-        return <IncorrectOutput input={test.input} expected={test.output} actual={output.stdout} />;
-    }
-
-    return <GeneralError error="Solution crashed" output={output} />;
-};
-
-const SingleResult = ({
-    output,
-    test,
-    index,
-}: {
-    output: TestOutput;
-    test: Test;
-    index: number;
-}) => {
-    return (
-        <>
-            <AccordionTrigger className="items-center justify-between px-8">
-                <h1>
-                    <b>Test Case {index + 1}</b>
-                </h1>
-                <h1 className={`flex items-center justify-center text-${output.kind}`}>
-                    <b>{output.kind.toUpperCase()}</b>
-                </h1>
-            </AccordionTrigger>
-            <AccordionContent className="px-8">
-                <TestDetails output={output} test={test} />
-            </AccordionContent>
-        </>
-    );
-};
-
-export const TestResults = () => {
+export default function TestResultsComponent() {
     const { testResults } = useTesting();
-    if (!testResults?.kind) return null;
-    switch (testResults.kind) {
-        case 'individual': {
+    const [openAccordions, setOpenAccordions] = useState<string[]>([]);
+
+    // This comonent is only rendered when testResults !== null
+    if (testResults === null) throw new Error('Unreachable');
+
+    useEffect(() => {
+        // Collapse open accordions if they are loading
+        setOpenAccordions((a) => {
+            if (testResults.resultState === 'compile-fail') return [];
+            return a.filter((o) => testResults.results[+o.split('-')[1]] !== null);
+        });
+    }, [testResults]);
+
+    switch (testResults.resultState) {
+        case 'test-complete':
+        case 'partial-results': {
+            const complete = testResults.resultState === 'test-complete';
+            const compilerTab = complete
+                ? testResults.compileStderr || testResults.compileStdout
+                : testResults.compileOutput !== null &&
+                  (testResults.compileOutput.stderr || testResults.compileOutput.stdout);
+            const numCompleted = testResults.results.reduce((p, c) => (c === null ? p : p + 1), 0);
             return (
                 <>
                     <Progress
-                        value={
-                            (testResults.passed * 100) / (testResults.passed + testResults.failed)
-                        }
-                        color={
-                            testResults.submitKind === 'test' ? 'bg-in-progress/50' : 'bg-pass/50'
-                        }
+                        value={(numCompleted / testResults.cases) * 100}
+                        color={testResults.kind === 'test' ? 'bg-in-progress/50' : 'bg-pass/50'}
                     />
-                    <Accordion type="single" collapsible>
-                        {testResults.kind === 'individual'
-                            ? testResults.tests?.map(([output, test], i) => (
-                                  <AccordionItem key={i} value={`test-${i}`}>
-                                      <SingleResult output={output} test={test} index={i} />
-                                  </AccordionItem>
-                              ))
-                            : []}
-                    </Accordion>
+                    <ScrollArea className="h-full w-full">
+                        <Tabs.Tabs defaultValue="tests">
+                            <div className="flex items-center justify-between px-4 py-2">
+                                {testResults.kind === 'submission' && (
+                                    <p className="flex flex-row items-center gap-2">
+                                        <span className="font-bold">Score:</span>
+                                        <span>
+                                            {complete ? (
+                                                testResults.score
+                                            ) : (
+                                                <Loader2 className="size-4 animate-spin" />
+                                            )}
+                                        </span>
+                                    </p>
+                                )}
+
+                                <p className="flex flex-row gap-2">
+                                    <span className="font-bold">Passed:</span>
+                                    <span>
+                                        {complete
+                                            ? testResults.passed
+                                            : testResults.results.reduce(
+                                                  (p, c) => (c?.state === 'pass' ? p + 1 : p),
+                                                  0
+                                              )}
+                                    </span>
+                                    <span>/</span>
+                                    <span>
+                                        {complete
+                                            ? testResults.passed + testResults.failed
+                                            : testResults.cases}
+                                    </span>
+                                </p>
+
+                                <p className="flex flex-row items-center gap-2">
+                                    <span className="font-bold">Time Taken:</span>
+                                    {complete ? (
+                                        formatDuration(testResults.timeTaken)
+                                    ) : (
+                                        <Loader2 className="size-4 animate-spin" />
+                                    )}
+                                </p>
+
+                                {compilerTab && (
+                                    <Tabs.TabsList>
+                                        <Tabs.TabsTrigger value="tests">Tests</Tabs.TabsTrigger>
+                                        <Tabs.TabsTrigger value="compiler-output">
+                                            Compiler Output
+                                        </Tabs.TabsTrigger>
+                                    </Tabs.TabsList>
+                                )}
+                            </div>
+                            <Separator />
+                            <Tabs.TabsContent value="tests" className="mt-0">
+                                <Accordion.Accordion
+                                    type="multiple"
+                                    value={openAccordions}
+                                    onValueChange={setOpenAccordions}
+                                >
+                                    {testResults.results?.map((res, i) => (
+                                        <OutputItem res={res} index={i} key={i} />
+                                    ))}
+                                </Accordion.Accordion>
+                            </Tabs.TabsContent>
+                            {compilerTab && (
+                                <Tabs.TabsContent value="compiler-output" className="gap-2 px-4">
+                                    {testResults.resultState === 'partial-results' ? (
+                                        <CompilerOutput
+                                            stdout={testResults.compileOutput!.stdout}
+                                            stderr={testResults.compileOutput!.stderr}
+                                        />
+                                    ) : (
+                                        <CompilerOutput
+                                            stdout={testResults.compileStdout}
+                                            stderr={testResults.compileStderr}
+                                        />
+                                    )}
+                                </Tabs.TabsContent>
+                            )}
+                        </Tabs.Tabs>
+                    </ScrollArea>
                 </>
-            );
-        }
-        case 'internal-error': {
-            return (
-                <h1 className="flex h-full w-full flex-col items-center justify-center text-2xl">
-                    <TriangleAlert className="my-4 text-fail" size={72} />
-                    There was an error running your{' '}
-                    {testResults.submitKind === 'test' ? 'test' : 'submission'}, please contact a
-                    competition host.
-                </h1>
             );
         }
         case 'compile-fail': {
             return (
-                <div className="p-8">
-                    <p className="pb-2 text-xl text-fail">Solution failed to compile</p>
-                    <CodeBlock text={convertAnsi(testResults.stderr)} rawHtml />
-                </div>
+                <>
+                    <Progress value={100} color="bg-fail/50" />
+                    <ScrollArea className="h-full w-full">
+                        <div className="px-8 py-8">
+                            <p className="pb-2 text-2xl text-fail">Solution failed to compile</p>
+                            <p>
+                                <span className="font-bold">Exit Status:</span>{' '}
+                                {testResults.compileExitStatus}
+                            </p>
+                            {testResults.compileStdout && (
+                                <div>
+                                    <p className="font-bold">Standard Output</p>
+                                    <CodeBlock
+                                        text={convertAnsi(testResults.compileStdout)}
+                                        rawHtml
+                                    />
+                                </div>
+                            )}
+                            {testResults.compileStderr && (
+                                <div>
+                                    <p className="font-bold">Standard Error</p>
+                                    <CodeBlock
+                                        text={convertAnsi(testResults.compileStderr)}
+                                        rawHtml
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+                </>
             );
         }
-        case 'other-error': {
-            return (
-                <h1 className="p-4 text-2xl">
-                    <span className="text-fail">Submission Attempt Failed:</span>{' '}
-                    {testResults.message}
-                </h1>
-            );
-        }
-        default:
-            throw 'unreachable';
     }
-};
+}
