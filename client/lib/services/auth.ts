@@ -93,11 +93,11 @@ export const useLogin = () => {
 };
 
 // if expectedErrors is provided, an error will be thrown with the status if it arrives
-export const tryFetch = async <T>(
+export const tryFetch = async <T, B = object>(
     url: string | URL,
     token: string,
     ip?: string,
-    init?: Partial<RequestInit> & { item?: string },
+    init?: Partial<RequestInit> & { item?: string; bodyJson?: B },
     expectedErrors?: number[]
 ): Promise<T | null> => {
     const innitBruv = { ...init };
@@ -105,6 +105,14 @@ export const tryFetch = async <T>(
         innitBruv.headers = {
             ...innitBruv.headers,
             Authorization: `Bearer ${token}`,
+        };
+    }
+
+    if (innitBruv.bodyJson) {
+        innitBruv.body = JSON.stringify(innitBruv.bodyJson);
+        innitBruv.headers = {
+            ...innitBruv.headers,
+            'Content-Type': 'application/json',
         };
     }
 

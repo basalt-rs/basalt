@@ -1,11 +1,12 @@
 import { atom, useAtom } from 'jotai';
-import { TestResults, TestState } from '../types';
+import { SubmissionHistory, TestResults, TestState } from '../types';
 import { Announcement } from '../types';
 import { toast, ToasterToast } from '@/hooks';
 import { relativeTime } from '../utils';
 import { TeamInfo } from './teams';
 
 type EVENT_MAPPING = {
+    // Broadcast events
     'game-paused': object;
     'game-unpaused': {
         timeLeftInSeconds: number;
@@ -27,50 +28,34 @@ type EVENT_MAPPING = {
     'new-announcement': Announcement;
     'team-connected': TeamInfo;
     'team-disconnected': TeamInfo;
-};
 
-type WebsocketSend =
-    | { kind: 'run-test'; id: number; language: string; solution: string; problem: number }
-    | { kind: 'submit'; id: number; language: string; solution: string; problem: number };
-
-interface WebsocketError {
-    kind: 'error';
-    id: number | null;
-    message: string;
-}
-
-export interface WebsocketRes {
-    'run-test': {
-        kind: 'test-results';
-        id: number;
-        results: TestResults;
-        failed: number;
-        passed: number;
+    // Private events
+    'test-results': {
+        id: string;
+        results: TestResults[];
     };
-    submit:
-        | {
-              kind: 'submit';
-              id: number;
-              results: TestResults;
-              failed: number;
-              passed: number;
-              remainingAttempts: number | null;
-          }
-        | WebsocketError;
-}
+    'tests-compiled': {
+        id: string;
+        stdout: string;
+        stderr: string;
+    };
+    'tests-error': { id: string };
+    'tests-cancelled': { id: string };
+    'tests-complete': {
+        results: TestResults[];
+        remainingAttempts: number | null;
+    } & SubmissionHistory;
+    'tests-compile-fail': SubmissionHistory;
+};
 
 type BroadcastEventKind = keyof EVENT_MAPPING;
 
 type BroadcastEventFn<K extends BroadcastEventKind> = (data: EVENT_MAPPING[K]) => void;
 
-type BasaltBroadcastEvent<K extends BroadcastEventKind> = { kind: K } & EVENT_MAPPING[K];
-
-type BasaltEvent =
-    | { kind: 'broadcast'; broadcast: { kind: BroadcastEventKind } & unknown }
-    | WebsocketRes[keyof WebsocketRes];
+type BasaltEvent = { kind: keyof EVENT_MAPPING } & EVENT_MAPPING[keyof EVENT_MAPPING];
 
 class BasaltWSClient {
-    private broadcastHandlers: {
+    private eventHandlers: {
         [K in keyof EVENT_MAPPING]: {
             id: string | null;
             fn: (d: unknown) => void;
@@ -84,14 +69,15 @@ class BasaltWSClient {
         'new-announcement': [],
         'team-connected': [],
         'team-disconnected': [],
+
+        'tests-error': [],
+        'tests-cancelled': [],
+        'tests-complete': [],
+        'tests-compile-fail': [],
+        'test-results': [],
+        'tests-compiled': [],
     };
     private onCloseTasks: (() => void)[] = [];
-    private pendingTasks: {
-        id: number;
-        resolve: (t: WebsocketRes[keyof WebsocketRes]) => void;
-        reject: (reason: string) => void;
-    }[] = [];
-    private nextId = 0;
 
     private ws!: WebSocket;
     public ip: string | null = null;
@@ -160,50 +146,13 @@ class BasaltWSClient {
             try {
                 const msg = JSON.parse(m.data) as BasaltEvent;
                 console.log('msg', msg);
-                switch (msg.kind) {
-                    case 'broadcast':
-                        {
-                            const { kind, ...data } = msg.broadcast as BasaltBroadcastEvent<
-                                typeof msg.broadcast.kind
-                            >;
-                            if (!(kind in this.broadcastHandlers)) return;
+                const { kind, ...data } = msg;
+                if (!(kind in this.eventHandlers)) return;
 
-                            for (const { fn } of this.broadcastHandlers[kind]) {
-                                fn(data);
-                            }
-                        }
-                        break;
-                    case 'error':
-                        {
-                            const { message, id } = msg;
-                            toast({
-                                title: 'WebSocket Error',
-                                description: message,
-                                variant: 'destructive',
-                            });
-                            if (id !== null) {
-                                for (let i = this.pendingTasks.length; i--; ) {
-                                    const { id, reject } = this.pendingTasks[i];
-                                    if (id === msg.id) {
-                                        reject(message);
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        {
-                            if (Object.hasOwn(msg, 'id')) {
-                                for (let i = this.pendingTasks.length; i--; ) {
-                                    const { id, resolve } = this.pendingTasks[i];
-                                    if (id === msg.id) {
-                                        this.pendingTasks.splice(i, 1);
-                                        resolve(msg);
-                                    }
-                                }
-                            }
-                        }
-                        break;
+                for (let i = this.eventHandlers[kind].length; --i >= 0; ) {
+                    const { fn, oneTime } = this.eventHandlers[kind][i];
+                    fn(data);
+                    if (oneTime) this.eventHandlers[kind].splice(i, 1);
                 }
             } catch (e) {
                 console.error('Error processing message:', e);
@@ -214,39 +163,30 @@ class BasaltWSClient {
     public registerEvent<K extends keyof EVENT_MAPPING>(
         eventName: K,
         fn: BroadcastEventFn<K>,
-        id: string | null = null
+        id: string | null = null,
+        oneTime: boolean = false
     ) {
-        const idx = this.broadcastHandlers[eventName].findIndex((h) => h.id === id);
+        const idx = this.eventHandlers[eventName].findIndex((h) => h.id === id);
         if (idx !== -1) {
-            this.broadcastHandlers[eventName][idx] = {
+            this.eventHandlers[eventName][idx] = {
                 id,
                 fn: fn as (data: unknown) => void,
-                oneTime: false,
+                oneTime,
             };
         } else {
-            this.broadcastHandlers[eventName].push({
+            this.eventHandlers[eventName].push({
                 id,
                 fn: fn as (data: unknown) => void,
-                oneTime: false,
+                oneTime,
             });
         }
     }
 
-    public sendAndWait<T extends Omit<WebsocketSend, 'id'>, U extends WebsocketRes[T['kind']]>(
-        data: T
-    ): Promise<U> {
-        const id = this.nextId++;
-        const send: WebsocketSend = { ...data, id };
-        let resolve: ((u: WebsocketRes[keyof WebsocketRes]) => void) | undefined = undefined;
-        let reject: (() => void) | undefined = undefined;
-        const promise = new Promise<U>((res, rej) => {
-            resolve = res as typeof resolve;
-            reject = rej;
-        });
-        this.pendingTasks.push({ id, resolve: resolve!, reject: reject! });
-        console.log('send', send);
-        this.ws.send(JSON.stringify(send));
-        return promise;
+    public removeEvent<K extends keyof EVENT_MAPPING>(eventName: K, id: string): boolean {
+        const idx = this.eventHandlers[eventName].findIndex((h) => h.id === id);
+        if (idx === -1) return false;
+        this.eventHandlers[eventName].splice(idx, 1);
+        return true;
     }
 
     public closeConnection() {
@@ -259,7 +199,6 @@ class BasaltWSClient {
     }
 
     private cleanup() {
-        this.pendingTasks.forEach(({ reject }) => reject('socket closed'));
         if (this.isOpen) {
             this.onCloseTasks.forEach((t) => t());
         }

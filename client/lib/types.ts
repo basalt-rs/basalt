@@ -16,24 +16,19 @@ export interface QuestionResponse {
     tests: Test[];
 }
 
-export interface SimpleOutput {
+export type TestResultState = 'pass' | 'runtime-fail' | 'timed-out' | 'incorrect-output';
+export type SubmissionState = 'started' | 'finished' | 'cancelled' | 'failed';
+export type CompileResultState = 'no-compile' | 'success' | 'runtime-fail' | 'timed-out';
+
+export interface TestResults {
+    index: number;
+    state: TestResultState;
     stdout: string;
     stderr: string;
-    status: number;
+    exitStatus: number;
+    // milliseconds
+    timeTaken: number;
 }
-export type TestOutput =
-    | { kind: 'pass' }
-    | ({ kind: 'fail' } & (
-          | { reason: 'timeout' }
-          | ({ reason: 'incorrect-output' } & SimpleOutput)
-          | ({ reason: 'crash' } & SimpleOutput)
-      ));
-
-export type TestResults =
-    | { kind: 'other-error'; message: string }
-    | { kind: 'internal-error' }
-    | ({ kind: 'compile-fail' } & SimpleOutput)
-    | { kind: 'individual'; tests: [TestOutput, Test][] };
 
 export interface QuestionSubmissionState {
     state: TestState;
@@ -44,11 +39,21 @@ export interface SubmissionHistory {
     id: string;
     submitter: string;
     time: string;
-    compile_fail: boolean;
     code: string;
-    question_index: number;
+    questionIndex: number;
+    language: string;
+    compileResult: CompileResultState;
+    compileStdout: string;
+    compileStderr: string;
+    compileExitStatus: number;
+    test_only: boolean;
+    state: SubmissionState;
     score: number;
+    passed: number;
+    failed: number;
     success: boolean;
+    // milliseconds
+    timeTaken: number;
 }
 
 export interface LeaderboardEntry {
